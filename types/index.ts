@@ -60,6 +60,7 @@ export type Spot = {
   notes: string | null
   want_to_visit: boolean
   cover_image_url: string | null
+  photo_urls: string[]
   reservation_methods: ReservationMethod[]
   is_featured: boolean
   lat: number | null

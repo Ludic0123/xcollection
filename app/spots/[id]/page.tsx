@@ -42,7 +42,10 @@ export default async function SpotDetailPage({
   )
 
   const totalPaid = visits.reduce((a, v) => a + (v.price ?? 0), 0)
-  const allPhotos = visits.flatMap((v) => v.photo_urls ?? [])
+  const allPhotos = [
+    ...(spot.photo_urls ?? []),
+    ...visits.flatMap((v) => v.photo_urls ?? []),
+  ]
 
   // 評価平均はエディターにだけ計算
   const rated = visits.filter((v) => v.rating != null)

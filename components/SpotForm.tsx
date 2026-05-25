@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { CATEGORY_OPTIONS, type Category, type Spot } from '@/types'
 import ImageUpload from './ImageUpload'
+import MultiImageUpload from './MultiImageUpload'
 
 export type GenreOption = { id: string; category: string; name: string }
 export type CityOption = { id: string; name: string }
@@ -39,6 +40,7 @@ export default function SpotForm({
   const [notes, setNotes] = useState(spot?.notes ?? '')
   const [wantToVisit, setWantToVisit] = useState(spot?.want_to_visit ?? false)
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(spot?.cover_image_url ?? null)
+  const [photoUrls, setPhotoUrls] = useState<string[]>(spot?.photo_urls ?? [])
   const [reservationMethods, setReservationMethods] = useState<string[]>(
     spot?.reservation_methods ?? []
   )
@@ -86,6 +88,7 @@ export default function SpotForm({
       notes: notes || null,
       want_to_visit: wantToVisit,
       cover_image_url: coverImageUrl,
+      photo_urls: photoUrls,
       reservation_methods: reservationMethods,
       is_featured: isFeatured,
       lat: lat === '' ? null : Number(lat),
@@ -130,6 +133,11 @@ export default function SpotForm({
       <div>
         <label className="block text-xs tracking-luxe text-neutral-500 mb-2">COVER IMAGE</label>
         <ImageUpload value={coverImageUrl} onChange={setCoverImageUrl} folder="spots" />
+      </div>
+
+      <div>
+        <label className="block text-xs tracking-luxe text-neutral-500 mb-2">PHOTOS</label>
+        <MultiImageUpload value={photoUrls} onChange={setPhotoUrls} folder="spots" max={20} />
       </div>
 
       <div>
