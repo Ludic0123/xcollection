@@ -1,7 +1,9 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { Menu, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 const PUBLIC_NAV = [
@@ -26,6 +28,7 @@ export default function Header({
 }) {
   const pathname = usePathname()
   const router = useRouter()
+  const [open, setOpen] = useState(false)
   const isMember = !!memberCode
   const nav = isAdmin
     ? [...MEMBER_NAV, { href: '/admin', label: 'ADMIN' }]
@@ -38,15 +41,16 @@ export default function Header({
     await supabase.auth.signOut()
     router.push('/')
     router.refresh()
+    setOpen(false)
   }
 
   return (
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b hairline">
-      <div className="relative px-8 md:px-14 h-24 flex items-center justify-between gap-6">
+      <div className="relative px-5 md:px-14 h-14 md:h-24 flex items-center justify-between gap-6">
         {/* Brand */}
         <Link
           href="/"
-          className="font-serif text-3xl md:text-4xl leading-none tracking-tight italic font-light shrink-0"
+          className="font-serif text-2xl md:text-4xl leading-none tracking-tight italic font-light shrink-0"
         >
           Collection
         </Link>
@@ -72,13 +76,13 @@ export default function Header({
           })}
         </nav>
 
-        {/* Right action */}
-        <div className="flex items-center gap-5 shrink-0">
+        {/* Right action — Desktop */}
+        <div className="hidden lg:flex items-center gap-5 shrink-0">
           {isMember ? (
             <>
               <Link
                 href="/profile"
-                className="hidden md:inline-block text-[11px] tracking-luxe text-neutral-500 hover:text-black"
+                className="text-[11px] tracking-luxe text-neutral-500 hover:text-black"
               >
                 PROFILE
               </Link>
@@ -106,36 +110,96 @@ export default function Header({
             </>
           )}
         </div>
+
+        {/* Hamburger — Mobile/Tablet */}
+        <button
+          className="lg:hidden p-1 -mr-1"
+          aria-label="メニュー"
+          onClick={() => setOpen(true)}
+        >
+          <Menu className="w-5 h-5" />
+        </button>
       </div>
 
-      {/* Mobile / Tablet nav */}
-      <nav className="lg:hidden border-t hairline px-6 py-3 flex items-center gap-5 overflow-x-auto">
-        {nav.map((item) => {
-          const active =
-            item.href === '/'
-              ? pathname === '/'
-              : pathname.startsWith(item.href.split('?')[0])
-          return (
+      {/* ===== Mobile drawer ===== */}
+      {open && (
+        <div
+          className="lg:hidden fixed inset-0 z-50 bg-white flex flex-col"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="px-5 h-14 flex items-center justify-between border-b hairline">
             <Link
-              key={item.href}
-              href={item.href}
-              className={`text-[10px] tracking-luxe whitespace-nowrap ${
-                active ? 'text-black' : 'text-neutral-400'
-              }`}
+              href="/"
+              onClick={() => setOpen(false)}
+              className="font-serif text-2xl leading-none italic font-light"
             >
-              {item.label}
+              Collection
             </Link>
-          )
-        })}
-        {isMember && (
-          <Link
-            href="/profile"
-            className="ml-auto text-[10px] tracking-luxe text-black whitespace-nowrap"
-          >
-            PROFILE
-          </Link>
-        )}
-      </nav>
+            <button onClick={() => setOpen(false)} aria-label="閉じる" className="p-1 -mr-1">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <nav className="flex-1 overflow-y-auto px-8 py-8 space-y-5">
+            {nav.map((item) => {
+              const active =
+                item.href === '/'
+                  ? pathname === '/'
+                  : pathname.startsWith(item.href.split('?')[0])
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className={`block font-serif text-2xl italic font-light ${
+                    active ? 'text-black' : 'text-neutral-400'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              )
+            })}
+          </nav>
+
+          <div className="px-8 py-6 border-t hairline space-y-3">
+            {isMember ? (
+              <>
+                <Link
+                  href="/profile"
+                  onClick={() => setOpen(false)}
+                  className="block text-xs tracking-luxe text-neutral-700"
+                >
+                  PROFILE
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="block text-xs tracking-luxe text-neutral-500"
+                >
+                  SIGN OUT
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/signup"
+                  onClick={() => setOpen(false)}
+                  className="block text-xs tracking-luxe text-neutral-700"
+                >
+                  JOIN
+                </Link>
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className="block text-xs tracking-luxe text-neutral-500"
+                >
+                  SIGN IN
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   )
 }

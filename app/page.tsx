@@ -84,9 +84,6 @@ export default async function TopPage() {
   >[]
   const isMember = !!member
 
-  const now = new Date()
-  const dateLabel = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}`
-
   return (
     <div className="bg-white">
       {/* ====== HERO ====== */}
@@ -98,12 +95,6 @@ export default async function TopPage() {
           className="absolute inset-0 w-full h-full object-cover object-center opacity-85"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/60" />
-
-        {/* 上部メタ */}
-        <div className="absolute top-0 left-0 right-0 px-5 md:px-14 pt-5 md:pt-8 flex items-baseline justify-between text-white">
-          <p className="text-[9px] md:text-[10px] tracking-luxe opacity-80">ISSUE — {dateLabel}</p>
-          <p className="text-[9px] md:text-[10px] tracking-luxe opacity-80">VOL. 01</p>
-        </div>
 
         {/* 中央タイトル */}
         <div className="absolute inset-0 flex items-center justify-center px-4">
@@ -130,11 +121,8 @@ export default async function TopPage() {
       {/* ====== FEATURED BANNER ====== */}
       {featured.length > 0 && (
         <section className="bg-black text-white border-b hairline">
-          <div className="px-8 md:px-14 pt-8 pb-3 flex items-baseline justify-between">
-            <div>
-              <p className="text-[10px] tracking-luxe text-white/50">EDITOR&apos;S PICKS</p>
-              <h2 className="font-serif text-3xl md:text-4xl italic font-light mt-1">Featured.</h2>
-            </div>
+          <div className="px-8 md:px-14 pt-6 pb-2 flex items-baseline justify-between">
+            <h2 className="font-serif text-2xl md:text-3xl italic font-light">Featured.</h2>
           </div>
           <div className="overflow-x-auto pb-6">
             <div className="snap-x snap-mandatory flex gap-5 px-8 md:px-14">
@@ -181,13 +169,8 @@ export default async function TopPage() {
       {/* ====== INVITATION (members only) ====== */}
       {isMember && events.length > 0 && (
         <section className="border-b hairline bg-neutral-50">
-          <div className="px-8 md:px-14 pt-6 pb-2 flex items-baseline justify-between">
-            <div>
-              <p className="text-[10px] tracking-luxe text-neutral-400">MEMBERS ONLY</p>
-              <h2 className="font-serif text-2xl md:text-3xl italic font-light mt-0.5">
-                Invitation.
-              </h2>
-            </div>
+          <div className="px-8 md:px-14 pt-5 pb-2 flex items-baseline justify-between">
+            <h2 className="font-serif text-2xl md:text-3xl italic font-light">Invitation.</h2>
             <Link
               href="/invitation"
               className="text-[10px] tracking-luxe text-neutral-500 hover:text-black"
@@ -333,23 +316,19 @@ function HeroStat({
 }
 
 function CarouselSection({
-  label,
   title,
   viewAllHref,
   children,
 }: {
-  label: string
+  label?: string
   title: string
   viewAllHref: string
   children: React.ReactNode
 }) {
   return (
     <section className="border-b hairline">
-      <div className="px-8 md:px-14 pt-6 pb-2 flex items-baseline justify-between">
-        <div>
-          <p className="text-[10px] tracking-luxe text-neutral-400">{label}</p>
-          <h2 className="font-serif text-2xl md:text-3xl italic font-light mt-0.5">{title}</h2>
-        </div>
+      <div className="px-8 md:px-14 pt-5 pb-2 flex items-baseline justify-between">
+        <h2 className="font-serif text-2xl md:text-3xl italic font-light">{title}</h2>
         <Link
           href={viewAllHref}
           className="text-[10px] tracking-luxe text-neutral-500 hover:text-black"
