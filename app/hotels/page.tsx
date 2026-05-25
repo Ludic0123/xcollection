@@ -88,42 +88,54 @@ export default async function HotelsListPage({
         </Link>
       </form>
 
-      <div className="px-8 md:px-16 py-12">
+      <div className="px-4 md:px-16 py-6">
         {list.length === 0 ? (
           <div className="py-24 text-center text-sm text-neutral-400">まだ登録がありません。</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
+          <ul className="divide-y hairline">
             {list.map((h) => (
-              <Link key={h.id} href={`/hotels/${h.id}`} className="block group">
-                <div className="aspect-[4/5] bg-neutral-100 overflow-hidden relative">
-                  {h.cover_image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={h.cover_image_url}
-                      alt={h.name}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center font-serif italic text-neutral-300 text-3xl">
-                      {h.name.slice(0, 1)}
+              <li key={h.id}>
+                <Link
+                  href={`/hotels/${h.id}`}
+                  className="flex items-start gap-4 md:gap-5 py-4 hover:bg-neutral-50 -mx-2 md:-mx-4 px-2 md:px-4 transition-colors"
+                >
+                  <div className="w-20 h-20 md:w-24 md:h-24 shrink-0 bg-neutral-100 overflow-hidden">
+                    {h.cover_image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={h.cover_image_url}
+                        alt={h.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center font-serif italic text-neutral-300 text-xl">
+                        {h.name.slice(0, 1)}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] tracking-luxe text-neutral-400">
+                      {h.prefecture ?? 'JAPAN'}
+                      {h.brand && ` · ${h.brand}`}
+                    </p>
+                    <h3 className="font-serif text-lg md:text-xl mt-1 leading-snug truncate">
+                      {h.name}
+                    </h3>
+                    <div className="flex items-center gap-3 mt-1 text-xs text-neutral-500 flex-wrap">
+                      {h.price_range && (
+                        <span className="text-neutral-400">{'¥'.repeat(h.price_range)}</span>
+                      )}
+                      {h.want_to_visit && (
+                        <span className="text-[9px] tracking-luxe bg-neutral-100 px-1.5 py-0.5">
+                          WISHLIST
+                        </span>
+                      )}
                     </div>
-                  )}
-                  {h.want_to_visit && (
-                    <span className="absolute top-3 left-3 bg-white text-[10px] tracking-luxe px-2 py-1">
-                      WISHLIST
-                    </span>
-                  )}
-                </div>
-                <div className="mt-5">
-                  <p className="text-[10px] tracking-luxe text-neutral-400">
-                    {h.prefecture ?? 'JAPAN'}
-                    {h.brand && ` · ${h.brand}`}
-                  </p>
-                  <h3 className="font-serif text-2xl mt-2 leading-tight">{h.name}</h3>
-                </div>
-              </Link>
+                  </div>
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
       </div>
     </div>

@@ -130,20 +130,21 @@ export default async function TopPage() {
       {/* ====== FEATURED BANNER ====== */}
       {featured.length > 0 && (
         <section className="bg-black text-white border-b hairline">
-          <div className="px-8 md:px-14 pt-14 pb-6 flex items-baseline justify-between">
+          <div className="px-8 md:px-14 pt-8 pb-3 flex items-baseline justify-between">
             <div>
               <p className="text-[10px] tracking-luxe text-white/50">EDITOR&apos;S PICKS</p>
-              <h2 className="font-serif text-4xl md:text-5xl italic font-light mt-1">Featured.</h2>
+              <h2 className="font-serif text-3xl md:text-4xl italic font-light mt-1">Featured.</h2>
             </div>
           </div>
-          <Carousel>
-            {featured.map((s) => (
+          <div className="overflow-x-auto pb-6">
+            <div className="snap-x snap-mandatory flex gap-5 px-8 md:px-14">
+              {featured.map((s) => (
               <Link
                 key={s.id}
                 href={`/spots/${s.id}`}
-                className="snap-start shrink-0 w-[60vw] md:w-[30vw] group"
+                className="snap-start shrink-0 w-[70vw] md:w-[34vw] group"
               >
-                <div className="aspect-[16/9] bg-neutral-900 overflow-hidden relative">
+                <div className="aspect-[4/3] bg-neutral-900 overflow-hidden relative">
                   {s.cover_image_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -174,8 +175,9 @@ export default async function TopPage() {
                   </div>
                 </div>
               </Link>
-            ))}
-          </Carousel>
+              ))}
+            </div>
+          </div>
         </section>
       )}
 
@@ -375,7 +377,7 @@ function SpotCard({ spot }: { spot: Spot }) {
   return (
     <Link
       href={`/spots/${spot.id}`}
-      className="snap-start shrink-0 w-64 md:w-72 group"
+      className="snap-start shrink-0 w-36 md:w-44 group"
     >
       <div className="aspect-[4/5] bg-neutral-100 overflow-hidden">
         {spot.cover_image_url ? (
@@ -387,18 +389,18 @@ function SpotCard({ spot }: { spot: Spot }) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <span className="font-serif italic text-neutral-300 text-4xl">
+            <span className="font-serif italic text-neutral-300 text-3xl">
               {spot.name.slice(0, 1)}
             </span>
           </div>
         )}
       </div>
-      <div className="mt-4">
-        <p className="text-[10px] tracking-luxe text-neutral-400">
+      <div className="mt-3">
+        <p className="text-[9px] tracking-luxe text-neutral-400">
           {CATEGORY_LABELS[spot.category as Category]}
           {spot.city && ` · ${spot.city}`}
         </p>
-        <h3 className="font-serif text-xl mt-1 leading-snug">{spot.name}</h3>
+        <h3 className="font-serif text-base mt-0.5 leading-snug">{spot.name}</h3>
       </div>
     </Link>
   )
@@ -408,7 +410,7 @@ function HotelCard({ hotel }: { hotel: Hotel }) {
   return (
     <Link
       href={`/hotels/${hotel.id}`}
-      className="snap-start shrink-0 w-64 md:w-72 group"
+      className="snap-start shrink-0 w-36 md:w-44 group"
     >
       <div className="aspect-[4/5] bg-neutral-100 overflow-hidden">
         {hotel.cover_image_url ? (
@@ -420,18 +422,18 @@ function HotelCard({ hotel }: { hotel: Hotel }) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <span className="font-serif italic text-neutral-300 text-4xl">
+            <span className="font-serif italic text-neutral-300 text-3xl">
               {hotel.name.slice(0, 1)}
             </span>
           </div>
         )}
       </div>
-      <div className="mt-4">
-        <p className="text-[10px] tracking-luxe text-neutral-400">
+      <div className="mt-3">
+        <p className="text-[9px] tracking-luxe text-neutral-400">
           {hotel.brand ?? 'HOTEL'}
           {hotel.prefecture && ` · ${hotel.prefecture}`}
         </p>
-        <h3 className="font-serif text-xl mt-1 leading-snug">{hotel.name}</h3>
+        <h3 className="font-serif text-base mt-0.5 leading-snug">{hotel.name}</h3>
       </div>
     </Link>
   )
@@ -441,7 +443,7 @@ function TripCard({ trip }: { trip: TripPlan }) {
   return (
     <Link
       href={`/trips/${trip.id}`}
-      className="snap-start shrink-0 w-64 md:w-72 group"
+      className="snap-start shrink-0 w-36 md:w-44 group"
     >
       <div className="aspect-[4/5] bg-neutral-100 overflow-hidden">
         {trip.cover_image_url ? (
@@ -453,17 +455,17 @@ function TripCard({ trip }: { trip: TripPlan }) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <span className="font-serif italic text-neutral-300 text-4xl">
+            <span className="font-serif italic text-neutral-300 text-3xl">
               {trip.title.slice(0, 1)}
             </span>
           </div>
         )}
       </div>
-      <div className="mt-4">
-        <p className="text-[10px] tracking-luxe text-neutral-400">
+      <div className="mt-3">
+        <p className="text-[9px] tracking-luxe text-neutral-400">
           {trip.city ?? 'JOURNEY'}
         </p>
-        <h3 className="font-serif text-xl mt-1 leading-snug">{trip.title}</h3>
+        <h3 className="font-serif text-base mt-0.5 leading-snug">{trip.title}</h3>
       </div>
     </Link>
   )

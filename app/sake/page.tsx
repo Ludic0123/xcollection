@@ -33,44 +33,51 @@ export default async function SakeListPage() {
         <p className="text-sm text-neutral-500 mt-3">{list.length} bottles</p>
       </div>
 
-      <div className="px-8 md:px-16 py-12">
+      <div className="px-4 md:px-16 py-6">
         {list.length === 0 ? (
           <div className="py-24 text-center text-sm text-neutral-400">
             まだ登録がありません。
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-14">
+          <ul className="divide-y hairline">
             {list.map((s) => (
-              <Link key={s.id} href={`/sake/${s.id}`} className="block group">
-                <div className="aspect-[3/4] bg-neutral-100 overflow-hidden">
-                  {s.cover_image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={s.cover_image_url}
-                      alt={s.name}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="font-serif italic text-neutral-300 text-4xl">
-                        {s.name.slice(0, 1)}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="mt-4">
-                  <p className="text-[10px] tracking-luxe text-neutral-400">
-                    {s.region ?? 'JAPAN'}
-                    {s.sake_type && ` · ${s.sake_type}`}
-                  </p>
-                  <h3 className="font-serif text-xl mt-1 leading-snug">{s.name}</h3>
-                  {s.brewery && (
-                    <p className="text-xs text-neutral-500 mt-1">{s.brewery}</p>
-                  )}
-                </div>
-              </Link>
+              <li key={s.id}>
+                <Link
+                  href={`/sake/${s.id}`}
+                  className="flex items-start gap-4 md:gap-5 py-4 hover:bg-neutral-50 -mx-2 md:-mx-4 px-2 md:px-4 transition-colors"
+                >
+                  <div className="w-20 h-20 md:w-24 md:h-24 shrink-0 bg-neutral-100 overflow-hidden">
+                    {s.cover_image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={s.cover_image_url}
+                        alt={s.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="font-serif italic text-neutral-300 text-xl">
+                          {s.name.slice(0, 1)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] tracking-luxe text-neutral-400">
+                      {s.region ?? 'JAPAN'}
+                      {s.sake_type && ` · ${s.sake_type}`}
+                    </p>
+                    <h3 className="font-serif text-lg md:text-xl mt-1 leading-snug truncate">
+                      {s.name}
+                    </h3>
+                    {s.brewery && (
+                      <p className="text-xs text-neutral-500 mt-1 truncate">{s.brewery}</p>
+                    )}
+                  </div>
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
       </div>
     </div>

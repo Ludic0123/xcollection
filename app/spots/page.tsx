@@ -124,61 +124,64 @@ export default async function SpotsPage({
         </Link>
       </form>
 
-      <div className="px-8 md:px-16 py-12">
+      <div className="px-4 md:px-16 py-6">
         {list.length === 0 ? (
           <div className="py-24 text-center text-sm text-neutral-400">
             まだ登録がありません。
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
+          <ul className="divide-y hairline">
             {list.map((spot) => {
               const r = ratingsBySpot[spot.id]
               return (
-                <Link
-                  key={spot.id}
-                  href={`/spots/${spot.id}`}
-                  className="block group"
-                >
-                  <div className="aspect-[4/5] bg-neutral-100 overflow-hidden relative">
-                    {spot.cover_image_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={spot.cover_image_url}
-                        alt={spot.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="font-serif italic text-neutral-300 text-3xl">
-                          {spot.name.slice(0, 1)}
-                        </span>
-                      </div>
-                    )}
-                    {spot.want_to_visit && (
-                      <span className="absolute top-3 left-3 bg-white text-[10px] tracking-luxe px-2 py-1">
-                        WISHLIST
-                      </span>
-                    )}
-                  </div>
-                  <div className="mt-5">
-                    <p className="text-[10px] tracking-luxe text-neutral-400">
-                      {CATEGORY_LABELS[spot.category as Category]}
-                      {spot.prefecture && ` · ${spot.prefecture}`}
-                      {spot.city && ` · ${spot.city}`}
-                    </p>
-                    <h3 className="font-serif text-2xl mt-2 leading-tight">{spot.name}</h3>
-                    <div className="flex items-center gap-3 mt-2 text-xs text-neutral-500">
-                      {authed && r && <span>★ {r.avg.toFixed(1)}</span>}
-                      {spot.price_range && (
-                        <span className="text-neutral-400">{'¥'.repeat(spot.price_range)}</span>
+                <li key={spot.id}>
+                  <Link
+                    href={`/spots/${spot.id}`}
+                    className="flex items-start gap-4 md:gap-5 py-4 hover:bg-neutral-50 -mx-2 md:-mx-4 px-2 md:px-4 transition-colors"
+                  >
+                    <div className="w-20 h-20 md:w-24 md:h-24 shrink-0 bg-neutral-100 overflow-hidden">
+                      {spot.cover_image_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={spot.cover_image_url}
+                          alt={spot.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="font-serif italic text-neutral-300 text-xl">
+                            {spot.name.slice(0, 1)}
+                          </span>
+                        </div>
                       )}
-                      {spot.genre && <span className="text-neutral-400">/ {spot.genre}</span>}
                     </div>
-                  </div>
-                </Link>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] tracking-luxe text-neutral-400">
+                        {CATEGORY_LABELS[spot.category as Category]}
+                        {spot.prefecture && ` · ${spot.prefecture}`}
+                        {spot.city && ` · ${spot.city}`}
+                      </p>
+                      <h3 className="font-serif text-lg md:text-xl mt-1 leading-snug truncate">
+                        {spot.name}
+                      </h3>
+                      <div className="flex items-center gap-3 mt-1 text-xs text-neutral-500 flex-wrap">
+                        {authed && r && <span>★ {r.avg.toFixed(1)}</span>}
+                        {spot.price_range && (
+                          <span className="text-neutral-400">{'¥'.repeat(spot.price_range)}</span>
+                        )}
+                        {spot.genre && <span className="text-neutral-400">{spot.genre}</span>}
+                        {spot.want_to_visit && (
+                          <span className="text-[9px] tracking-luxe bg-neutral-100 px-1.5 py-0.5">
+                            WISHLIST
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                </li>
               )
             })}
-          </div>
+          </ul>
         )}
       </div>
     </div>
