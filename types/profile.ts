@@ -11,6 +11,8 @@ export const PREFECTURES = [
   '海外',
 ]
 
+export const WORK_LOCATIONS = [...PREFECTURES, 'リモートワーク']
+
 export const EDUCATION_LEVELS = [
   '高卒',
   '専門学校卒',

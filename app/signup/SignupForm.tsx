@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import {
   PREFECTURES,
+  WORK_LOCATIONS,
   EDUCATION_LEVELS,
   DRINKING_FREQUENCIES,
   FAVORITE_GENRE_OPTIONS,
@@ -25,6 +26,7 @@ export default function SignupForm({ isFirstUser }: { isFirstUser: boolean }) {
   const [firstNameKanji, setFirstNameKanji] = useState('')
   const [lastNameKana, setLastNameKana] = useState('')
   const [firstNameKana, setFirstNameKana] = useState('')
+  const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [inviter, setInviter] = useState<Inviter | null>(null)
@@ -34,6 +36,7 @@ export default function SignupForm({ isFirstUser }: { isFirstUser: boolean }) {
   const [residence2, setResidence2] = useState('')
   const [highSchool, setHighSchool] = useState('')
   const [education, setEducation] = useState('')
+  const [workLocation, setWorkLocation] = useState('')
   const [company, setCompany] = useState('')
   const [favoriteGenres, setFavoriteGenres] = useState<string[]>([])
   const [allergies, setAllergies] = useState('')
@@ -121,10 +124,12 @@ export default function SignupForm({ isFirstUser }: { isFirstUser: boolean }) {
       first_name_kanji: firstNameKanji.trim(),
       last_name_kana: lastNameKana.trim(),
       first_name_kana: firstNameKana.trim(),
+      phone: phone.trim(),
       residence_1: residence1,
       residence_2: residence2,
       high_school: highSchool.trim(),
       education,
+      work_location: workLocation,
       company: company.trim(),
       favorite_genres: favoriteGenres.join(','),
       allergies: allergies.trim(),
@@ -250,6 +255,17 @@ export default function SignupForm({ isFirstUser }: { isFirstUser: boolean }) {
               </Field>
             </div>
 
+            <Field label="電話番号">
+              <input
+                type="tel"
+                required
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="例: 090-1234-5678"
+                className={inputClass}
+              />
+            </Field>
+
             <Field label="EMAIL">
               <input
                 type="email"
@@ -338,6 +354,22 @@ export default function SignupForm({ isFirstUser }: { isFirstUser: boolean }) {
                 {EDUCATION_LEVELS.map((l) => (
                   <option key={l} value={l}>
                     {l}
+                  </option>
+                ))}
+              </select>
+            </Field>
+
+            <Field label="勤務地">
+              <select
+                required
+                value={workLocation}
+                onChange={(e) => setWorkLocation(e.target.value)}
+                className={inputClass}
+              >
+                <option value="">選択してください</option>
+                {WORK_LOCATIONS.map((w) => (
+                  <option key={w} value={w}>
+                    {w}
                   </option>
                 ))}
               </select>
