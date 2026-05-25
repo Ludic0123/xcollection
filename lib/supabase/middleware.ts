@@ -16,6 +16,7 @@ const PROTECTED_PATTERNS = [
   /^\/hotels\/[^/]+\/stay$/,
   /^\/chefs\/new$/,
   /^\/chefs\/[^/]+\/edit$/,
+  /^\/visits\/new$/,
   /^\/invitation/,
   /^\/admin/,
 ]

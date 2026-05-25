@@ -8,6 +8,7 @@ import AdminSignOut from './AdminSignOut'
 
 const ADMIN_NAV = [
   { href: '/admin', label: 'OVERVIEW', section: 'GENERAL' },
+  { href: '/visits/new', label: '+ 訪問記録', section: 'GENERAL' },
   { href: '/admin/spots', label: 'お店', section: 'CONTENTS' },
   { href: '/admin/hotels', label: 'ホテル', section: 'CONTENTS' },
   { href: '/admin/chefs', label: '大将・シェフ', section: 'CONTENTS' },

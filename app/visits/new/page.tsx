@@ -1,0 +1,32 @@
+export const dynamic = 'force-dynamic'
+
+import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
+import VisitFormWithPicker, { type SpotLite } from '@/components/VisitFormWithPicker'
+
+export default async function NewVisitPage() {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('spots')
+    .select('id, name, prefecture, city')
+    .order('name')
+  const spots = (data ?? []) as SpotLite[]
+
+  return (
+    <div className="bg-white min-h-screen px-8 md:px-16 py-12 max-w-3xl">
+      <Link
+        href="/admin"
+        className="inline-flex items-center gap-1 text-[10px] tracking-luxe text-neutral-500 hover:text-black mb-4"
+      >
+        <ArrowLeft className="w-3 h-3" />
+        BACK
+      </Link>
+      <h1 className="font-serif text-4xl italic font-light mb-2">Log a visit.</h1>
+      <p className="text-sm text-neutral-500 mb-6">
+        2回目以降の訪問記録。お店を選んで詳細を記録します。
+      </p>
+      <VisitFormWithPicker spots={spots} />
+    </div>
+  )
+}

@@ -255,7 +255,7 @@ export default async function TopPage() {
             <Link
               key={s.id}
               href={`/sake/${s.id}`}
-              className="snap-start shrink-0 w-56 md:w-64 group"
+              className="snap-start shrink-0 w-36 md:w-44 group"
             >
               <div className="aspect-[3/4] bg-neutral-100 overflow-hidden">
                 {s.cover_image_url ? (
@@ -266,19 +266,18 @@ export default async function TopPage() {
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center font-serif italic text-neutral-300 text-4xl">
+                  <div className="w-full h-full flex items-center justify-center font-serif italic text-neutral-300 text-3xl">
                     {s.name.slice(0, 1)}
                   </div>
                 )}
               </div>
-              <div className="mt-4">
-                <p className="text-[10px] tracking-luxe text-neutral-400">
+              <div className="mt-3">
+                <p className="text-[9px] tracking-luxe text-neutral-400">
                   {s.region ?? 'JAPAN'}
-                  {s.sake_type && ` · ${s.sake_type}`}
                 </p>
-                <h3 className="font-serif text-xl mt-1 leading-snug">{s.name}</h3>
+                <h3 className="font-serif text-base mt-0.5 leading-snug">{s.name}</h3>
                 {s.brewery && (
-                  <p className="text-xs text-neutral-500 mt-1">{s.brewery}</p>
+                  <p className="text-[10px] text-neutral-500 mt-0.5">{s.brewery}</p>
                 )}
               </div>
             </Link>

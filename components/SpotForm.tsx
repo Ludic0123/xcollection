@@ -51,6 +51,7 @@ export default function SpotForm({
   const [lng, setLng] = useState<string>(spot?.lng?.toString() ?? '')
   const [chefId, setChefId] = useState<string>(spot?.chef_id ?? '')
   const [mealTimes, setMealTimes] = useState<string[]>(spot?.meal_times ?? [])
+  const [firstVisitMonth, setFirstVisitMonth] = useState<string>('') // 新規登録時のみ使用 (YYYY-MM)
 
   const genresForCategory = useMemo(
     () => genres.filter((g) => g.category === category),
@@ -128,6 +129,14 @@ export default function SpotForm({
         setError(error.message)
         setSaving(false)
         return
+      }
+      // 初訪問年月が入力されていれば、訪問記録を1件作成
+      if (firstVisitMonth) {
+        await supabase.from('visits').insert({
+          user_id: user.id,
+          spot_id: data.id,
+          visited_at: `${firstVisitMonth}-01`, // YYYY-MM → YYYY-MM-01
+        })
       }
       router.push(`/spots/${data.id}`)
     }
@@ -339,6 +348,23 @@ export default function SpotForm({
           className="w-full border border-gray-300 px-3 py-2 text-sm"
         />
       </div>
+
+      {!spot && (
+        <div>
+          <label className="block text-sm text-gray-700 mb-1">
+            初訪問年月（任意）
+          </label>
+          <input
+            type="month"
+            value={firstVisitMonth}
+            onChange={(e) => setFirstVisitMonth(e.target.value)}
+            className="border border-gray-300 px-3 py-2 text-sm"
+          />
+          <p className="text-[10px] text-neutral-400 mt-1">
+            入力すると同時に訪問記録が1件作成されます。2回目以降の訪問は別途追加できます
+          </p>
+        </div>
+      )}
 
       <div>
         <label className="block text-xs tracking-luxe text-neutral-500 mb-2">
