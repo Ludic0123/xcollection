@@ -53,13 +53,15 @@ export default async function InvitationPage({
   return (
     <div className="bg-white min-h-[calc(100vh-6rem)]">
       {/* HERO */}
-      <section className="px-8 md:px-16 pt-16 pb-12 border-b hairline">
-        <p className="text-[10px] tracking-luxe text-neutral-400">MEMBERS ONLY</p>
-        <h1 className="font-serif text-5xl md:text-7xl italic font-light mt-3">Invitation.</h1>
-        <p className="text-sm text-neutral-600 mt-6 max-w-xl">
-          会員限定。グルメ会・日本酒会・日本酒配布の募集と参加。
+      <div className="px-4 md:px-16 pt-4 pb-3 md:pt-12 md:pb-8 border-b hairline">
+        <p className="text-[9px] tracking-luxe text-neutral-400">MEMBERS ONLY</p>
+        <h1 className="font-serif text-3xl md:text-6xl mt-1 md:mt-3 italic font-light">
+          Invitation.
+        </h1>
+        <p className="text-[10px] md:text-sm text-neutral-500 mt-1 md:mt-2">
+          グルメ会・日本酒会・日本酒配布の募集と参加
         </p>
-      </section>
+      </div>
 
       {/* EVENTS */}
       <section className="px-8 md:px-16 py-12">

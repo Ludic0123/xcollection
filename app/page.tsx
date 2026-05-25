@@ -87,7 +87,7 @@ export default async function TopPage() {
   return (
     <div className="bg-white">
       {/* ====== HERO ====== */}
-      <section className="relative h-[55vh] min-h-[380px] md:h-[calc(100vh-6rem)] md:min-h-[640px] overflow-hidden bg-black">
+      <section className="relative h-[40vh] min-h-[280px] md:h-[70vh] md:min-h-[480px] overflow-hidden bg-black">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={HERO_IMAGE}
@@ -113,7 +113,7 @@ export default async function TopPage() {
 
       {/* ====== FEATURED BANNER ====== */}
       {featured.length > 0 && (
-        <section className="bg-black text-white border-b hairline">
+        <section className="bg-neutral-800 text-white border-b hairline">
           <div className="px-8 md:px-14 pt-6 pb-2 flex items-baseline justify-between">
             <h2 className="font-serif text-2xl md:text-3xl italic font-light">Featured.</h2>
           </div>
