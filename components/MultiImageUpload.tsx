@@ -29,36 +29,51 @@ export default function MultiImageUpload({
     setUploading(true)
     const supabase = createClient()
 
-    // 並列アップロード（1枚ずつ順次ではなく全部同時に送信）
-    const results = await Promise.all(
-      toUpload.map(async (file) => {
-        try {
-          const ext = file.name.split('.').pop() || 'jpg'
-          const filename = `${folder}/${Date.now()}-${Math.random()
-            .toString(36)
-            .slice(2, 10)}.${ext}`
-          const { error: uploadError } = await supabase.storage
-            .from('photos')
-            .upload(filename, file, { upsert: false, cacheControl: '3600' })
-          if (uploadError) {
-            return { url: null, error: uploadError.message }
-          }
-          const { data } = supabase.storage.from('photos').getPublicUrl(filename)
-          return { url: data.publicUrl, error: null }
-        } catch (e) {
-          return {
-            url: null,
-            error: e instanceof Error ? e.message : 'アップロード失敗',
-          }
+    async function uploadOne(file: File): Promise<{ url: string | null; error: string | null }> {
+      try {
+        const ext = file.name.split('.').pop() || 'jpg'
+        const filename = `${folder}/${Date.now()}-${Math.random()
+          .toString(36)
+          .slice(2, 10)}.${ext}`
+        const { error: uploadError } = await supabase.storage
+          .from('photos')
+          .upload(filename, file, { upsert: false, cacheControl: '3600' })
+        if (uploadError) {
+          return { url: null, error: uploadError.message }
         }
-      })
-    )
+        const { data } = supabase.storage.from('photos').getPublicUrl(filename)
+        return { url: data.publicUrl, error: null }
+      } catch (e) {
+        return {
+          url: null,
+          error: e instanceof Error ? e.message : 'アップロード失敗',
+        }
+      }
+    }
 
-    const uploaded = results.filter((r): r is { url: string; error: null } => !!r.url).map((r) => r.url)
-    const failed = results.filter((r) => !r.url)
-    onChange([...value, ...uploaded])
+    // 5枚ずつ並列にアップロード（ブラウザ/Supabase の接続上限対策）
+    const concurrency = 5
+    const allResults: { url: string | null; error: string | null }[] = []
+    let accumulated = [...value]
+    for (let i = 0; i < toUpload.length; i += concurrency) {
+      const chunk = toUpload.slice(i, i + concurrency)
+      const chunkResults = await Promise.all(chunk.map(uploadOne))
+      allResults.push(...chunkResults)
+      // 各チャンクごとに UI を逐次更新
+      const newUrls = chunkResults
+        .filter((r): r is { url: string; error: null } => !!r.url)
+        .map((r) => r.url)
+      if (newUrls.length > 0) {
+        accumulated = [...accumulated, ...newUrls]
+        onChange(accumulated)
+      }
+    }
+
+    const failed = allResults.filter((r) => !r.url)
     if (failed.length > 0) {
-      setError(`${failed.length}枚のアップロードに失敗: ${failed[0].error ?? ''}`)
+      setError(
+        `${failed.length}枚のアップロードに失敗: ${failed[0].error ?? ''}`
+      )
     }
     setUploading(false)
   }
