@@ -52,6 +52,7 @@ export type Spot = {
   name: string
   category: Category
   genre: string | null
+  prefecture: string | null
   city: string | null
   address: string | null
   price_range: number | null

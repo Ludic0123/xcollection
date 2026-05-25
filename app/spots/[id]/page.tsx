@@ -73,6 +73,7 @@ export default async function SpotDetailPage({
               <p className="text-[10px] tracking-luxe opacity-80">
                 {CATEGORY_LABELS[spot.category as Category]}
                 {spot.genre && ` · ${spot.genre}`}
+                {spot.prefecture && ` · ${spot.prefecture}`}
                 {spot.city && ` · ${spot.city}`}
               </p>
               <h1 className="font-serif text-5xl md:text-7xl mt-3 leading-tight">{spot.name}</h1>
@@ -83,6 +84,7 @@ export default async function SpotDetailPage({
             <p className="text-[10px] tracking-luxe text-neutral-400">
               {CATEGORY_LABELS[spot.category as Category]}
               {spot.genre && ` · ${spot.genre}`}
+              {spot.prefecture && ` · ${spot.prefecture}`}
               {spot.city && ` · ${spot.city}`}
             </p>
             <h1 className="font-serif text-5xl md:text-7xl mt-4 leading-tight">{spot.name}</h1>

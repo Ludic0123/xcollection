@@ -163,6 +163,7 @@ export default async function SpotsPage({
                   <div className="mt-5">
                     <p className="text-[10px] tracking-luxe text-neutral-400">
                       {CATEGORY_LABELS[spot.category as Category]}
+                      {spot.prefecture && ` · ${spot.prefecture}`}
                       {spot.city && ` · ${spot.city}`}
                     </p>
                     <h3 className="font-serif text-2xl mt-2 leading-tight">{spot.name}</h3>

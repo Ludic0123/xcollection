@@ -162,10 +162,14 @@ export default async function TopPage() {
                   <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
                     <p className="text-[10px] tracking-luxe text-white/70">
                       {CATEGORY_LABELS[s.category as Category]}
-                      {s.city && ` · ${s.city}`}
                     </p>
                     <h3 className="font-serif text-3xl md:text-4xl mt-2 leading-tight">
                       {s.name}
+                      {(s.prefecture || s.city) && (
+                        <span className="ml-3 font-sans font-light text-xs md:text-sm tracking-luxe text-white/60 align-middle">
+                          {[s.prefecture, s.city].filter(Boolean).join(' · ')}
+                        </span>
+                      )}
                     </h3>
                   </div>
                 </div>

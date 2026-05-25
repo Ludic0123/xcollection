@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { CATEGORY_OPTIONS, type Category, type Spot } from '@/types'
+import { PREFECTURES } from '@/types/profile'
 import ImageUpload from './ImageUpload'
 import MultiImageUpload from './MultiImageUpload'
 
@@ -32,6 +33,7 @@ export default function SpotForm({
   const [name, setName] = useState(spot?.name ?? '')
   const [category, setCategory] = useState<Category>(spot?.category ?? 'restaurant')
   const [genre, setGenre] = useState(spot?.genre ?? '')
+  const [prefecture, setPrefecture] = useState(spot?.prefecture ?? '')
   const [city, setCity] = useState(spot?.city ?? '')
   const [address, setAddress] = useState(spot?.address ?? '')
   const [priceRange, setPriceRange] = useState<number | ''>(spot?.price_range ?? '')
@@ -80,6 +82,7 @@ export default function SpotForm({
       name,
       category,
       genre: genre || null,
+      prefecture: prefecture || null,
       city: city || null,
       address: address || null,
       price_range: priceRange === '' ? null : Number(priceRange),
@@ -188,38 +191,54 @@ export default function SpotForm({
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm text-gray-700 mb-1">街</label>
+          <label className="block text-sm text-gray-700 mb-1">都道府県</label>
           <select
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
+            value={prefecture}
+            onChange={(e) => setPrefecture(e.target.value)}
             className="w-full border border-gray-300 px-3 py-2 text-sm"
           >
             <option value="">未設定</option>
-            {cities.map((c) => (
-              <option key={c.id} value={c.name}>
-                {c.name}
+            {PREFECTURES.map((p) => (
+              <option key={p} value={p}>
+                {p}
               </option>
             ))}
-            {city && !cities.some((c) => c.name === city) && (
-              <option value={city}>{city}（既存）</option>
-            )}
           </select>
         </div>
         <div>
-          <label className="block text-sm text-gray-700 mb-1">価格帯</label>
-          <select
-            value={priceRange}
-            onChange={(e) => setPriceRange(e.target.value === '' ? '' : Number(e.target.value))}
+          <label className="block text-sm text-gray-700 mb-1">街・エリア名</label>
+          <input
+            list="city-suggestions"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            placeholder="例: 銀座 / 嵐山 / 那覇市"
             className="w-full border border-gray-300 px-3 py-2 text-sm"
-          >
-            <option value="">未設定</option>
-            {priceRanges.map((p) => (
-              <option key={p.level} value={p.level}>
-                {p.label}
-              </option>
+          />
+          <datalist id="city-suggestions">
+            {cities.map((c) => (
+              <option key={c.id} value={c.name} />
             ))}
-          </select>
+          </datalist>
+          <p className="text-[10px] text-neutral-400 mt-1">
+            登録済みから選ぶか、自由に入力できます
+          </p>
         </div>
+      </div>
+
+      <div>
+        <label className="block text-sm text-gray-700 mb-1">価格帯</label>
+        <select
+          value={priceRange}
+          onChange={(e) => setPriceRange(e.target.value === '' ? '' : Number(e.target.value))}
+          className="w-full border border-gray-300 px-3 py-2 text-sm"
+        >
+          <option value="">未設定</option>
+          {priceRanges.map((p) => (
+            <option key={p.level} value={p.level}>
+              {p.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div>
