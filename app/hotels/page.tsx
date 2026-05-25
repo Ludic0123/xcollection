@@ -28,38 +28,38 @@ export default async function HotelsListPage({
 
   return (
     <div className="bg-white min-h-screen">
-      <div className="px-8 md:px-16 pt-14 pb-10 border-b hairline">
+      <div className="px-4 md:px-16 pt-4 pb-3 md:pt-12 md:pb-8 border-b hairline">
         <div className="flex items-baseline justify-between">
-          <p className="text-[10px] tracking-luxe text-neutral-400">STAYS</p>
+          <p className="text-[9px] tracking-luxe text-neutral-400">STAYS</p>
           {authed && (
             <Link
               href="/hotels/new"
-              className="text-[10px] tracking-luxe text-neutral-500 hover:text-black"
+              className="text-[9px] tracking-luxe text-neutral-500 hover:text-black"
             >
               + ADD NEW
             </Link>
           )}
         </div>
-        <h1 className="font-serif text-5xl md:text-7xl mt-4 italic font-light">Stays.</h1>
-        <p className="text-sm text-neutral-500 mt-3">{list.length} hotels</p>
+        <h1 className="font-serif text-3xl md:text-6xl mt-1 md:mt-3 italic font-light">Stays.</h1>
+        <p className="text-[10px] md:text-sm text-neutral-500 mt-1 md:mt-2">{list.length} hotels</p>
       </div>
 
-      <form className="px-8 md:px-16 py-6 border-b hairline flex flex-wrap gap-4 items-end text-sm">
+      <form className="px-4 md:px-16 py-2.5 md:py-5 border-b hairline flex flex-wrap gap-3 md:gap-4 items-end">
         <div>
-          <p className="text-[10px] tracking-luxe text-neutral-400 mb-1">SEARCH</p>
+          <p className="text-[9px] tracking-luxe text-neutral-400 mb-0.5">SEARCH</p>
           <input
             name="q"
             defaultValue={params.q ?? ''}
             placeholder="ホテル名"
-            className="border-b hairline bg-transparent px-1 py-1 text-sm w-48 focus:outline-none focus:border-black"
+            className="border-b hairline bg-transparent px-1 py-0.5 text-xs md:text-sm w-32 md:w-48 focus:outline-none focus:border-black"
           />
         </div>
         <div>
-          <p className="text-[10px] tracking-luxe text-neutral-400 mb-1">PREFECTURE</p>
+          <p className="text-[9px] tracking-luxe text-neutral-400 mb-0.5">PREFECTURE</p>
           <select
             name="prefecture"
             defaultValue={params.prefecture ?? ''}
-            className="border-b hairline bg-transparent px-1 py-1 text-sm focus:outline-none focus:border-black"
+            className="border-b hairline bg-transparent px-1 py-0.5 text-xs md:text-sm focus:outline-none focus:border-black"
           >
             <option value="">ALL</option>
             {prefectures.map((p) => (
@@ -68,11 +68,11 @@ export default async function HotelsListPage({
           </select>
         </div>
         <div>
-          <p className="text-[10px] tracking-luxe text-neutral-400 mb-1">BRAND</p>
+          <p className="text-[9px] tracking-luxe text-neutral-400 mb-0.5">BRAND</p>
           <select
             name="brand"
             defaultValue={params.brand ?? ''}
-            className="border-b hairline bg-transparent px-1 py-1 text-sm focus:outline-none focus:border-black"
+            className="border-b hairline bg-transparent px-1 py-0.5 text-xs md:text-sm focus:outline-none focus:border-black"
           >
             <option value="">ALL</option>
             {brands.map((b) => (
@@ -80,10 +80,10 @@ export default async function HotelsListPage({
             ))}
           </select>
         </div>
-        <button className="text-[10px] tracking-luxe border-b border-black px-1 py-1 hover:opacity-50">
+        <button className="text-[9px] tracking-luxe border-b border-black px-1 py-0.5 hover:opacity-50">
           FILTER
         </button>
-        <Link href="/hotels" className="text-[10px] tracking-luxe text-neutral-400 hover:text-black">
+        <Link href="/hotels" className="text-[9px] tracking-luxe text-neutral-400 hover:text-black">
           RESET
         </Link>
       </form>

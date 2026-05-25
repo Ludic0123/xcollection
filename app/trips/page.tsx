@@ -34,20 +34,20 @@ export default async function TripsPage() {
 
   return (
     <div className="bg-white min-h-screen">
-      <div className="px-8 md:px-16 pt-14 pb-10 border-b hairline">
+      <div className="px-4 md:px-16 pt-4 pb-3 md:pt-12 md:pb-8 border-b hairline">
         <div className="flex items-baseline justify-between">
-          <p className="text-[10px] tracking-luxe text-neutral-400">JOURNEYS</p>
+          <p className="text-[9px] tracking-luxe text-neutral-400">JOURNEYS</p>
           {authed && (
             <Link
               href="/trips/new"
-              className="text-[10px] tracking-luxe text-neutral-500 hover:text-black"
+              className="text-[9px] tracking-luxe text-neutral-500 hover:text-black"
             >
               + NEW JOURNEY
             </Link>
           )}
         </div>
-        <h1 className="font-serif text-5xl md:text-7xl mt-4 italic font-light">Journeys.</h1>
-        <p className="text-sm text-neutral-500 mt-3">
+        <h1 className="font-serif text-3xl md:text-6xl mt-1 md:mt-3 italic font-light">Journeys.</h1>
+        <p className="text-[10px] md:text-sm text-neutral-500 mt-1 md:mt-2">
           {list.length} plan{list.length !== 1 ? 's' : ''}
         </p>
       </div>

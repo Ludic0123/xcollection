@@ -17,20 +17,20 @@ export default async function SakeListPage() {
 
   return (
     <div className="bg-white min-h-screen">
-      <div className="px-8 md:px-16 pt-14 pb-10 border-b hairline">
+      <div className="px-4 md:px-16 pt-4 pb-3 md:pt-12 md:pb-8 border-b hairline">
         <div className="flex items-baseline justify-between">
-          <p className="text-[10px] tracking-luxe text-neutral-400">SAKE</p>
+          <p className="text-[9px] tracking-luxe text-neutral-400">SAKE</p>
           {authed && (
             <Link
               href="/sake/new"
-              className="text-[10px] tracking-luxe text-neutral-500 hover:text-black"
+              className="text-[9px] tracking-luxe text-neutral-500 hover:text-black"
             >
               + ADD NEW
             </Link>
           )}
         </div>
-        <h1 className="font-serif text-5xl md:text-7xl mt-4 italic font-light">Sake.</h1>
-        <p className="text-sm text-neutral-500 mt-3">{list.length} bottles</p>
+        <h1 className="font-serif text-3xl md:text-6xl mt-1 md:mt-3 italic font-light">Sake.</h1>
+        <p className="text-[10px] md:text-sm text-neutral-500 mt-1 md:mt-2">{list.length} bottles</p>
       </div>
 
       <div className="px-4 md:px-16 py-6">
