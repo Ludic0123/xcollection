@@ -28,25 +28,38 @@ export default function MultiImageUpload({
     const toUpload = Array.from(files).slice(0, remaining)
     setUploading(true)
     const supabase = createClient()
-    const uploaded: string[] = []
-    for (const file of toUpload) {
-      try {
-        const ext = file.name.split('.').pop() || 'jpg'
-        const filename = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
-        const { error: uploadError } = await supabase.storage
-          .from('photos')
-          .upload(filename, file, { upsert: false, cacheControl: '3600' })
-        if (uploadError) {
-          setError(uploadError.message)
-          continue
+
+    // 並列アップロード（1枚ずつ順次ではなく全部同時に送信）
+    const results = await Promise.all(
+      toUpload.map(async (file) => {
+        try {
+          const ext = file.name.split('.').pop() || 'jpg'
+          const filename = `${folder}/${Date.now()}-${Math.random()
+            .toString(36)
+            .slice(2, 10)}.${ext}`
+          const { error: uploadError } = await supabase.storage
+            .from('photos')
+            .upload(filename, file, { upsert: false, cacheControl: '3600' })
+          if (uploadError) {
+            return { url: null, error: uploadError.message }
+          }
+          const { data } = supabase.storage.from('photos').getPublicUrl(filename)
+          return { url: data.publicUrl, error: null }
+        } catch (e) {
+          return {
+            url: null,
+            error: e instanceof Error ? e.message : 'アップロード失敗',
+          }
         }
-        const { data } = supabase.storage.from('photos').getPublicUrl(filename)
-        uploaded.push(data.publicUrl)
-      } catch (e) {
-        setError(e instanceof Error ? e.message : 'アップロード失敗')
-      }
-    }
+      })
+    )
+
+    const uploaded = results.filter((r): r is { url: string; error: null } => !!r.url).map((r) => r.url)
+    const failed = results.filter((r) => !r.url)
     onChange([...value, ...uploaded])
+    if (failed.length > 0) {
+      setError(`${failed.length}枚のアップロードに失敗: ${failed[0].error ?? ''}`)
+    }
     setUploading(false)
   }
 

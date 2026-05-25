@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 ﻿import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { EVENT_TYPE_LABELS, type AppEvent } from '@/types'

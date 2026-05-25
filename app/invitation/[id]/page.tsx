@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'

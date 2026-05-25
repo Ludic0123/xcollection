@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { createClient } from '@/lib/supabase/server'
 import GoogleMap from '@/components/GoogleMap'
 import type { Spot, Hotel } from '@/types'
