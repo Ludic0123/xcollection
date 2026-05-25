@@ -91,37 +91,37 @@ export default async function TopPage() {
   return (
     <div className="bg-white">
       {/* ====== HERO ====== */}
-      <section className="relative h-[calc(100vh-6rem)] min-h-[640px] overflow-hidden bg-black">
+      <section className="relative h-[70vh] min-h-[480px] md:h-[calc(100vh-6rem)] md:min-h-[640px] overflow-hidden bg-black">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={HERO_IMAGE}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover opacity-85"
+          className="absolute inset-0 w-full h-full object-cover object-center opacity-85"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/60" />
 
         {/* 上部メタ */}
-        <div className="absolute top-0 left-0 right-0 px-8 md:px-14 pt-8 flex items-baseline justify-between text-white">
-          <p className="text-[10px] tracking-luxe opacity-80">ISSUE — {dateLabel}</p>
-          <p className="text-[10px] tracking-luxe opacity-80">VOL. 01</p>
+        <div className="absolute top-0 left-0 right-0 px-5 md:px-14 pt-5 md:pt-8 flex items-baseline justify-between text-white">
+          <p className="text-[9px] md:text-[10px] tracking-luxe opacity-80">ISSUE — {dateLabel}</p>
+          <p className="text-[9px] md:text-[10px] tracking-luxe opacity-80">VOL. 01</p>
         </div>
 
         {/* 中央タイトル */}
         <div className="absolute inset-0 flex items-center justify-center px-4">
-          <h1 className="font-serif text-[22vw] md:text-[15vw] leading-[0.9] tracking-tight italic font-light text-white text-center">
+          <h1 className="font-serif text-[19vw] md:text-[15vw] leading-[0.9] tracking-tight italic font-light text-white text-center">
             Collection.
           </h1>
         </div>
 
         {/* 右下に縦並びステータス（大きめ） */}
-        <div className="absolute bottom-8 md:bottom-14 right-8 md:right-14 text-white text-right space-y-7">
+        <div className="absolute bottom-5 md:bottom-14 right-5 md:right-14 text-white text-right space-y-3 md:space-y-7">
           <HeroStat label="TASTES" value={spotCount ?? 0} href="/spots" />
           <HeroStat label="STAYS" value={hotelCount ?? 0} href="/spots?category=hotel" />
           <HeroStat label="JOURNEYS" value={tripCount ?? 0} href="/trips" />
         </div>
 
-        {/* 左下にキャプション */}
-        <div className="absolute bottom-8 md:bottom-14 left-8 md:left-14">
+        {/* 左下にキャプション (モバイルでは省略) */}
+        <div className="hidden md:block absolute bottom-14 left-14">
           <p className="text-[10px] tracking-luxe text-white/70">
             CURATED EATS<br />STAYS · JOURNEYS
           </p>
@@ -321,10 +321,10 @@ function HeroStat({
 }) {
   return (
     <Link href={href} className="block group">
-      <p className="text-xs tracking-luxe text-white/70 group-hover:text-white transition-colors">
+      <p className="text-[10px] md:text-xs tracking-luxe text-white/70 group-hover:text-white transition-colors">
         {label}
       </p>
-      <p className="font-serif text-5xl md:text-6xl mt-1 leading-none group-hover:italic transition-all">
+      <p className="font-serif text-3xl md:text-6xl mt-0.5 md:mt-1 leading-none group-hover:italic transition-all">
         {String(value).padStart(2, '0')}
       </p>
     </Link>
