@@ -131,15 +131,17 @@ export default async function SpotDetailPage({
               <p className="font-serif text-2xl mt-2">{priceLabel ?? `Lv. ${spot.price_range}`}</p>
             </div>
           )}
-          <div>
-            <p className="text-[10px] tracking-luxe text-neutral-400">VISITS</p>
-            <p className="font-serif text-2xl mt-2">{visits.length}</p>
-            {totalPaid > 0 && (
-              <p className="text-xs text-neutral-500 mt-1">
-                総支出 ¥{totalPaid.toLocaleString()}
-              </p>
-            )}
-          </div>
+          {visits.length > 0 && (
+            <div>
+              <p className="text-[10px] tracking-luxe text-neutral-400">VISITS</p>
+              <p className="font-serif text-2xl mt-2">{visits.length}</p>
+              {totalPaid > 0 && (
+                <p className="text-xs text-neutral-500 mt-1">
+                  総支出 ¥{totalPaid.toLocaleString()}
+                </p>
+              )}
+            </div>
+          )}
           {spot.chef && (
             <div>
               <p className="text-[10px] tracking-luxe text-neutral-400">大将・シェフ</p>
@@ -238,41 +240,43 @@ export default async function SpotDetailPage({
         </section>
       )}
 
-      {/* VISITS LOG */}
-      <section className="px-8 md:px-16 py-12">
-        <div className="flex items-baseline justify-between mb-6">
-          <div>
-            <p className="text-[10px] tracking-luxe text-neutral-400">VISITS</p>
-            <h2 className="font-serif text-3xl italic font-light mt-1">Memories.</h2>
+      {/* VISITS LOG（訪問が1回以上、または編集者には常に表示） */}
+      {(visits.length > 0 || authed) && (
+        <section className="px-8 md:px-16 py-12">
+          <div className="flex items-baseline justify-between mb-6">
+            <div>
+              <p className="text-[10px] tracking-luxe text-neutral-400">VISITS</p>
+              <h2 className="font-serif text-3xl italic font-light mt-1">Memories.</h2>
+            </div>
+            {authed && (
+              <Link
+                href={`/spots/${id}/visit`}
+                className="text-[10px] tracking-luxe text-neutral-500 hover:text-black"
+              >
+                + ADD VISIT
+              </Link>
+            )}
           </div>
-          {authed && (
-            <Link
-              href={`/spots/${id}/visit`}
-              className="text-[10px] tracking-luxe text-neutral-500 hover:text-black"
-            >
-              + ADD VISIT
-            </Link>
-          )}
-        </div>
 
-        {visits.length === 0 ? (
-          <div className="py-12 text-center text-sm text-neutral-400">
-            まだ訪問記録がありません。
-          </div>
-        ) : (
-          <ul className="space-y-px bg-neutral-100">
-            {visits.map((v) => (
-              <VisitItem
-                key={v.id}
-                visit={v}
-                spotId={id}
-                canEdit={authed}
-                showRating={authed}
-              />
-            ))}
-          </ul>
-        )}
-      </section>
+          {visits.length === 0 ? (
+            <div className="py-12 text-center text-sm text-neutral-400">
+              まだ訪問記録がありません。
+            </div>
+          ) : (
+            <ul className="space-y-px bg-neutral-100">
+              {visits.map((v) => (
+                <VisitItem
+                  key={v.id}
+                  visit={v}
+                  spotId={id}
+                  canEdit={authed}
+                  showRating={authed}
+                />
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
     </div>
   )
 }
