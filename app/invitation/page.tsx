@@ -61,36 +61,9 @@ export default async function InvitationPage({
         </p>
       </section>
 
-      {/* MEMBER CARD */}
-      <section className="px-8 md:px-16 py-10 border-b hairline grid grid-cols-1 md:grid-cols-12 gap-8 bg-neutral-50">
-        <div className="md:col-span-4">
-          <p className="text-[10px] tracking-luxe text-neutral-400">YOUR MEMBERSHIP</p>
-          <div className="mt-3">
-            <p className="font-mono text-3xl tracking-widest">
-              <span className="text-neutral-400">NO.</span> {String(member.memberNumber).padStart(3, '0')}
-            </p>
-            <p className="font-mono text-2xl tracking-widest mt-2">
-              <span className="text-neutral-400 text-base">CODE</span> {member.memberCode}
-            </p>
-          </div>
-        </div>
-        <div className="md:col-span-8">
-          <p className="text-[10px] tracking-luxe text-neutral-400">INVITE A FRIEND</p>
-          <p className="text-sm text-neutral-700 mt-3 leading-relaxed">
-            あなたの <span className="font-mono">No.{member.memberNumber}</span> と{' '}
-            <span className="font-mono">{member.memberCode}</span> の両方を伝えてください。
-            相手は <Link href="/signup" className="underline">サインアップページ</Link> で2つを入力して会員になれます。
-          </p>
-        </div>
-      </section>
-
       {/* EVENTS */}
       <section className="px-8 md:px-16 py-12">
-        <div className="flex items-end justify-between mb-6">
-          <div>
-            <p className="text-[10px] tracking-luxe text-neutral-400">GATHERINGS</p>
-            <h2 className="font-serif text-4xl italic font-light mt-1">Open calls.</h2>
-          </div>
+        <div className="flex items-center justify-end mb-6">
           <Link
             href="/invitation/new"
             className="text-[11px] tracking-luxe bg-black text-white px-4 py-2.5 hover:bg-neutral-800"

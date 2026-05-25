@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 const PUBLIC_NAV = [
@@ -19,7 +18,6 @@ const MEMBER_NAV = [...PUBLIC_NAV, { href: '/invitation', label: 'INVITATION' }]
 
 export default function Header({
   memberCode,
-  memberNumber,
   isAdmin,
 }: {
   memberCode: string | null
@@ -28,7 +26,6 @@ export default function Header({
 }) {
   const pathname = usePathname()
   const router = useRouter()
-  const [copied, setCopied] = useState(false)
   const isMember = !!memberCode
   const nav = isAdmin
     ? [...MEMBER_NAV, { href: '/admin', label: 'ADMIN' }]
@@ -41,15 +38,6 @@ export default function Header({
     await supabase.auth.signOut()
     router.push('/')
     router.refresh()
-  }
-
-  async function copyCode() {
-    if (!memberCode) return
-    await navigator.clipboard.writeText(
-      `Member No.${memberNumber} / Code: ${memberCode}`
-    )
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
   }
 
   return (
@@ -88,21 +76,12 @@ export default function Header({
         <div className="flex items-center gap-5 shrink-0">
           {isMember ? (
             <>
-              <button
-                onClick={copyCode}
-                title="クリックでコピー"
-                className="hidden md:flex items-center gap-2 text-[10px] tracking-luxe text-neutral-500 hover:text-black"
+              <Link
+                href="/profile"
+                className="hidden md:inline-block text-[11px] tracking-luxe text-neutral-500 hover:text-black"
               >
-                <span className="text-neutral-300">NO.</span>
-                <span className="font-mono font-semibold text-black">
-                  {String(memberNumber ?? '').padStart(3, '0')}
-                </span>
-                <span className="text-neutral-300">/</span>
-                <span className="font-mono font-semibold tracking-widest text-black">
-                  {memberCode}
-                </span>
-                {copied && <span className="text-green-600 ml-1">COPIED</span>}
-              </button>
+                PROFILE
+              </Link>
               <button
                 onClick={handleLogout}
                 className="text-[11px] tracking-luxe text-neutral-500 hover:text-black"
@@ -149,12 +128,12 @@ export default function Header({
           )
         })}
         {isMember && (
-          <button
-            onClick={copyCode}
-            className="ml-auto text-[10px] tracking-luxe font-mono text-black whitespace-nowrap"
+          <Link
+            href="/profile"
+            className="ml-auto text-[10px] tracking-luxe text-black whitespace-nowrap"
           >
-            {copied ? 'COPIED' : `${memberNumber}/${memberCode}`}
-          </button>
+            PROFILE
+          </Link>
         )}
       </nav>
     </header>

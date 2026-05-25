@@ -18,6 +18,7 @@ const PROTECTED_PATTERNS = [
   /^\/chefs\/[^/]+\/edit$/,
   /^\/visits\/new$/,
   /^\/invitation/,
+  /^\/profile/,
   /^\/admin/,
 ]
 
