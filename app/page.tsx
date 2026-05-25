@@ -96,13 +96,6 @@ export default async function TopPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/60" />
 
-        {/* 中央タイトル */}
-        <div className="absolute inset-0 flex items-center justify-center px-4">
-          <h1 className="font-serif text-[16vw] md:text-[15vw] leading-[0.9] tracking-tight italic font-light text-white text-center">
-            Collection.
-          </h1>
-        </div>
-
         {/* 右下に縦並びステータス */}
         <div className="absolute bottom-4 md:bottom-14 right-4 md:right-14 text-white text-right space-y-2.5 md:space-y-7">
           <HeroStat label="TASTES" value={spotCount ?? 0} href="/spots" />
@@ -130,7 +123,7 @@ export default async function TopPage() {
               <Link
                 key={s.id}
                 href={`/spots/${s.id}`}
-                className="snap-start shrink-0 w-[70vw] md:w-[34vw] group"
+                className="snap-start shrink-0 w-[50vw] md:w-[24vw] group"
               >
                 <div className="aspect-[4/3] bg-neutral-900 overflow-hidden relative">
                   {s.cover_image_url ? (
@@ -148,15 +141,15 @@ export default async function TopPage() {
                     </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5">
-                    <h3 className="font-serif text-xl md:text-2xl leading-tight">
+                  <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
+                    <h3 className="font-serif text-base md:text-xl leading-tight">
                       {s.name}
-                      {(s.prefecture || s.city) && (
-                        <span className="ml-2 font-sans font-light text-[10px] md:text-xs tracking-luxe text-white/60 align-middle">
-                          {[s.prefecture, s.city].filter(Boolean).join(' · ')}
-                        </span>
-                      )}
                     </h3>
+                    {(s.prefecture || s.city) && (
+                      <p className="font-sans font-light text-[9px] md:text-[10px] tracking-luxe text-white/60 mt-1">
+                        {[s.prefecture, s.city].filter(Boolean).join(' · ')}
+                      </p>
+                    )}
                   </div>
                 </div>
               </Link>
@@ -239,7 +232,7 @@ export default async function TopPage() {
               href={`/sake/${s.id}`}
               className="snap-start shrink-0 w-36 md:w-44 group"
             >
-              <div className="aspect-[3/4] bg-neutral-100 overflow-hidden">
+              <div className="aspect-[1/1] bg-neutral-100 overflow-hidden">
                 {s.cover_image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -351,12 +344,19 @@ function Carousel({ children }: { children: React.ReactNode }) {
 
 function SpotCard({ spot }: { spot: Spot }) {
   const location = [spot.prefecture, spot.city].filter(Boolean).join(' · ')
+  const priceMark =
+    spot.price_range != null
+      ? spot.price_range <= 5
+        ? '¥'.repeat(spot.price_range)
+        : '¥¥¥¥¥+'
+      : null
+  const subParts = [spot.genre, priceMark].filter(Boolean)
   return (
     <Link
       href={`/spots/${spot.id}`}
       className="snap-start shrink-0 w-36 md:w-44 group"
     >
-      <div className="aspect-[4/5] bg-neutral-100 overflow-hidden">
+      <div className="aspect-[1/1] bg-neutral-100 overflow-hidden">
         {spot.cover_image_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -372,23 +372,32 @@ function SpotCard({ spot }: { spot: Spot }) {
           </div>
         )}
       </div>
-      <div className="mt-3">
+      <div className="mt-2">
         {location && (
           <p className="text-[9px] tracking-luxe text-neutral-400">{location}</p>
         )}
         <h3 className="font-serif text-base mt-0.5 leading-snug">{spot.name}</h3>
+        {subParts.length > 0 && (
+          <p className="text-[10px] text-neutral-500 mt-0.5">{subParts.join(' · ')}</p>
+        )}
       </div>
     </Link>
   )
 }
 
 function HotelCard({ hotel }: { hotel: Hotel }) {
+  const priceMark =
+    hotel.price_range != null
+      ? hotel.price_range <= 5
+        ? '¥'.repeat(hotel.price_range)
+        : '¥¥¥¥¥+'
+      : null
   return (
     <Link
       href={`/hotels/${hotel.id}`}
       className="snap-start shrink-0 w-36 md:w-44 group"
     >
-      <div className="aspect-[4/5] bg-neutral-100 overflow-hidden">
+      <div className="aspect-[1/1] bg-neutral-100 overflow-hidden">
         {hotel.cover_image_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -404,12 +413,16 @@ function HotelCard({ hotel }: { hotel: Hotel }) {
           </div>
         )}
       </div>
-      <div className="mt-3">
+      <div className="mt-2">
         <p className="text-[9px] tracking-luxe text-neutral-400">
-          {hotel.brand ?? 'HOTEL'}
-          {hotel.prefecture && ` · ${hotel.prefecture}`}
+          {hotel.prefecture ?? 'JAPAN'}
         </p>
         <h3 className="font-serif text-base mt-0.5 leading-snug">{hotel.name}</h3>
+        {(hotel.brand || priceMark) && (
+          <p className="text-[10px] text-neutral-500 mt-0.5">
+            {[hotel.brand, priceMark].filter(Boolean).join(' · ')}
+          </p>
+        )}
       </div>
     </Link>
   )
@@ -421,7 +434,7 @@ function TripCard({ trip }: { trip: TripPlan }) {
       href={`/trips/${trip.id}`}
       className="snap-start shrink-0 w-36 md:w-44 group"
     >
-      <div className="aspect-[4/5] bg-neutral-100 overflow-hidden">
+      <div className="aspect-[1/1] bg-neutral-100 overflow-hidden">
         {trip.cover_image_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
