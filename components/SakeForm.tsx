@@ -104,7 +104,7 @@ export default function SakeForm({
 
       <div>
         <label className="block text-xs tracking-luxe text-neutral-500 mb-2">PHOTOS</label>
-        <MultiImageUpload value={photos} onChange={setPhotos} folder="sakes" max={30} />
+        <MultiImageUpload value={photos} onChange={setPhotos} folder="sakes" max={20} />
       </div>
 
       <div>

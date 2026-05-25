@@ -129,7 +129,7 @@ export default function HotelForm({
 
       <div>
         <label className="block text-xs tracking-luxe text-neutral-500 mb-2">PHOTOS</label>
-        <MultiImageUpload value={photos} onChange={setPhotos} folder="hotels" max={30} />
+        <MultiImageUpload value={photos} onChange={setPhotos} folder="hotels" max={20} />
       </div>
 
       <div>

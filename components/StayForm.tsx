@@ -53,7 +53,7 @@ export default function StayForm({ hotelId }: { hotelId: string }) {
     <form onSubmit={handleSubmit} className="bg-white border hairline p-6 space-y-6">
       <div>
         <label className="block text-xs tracking-luxe text-neutral-500 mb-2">PHOTOS</label>
-        <MultiImageUpload value={photos} onChange={setPhotos} folder="stays" max={30} />
+        <MultiImageUpload value={photos} onChange={setPhotos} folder="stays" max={20} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import MasterTable from '@/components/admin/MasterTable'
 
 export default async function ReservationMethodsAdminPage() {
@@ -8,7 +8,7 @@ export default async function ReservationMethodsAdminPage() {
     .select('*')
     .order('display_order')
   return (
-    <div className="px-10 py-10">
+    <div className="px-4 py-6 md:px-10 md:py-10">
       <p className="text-[10px] tracking-luxe text-neutral-400">MASTERS</p>
       <h1 className="font-serif text-4xl italic font-light mt-1 mb-6">Reservation methods.</h1>
       <p className="text-sm text-neutral-500 mb-6">

@@ -8,7 +8,7 @@ export default function MultiImageUpload({
   value,
   onChange,
   folder = 'visits',
-  max = 30,
+  max = 20,
 }: {
   value: string[]
   onChange: (urls: string[]) => void
@@ -96,7 +96,7 @@ export default function MultiImageUpload({
         )}
       </div>
       <p className="text-[10px] text-neutral-400 mt-2">
-        {value.length} / {max} 枚
+        {value.length} / {max} 枚 ・ 複数枚をまとめて選択できます
       </p>
       {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
     </div>

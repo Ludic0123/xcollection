@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { EVENT_TYPE_LABELS, type AppEvent } from '@/types'
 
@@ -11,7 +11,7 @@ export default async function AdminEventsPage() {
   const events = (data ?? []) as AppEvent[]
 
   return (
-    <div className="px-10 py-10">
+    <div className="px-4 py-6 md:px-10 md:py-10">
       <div className="flex items-baseline justify-between mb-6">
         <div>
           <p className="text-[10px] tracking-luxe text-neutral-400">CONTENTS</p>

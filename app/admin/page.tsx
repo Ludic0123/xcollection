@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 
 export default async function AdminDashboard() {
@@ -20,7 +20,7 @@ export default async function AdminDashboard() {
   ])
 
   return (
-    <div className="px-10 py-10">
+    <div className="px-4 py-6 md:px-10 md:py-10">
       <p className="text-[10px] tracking-luxe text-neutral-400">DASHBOARD</p>
       <h1 className="font-serif text-4xl italic font-light mt-1">Overview.</h1>
 

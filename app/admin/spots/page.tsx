@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import type { Spot } from '@/types'
 import { CATEGORY_LABELS, type Category } from '@/types'
@@ -12,7 +12,7 @@ export default async function AdminSpotsPage() {
   const spots = (data ?? []) as Spot[]
 
   return (
-    <div className="px-10 py-10">
+    <div className="px-4 py-6 md:px-10 md:py-10">
       <div className="flex items-baseline justify-between mb-6">
         <div>
           <p className="text-[10px] tracking-luxe text-neutral-400">CONTENTS</p>

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 
 export default async function UsersAdminPage() {
   const supabase = await createClient()
@@ -11,7 +11,7 @@ export default async function UsersAdminPage() {
     .order('member_number')
 
   return (
-    <div className="px-10 py-10">
+    <div className="px-4 py-6 md:px-10 md:py-10">
       <p className="text-[10px] tracking-luxe text-neutral-400">PEOPLE</p>
       <h1 className="font-serif text-4xl italic font-light mt-1 mb-6">Members.</h1>
       <p className="text-sm text-neutral-500 mb-6">
