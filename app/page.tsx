@@ -6,6 +6,7 @@ import {
   EVENT_TYPE_LABELS,
   type AppEvent,
   type Category,
+  type Hotel,
   type Sake,
   type Spot,
   type TripPlan,
@@ -31,10 +32,7 @@ export default async function TopPage() {
     { data: eventsData },
   ] = await Promise.all([
     supabase.from('spots').select('id', { count: 'exact', head: true }),
-    supabase
-      .from('spots')
-      .select('id', { count: 'exact', head: true })
-      .eq('category', 'hotel'),
+    supabase.from('hotels').select('id', { count: 'exact', head: true }),
     supabase.from('trip_plans').select('id', { count: 'exact', head: true }),
     supabase
       .from('spots')
@@ -49,9 +47,8 @@ export default async function TopPage() {
       .order('created_at', { ascending: false })
       .limit(12),
     supabase
-      .from('spots')
+      .from('hotels')
       .select('*')
-      .eq('category', 'hotel')
       .order('created_at', { ascending: false })
       .limit(12),
     supabase
@@ -76,7 +73,7 @@ export default async function TopPage() {
 
   const featured = (featuredData ?? []) as Spot[]
   const tastes = (tasteData ?? []) as Spot[]
-  const stays = (stayData ?? []) as Spot[]
+  const stays = (stayData ?? []) as Hotel[]
   const trips = (tripData ?? []) as TripPlan[]
   const sakes = (sakeData ?? []) as Sake[]
   const events = (eventsData ?? []) as Pick<
@@ -287,12 +284,12 @@ export default async function TopPage() {
       <CarouselSection
         label="HOTELS · RYOKAN"
         title="Stays."
-        viewAllHref="/spots?category=hotel"
+        viewAllHref="/hotels"
       >
         {stays.length === 0 ? (
           <EmptyState />
         ) : (
-          stays.map((s) => <SpotCard key={s.id} spot={s} />)
+          stays.map((h) => <HotelCard key={h.id} hotel={h} />)
         )}
       </CarouselSection>
 
@@ -397,6 +394,39 @@ function SpotCard({ spot }: { spot: Spot }) {
           {spot.city && ` · ${spot.city}`}
         </p>
         <h3 className="font-serif text-xl mt-1 leading-snug">{spot.name}</h3>
+      </div>
+    </Link>
+  )
+}
+
+function HotelCard({ hotel }: { hotel: Hotel }) {
+  return (
+    <Link
+      href={`/hotels/${hotel.id}`}
+      className="snap-start shrink-0 w-64 md:w-72 group"
+    >
+      <div className="aspect-[4/5] bg-neutral-100 overflow-hidden">
+        {hotel.cover_image_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={hotel.cover_image_url}
+            alt={hotel.name}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="font-serif italic text-neutral-300 text-4xl">
+              {hotel.name.slice(0, 1)}
+            </span>
+          </div>
+        )}
+      </div>
+      <div className="mt-4">
+        <p className="text-[10px] tracking-luxe text-neutral-400">
+          {hotel.brand ?? 'HOTEL'}
+          {hotel.prefecture && ` · ${hotel.prefecture}`}
+        </p>
+        <h3 className="font-serif text-xl mt-1 leading-snug">{hotel.name}</h3>
       </div>
     </Link>
   )

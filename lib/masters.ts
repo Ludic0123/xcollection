@@ -42,3 +42,21 @@ export async function fetchSakeMasters() {
     .order('display_order')
   return { sakeTypes: sakeTypes ?? [] }
 }
+
+export async function fetchHotelMasters() {
+  const supabase = await createClient()
+  const [
+    { data: brands },
+    { data: priceRanges },
+    { data: reservations },
+  ] = await Promise.all([
+    supabase.from('master_hotel_brands').select('id, name').order('display_order'),
+    supabase.from('master_price_ranges').select('level, label').order('level'),
+    supabase.from('master_reservation_methods').select('value, label').order('display_order'),
+  ])
+  return {
+    brands: brands ?? [],
+    priceRanges: priceRanges ?? [],
+    reservations: reservations ?? [],
+  }
+}

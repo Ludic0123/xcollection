@@ -5,12 +5,14 @@ export default async function AdminDashboard() {
   const supabase = await createClient()
   const [
     { count: spots },
+    { count: hotels },
     { count: sakes },
     { count: trips },
     { count: events },
     { count: members },
   ] = await Promise.all([
     supabase.from('spots').select('id', { count: 'exact', head: true }),
+    supabase.from('hotels').select('id', { count: 'exact', head: true }),
     supabase.from('sakes').select('id', { count: 'exact', head: true }),
     supabase.from('trip_plans').select('id', { count: 'exact', head: true }),
     supabase.from('events').select('id', { count: 'exact', head: true }),
@@ -22,25 +24,19 @@ export default async function AdminDashboard() {
       <p className="text-[10px] tracking-luxe text-neutral-400">DASHBOARD</p>
       <h1 className="font-serif text-4xl italic font-light mt-1">Overview.</h1>
 
-      <div className="mt-10 grid grid-cols-2 md:grid-cols-5 gap-4">
-        <StatTile label="お店・ホテル" value={spots ?? 0} href="/admin/spots" />
+      <div className="mt-10 grid grid-cols-2 md:grid-cols-6 gap-4">
+        <StatTile label="お店" value={spots ?? 0} href="/admin/spots" />
+        <StatTile label="ホテル" value={hotels ?? 0} href="/admin/hotels" />
         <StatTile label="日本酒" value={sakes ?? 0} href="/admin/sake" />
         <StatTile label="旅行プラン" value={trips ?? 0} href="/admin/trips" />
         <StatTile label="グルメ会" value={events ?? 0} href="/admin/events" />
         <StatTile label="会員" value={members ?? 0} href="/admin/users" />
       </div>
 
-      <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <QuickAction
-          title="お店・ホテルを登録"
-          href="/spots/new"
-          desc="新しいスポットを追加。後で /admin/spots に統合予定"
-        />
-        <QuickAction
-          title="日本酒を登録"
-          href="/sake/new"
-          desc="銘柄登録。後で /admin/sake に統合予定"
-        />
+      <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <QuickAction title="お店を登録" href="/spots/new" desc="飲食店・カフェ・バー" />
+        <QuickAction title="ホテルを登録" href="/hotels/new" desc="ホテル・旅館" />
+        <QuickAction title="日本酒を登録" href="/sake/new" desc="銘柄登録" />
       </div>
     </div>
   )

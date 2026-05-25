@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 const PUBLIC_NAV = [
   { href: '/', label: 'HOME' },
   { href: '/spots', label: 'TASTES' },
-  { href: '/spots?category=hotel', label: 'STAYS' },
+  { href: '/hotels', label: 'STAYS' },
   { href: '/sake', label: 'SAKE' },
   { href: '/trips', label: 'JOURNEYS' },
   { href: '/map', label: 'MAP' },

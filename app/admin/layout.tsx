@@ -5,12 +5,14 @@ import AdminSignOut from '@/components/admin/AdminSignOut'
 
 const ADMIN_NAV = [
   { href: '/admin', label: 'OVERVIEW', section: 'GENERAL' },
-  { href: '/admin/spots', label: 'お店・ホテル', section: 'CONTENTS' },
+  { href: '/admin/spots', label: 'お店', section: 'CONTENTS' },
+  { href: '/admin/hotels', label: 'ホテル', section: 'CONTENTS' },
   { href: '/admin/sake', label: '日本酒', section: 'CONTENTS' },
   { href: '/admin/trips', label: '旅行プラン', section: 'CONTENTS' },
   { href: '/admin/events', label: 'グルメ会', section: 'CONTENTS' },
   { href: '/admin/masters/genres', label: 'ジャンル', section: 'MASTERS' },
   { href: '/admin/masters/cities', label: '街', section: 'MASTERS' },
+  { href: '/admin/masters/hotel-brands', label: 'ホテルブランド', section: 'MASTERS' },
   { href: '/admin/masters/sake-types', label: '日本酒タイプ', section: 'MASTERS' },
   { href: '/admin/masters/reservation-methods', label: '予約方法', section: 'MASTERS' },
   { href: '/admin/masters/price-ranges', label: '価格帯', section: 'MASTERS' },

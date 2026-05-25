@@ -1,10 +1,15 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import type { Spot } from '@/types'
-import { CATEGORY_LABELS, type Category } from '@/types'
 
-type MapSpot = Pick<Spot, 'id' | 'name' | 'lat' | 'lng' | 'category' | 'city'>
+export type Marker = {
+  id: string
+  name: string
+  lat: number | null
+  lng: number | null
+  kind: 'spot' | 'hotel'
+  sub: string
+}
 
 declare global {
   interface Window {
@@ -43,7 +48,7 @@ function loadGoogleMaps(apiKey: string): Promise<void> {
   })
 }
 
-export default function GoogleMap({ spots }: { spots: MapSpot[] }) {
+export default function GoogleMap({ markers }: { markers: Marker[] }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [error, setError] = useState<string | null>(null)
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
@@ -62,8 +67,7 @@ export default function GoogleMap({ spots }: { spots: MapSpot[] }) {
       .then(() => {
         if (cancelled || !containerRef.current || !window.google) return
 
-        // 中心は最初のスポット、なければ東京駅
-        const first = spots.find((s) => s.lat != null && s.lng != null)
+        const first = markers.find((m) => m.lat != null && m.lng != null)
         const center = first
           ? { lat: Number(first.lat), lng: Number(first.lng) }
           : { lat: 35.6812, lng: 139.7671 }
@@ -86,24 +90,43 @@ export default function GoogleMap({ spots }: { spots: MapSpot[] }) {
         const bounds = new window.google.maps.LatLngBounds()
         const infoWindow = new window.google.maps.InfoWindow()
 
-        spots
-          .filter((s) => s.lat != null && s.lng != null)
-          .forEach((s) => {
-            const position = { lat: Number(s.lat), lng: Number(s.lng) }
+        markers
+          .filter((m) => m.lat != null && m.lng != null)
+          .forEach((m) => {
+            const position = { lat: Number(m.lat), lng: Number(m.lng) }
             bounds.extend(position)
+            const isHotel = m.kind === 'hotel'
             const marker = new window.google!.maps.Marker({
               position,
               map,
-              title: s.name,
+              title: m.name,
+              icon: isHotel
+                ? {
+                    path: window.google!.maps.SymbolPath.CIRCLE,
+                    scale: 9,
+                    fillColor: '#1a1a1a',
+                    fillOpacity: 1,
+                    strokeColor: '#fff',
+                    strokeWeight: 2,
+                  }
+                : {
+                    path: window.google!.maps.SymbolPath.CIRCLE,
+                    scale: 8,
+                    fillColor: '#b87333',
+                    fillOpacity: 1,
+                    strokeColor: '#fff',
+                    strokeWeight: 2,
+                  },
             })
+            const detailPath = m.kind === 'hotel' ? `/hotels/${m.id}` : `/spots/${m.id}`
             marker.addListener('click', () => {
               infoWindow.setContent(
                 `<div style="font-family:serif;padding:4px;">
                   <div style="font-size:11px;letter-spacing:0.2em;color:#888;text-transform:uppercase">${
-                    CATEGORY_LABELS[s.category as Category]
-                  }${s.city ? ' · ' + s.city : ''}</div>
-                  <div style="font-size:18px;font-style:italic;margin-top:4px">${s.name}</div>
-                  <a href="/spots/${s.id}" style="display:inline-block;margin-top:8px;font-size:10px;letter-spacing:0.2em;text-decoration:underline">VIEW</a>
+                    isHotel ? 'HOTEL' : 'SPOT'
+                  }${m.sub ? ' · ' + m.sub : ''}</div>
+                  <div style="font-size:18px;font-style:italic;margin-top:4px">${m.name}</div>
+                  <a href="${detailPath}" style="display:inline-block;margin-top:8px;font-size:10px;letter-spacing:0.2em;text-decoration:underline">VIEW</a>
                 </div>`
               )
               infoWindow.open({ anchor: marker, map })
@@ -121,7 +144,7 @@ export default function GoogleMap({ spots }: { spots: MapSpot[] }) {
     return () => {
       cancelled = true
     }
-  }, [apiKey, spots])
+  }, [apiKey, markers])
 
   if (error) {
     return (

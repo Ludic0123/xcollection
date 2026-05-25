@@ -1,8 +1,7 @@
-export type Category = 'restaurant' | 'hotel' | 'cafe' | 'bar' | 'other'
+export type Category = 'restaurant' | 'cafe' | 'bar' | 'other'
 
 export const CATEGORY_LABELS: Record<Category, string> = {
   restaurant: 'お店（食事）',
-  hotel: 'ホテル',
   cafe: 'カフェ',
   bar: 'バー',
   other: 'その他',
@@ -67,6 +66,42 @@ export type Spot = {
   lng: number | null
   created_at: string
   updated_at: string
+}
+
+export type Hotel = {
+  id: string
+  user_id: string
+  name: string
+  brand: string | null
+  prefecture: string | null
+  address: string | null
+  url: string | null
+  map_url: string | null
+  lat: number | null
+  lng: number | null
+  cover_image_url: string | null
+  photo_urls: string[]
+  price_range: number | null
+  notes: string | null
+  rating: number | null
+  reservation_methods: string[]
+  want_to_visit: boolean
+  is_featured: boolean
+  created_at: string
+  updated_at: string
+}
+
+export type Stay = {
+  id: string
+  user_id: string
+  hotel_id: string
+  check_in_date: string
+  check_out_date: string | null
+  price: number | null
+  rating: number | null
+  comment: string | null
+  photo_urls: string[]
+  created_at: string
 }
 
 export type Sake = {
