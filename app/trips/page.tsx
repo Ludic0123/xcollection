@@ -92,7 +92,7 @@ export default async function TripsPage() {
                             month: '2-digit',
                           })}`}
                       </p>
-                      <h3 className="font-serif text-lg md:text-xl mt-1 leading-snug truncate">
+                      <h3 className="font-serif text-base md:text-lg mt-1 leading-snug truncate">
                         {plan.title}
                       </h3>
                       <div className="flex items-center gap-3 mt-1 text-xs text-neutral-500 flex-wrap">

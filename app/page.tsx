@@ -161,10 +161,7 @@ export default async function TopPage() {
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5">
-                    <p className="text-[9px] md:text-[10px] tracking-luxe text-white/70">
-                      {CATEGORY_LABELS[s.category as Category]}
-                    </p>
-                    <h3 className="font-serif text-xl md:text-2xl mt-1.5 leading-tight">
+                    <h3 className="font-serif text-xl md:text-2xl leading-tight">
                       {s.name}
                       {(s.prefecture || s.city) && (
                         <span className="ml-2 font-sans font-light text-[10px] md:text-xs tracking-luxe text-white/60 align-middle">
@@ -184,10 +181,10 @@ export default async function TopPage() {
       {/* ====== INVITATION (members only) ====== */}
       {isMember && events.length > 0 && (
         <section className="border-b hairline bg-neutral-50">
-          <div className="px-8 md:px-14 pt-14 pb-6 flex items-baseline justify-between">
+          <div className="px-8 md:px-14 pt-6 pb-2 flex items-baseline justify-between">
             <div>
               <p className="text-[10px] tracking-luxe text-neutral-400">MEMBERS ONLY</p>
-              <h2 className="font-serif text-4xl md:text-5xl italic font-light mt-1">
+              <h2 className="font-serif text-2xl md:text-3xl italic font-light mt-0.5">
                 Invitation.
               </h2>
             </div>
@@ -348,10 +345,10 @@ function CarouselSection({
 }) {
   return (
     <section className="border-b hairline">
-      <div className="px-8 md:px-14 pt-14 pb-6 flex items-baseline justify-between">
+      <div className="px-8 md:px-14 pt-6 pb-2 flex items-baseline justify-between">
         <div>
           <p className="text-[10px] tracking-luxe text-neutral-400">{label}</p>
-          <h2 className="font-serif text-4xl md:text-5xl italic font-light mt-1">{title}</h2>
+          <h2 className="font-serif text-2xl md:text-3xl italic font-light mt-0.5">{title}</h2>
         </div>
         <Link
           href={viewAllHref}
@@ -367,13 +364,14 @@ function CarouselSection({
 
 function Carousel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="overflow-x-auto pb-12">
-      <div className="snap-x snap-mandatory flex gap-5 px-8 md:px-14">{children}</div>
+    <div className="overflow-x-auto pb-5">
+      <div className="snap-x snap-mandatory flex gap-4 px-8 md:px-14">{children}</div>
     </div>
   )
 }
 
 function SpotCard({ spot }: { spot: Spot }) {
+  const location = [spot.prefecture, spot.city].filter(Boolean).join(' · ')
   return (
     <Link
       href={`/spots/${spot.id}`}
@@ -396,10 +394,9 @@ function SpotCard({ spot }: { spot: Spot }) {
         )}
       </div>
       <div className="mt-3">
-        <p className="text-[9px] tracking-luxe text-neutral-400">
-          {CATEGORY_LABELS[spot.category as Category]}
-          {spot.city && ` · ${spot.city}`}
-        </p>
+        {location && (
+          <p className="text-[9px] tracking-luxe text-neutral-400">{location}</p>
+        )}
         <h3 className="font-serif text-base mt-0.5 leading-snug">{spot.name}</h3>
       </div>
     </Link>

@@ -67,7 +67,7 @@ export default async function SakeListPage() {
                       {s.region ?? 'JAPAN'}
                       {s.sake_type && ` · ${s.sake_type}`}
                     </p>
-                    <h3 className="font-serif text-lg md:text-xl mt-1 leading-snug truncate">
+                    <h3 className="font-serif text-base md:text-lg mt-1 leading-snug truncate">
                       {s.name}
                     </h3>
                     {s.brewery && (

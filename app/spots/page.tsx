@@ -157,11 +157,9 @@ export default async function SpotsPage({
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[10px] tracking-luxe text-neutral-400">
-                        {CATEGORY_LABELS[spot.category as Category]}
-                        {spot.prefecture && ` · ${spot.prefecture}`}
-                        {spot.city && ` · ${spot.city}`}
+                        {[spot.prefecture, spot.city].filter(Boolean).join(' · ') || '—'}
                       </p>
-                      <h3 className="font-serif text-lg md:text-xl mt-1 leading-snug truncate">
+                      <h3 className="font-serif text-base md:text-lg mt-1 leading-snug truncate">
                         {spot.name}
                       </h3>
                       <div className="flex items-center gap-3 mt-1 text-xs text-neutral-500 flex-wrap">

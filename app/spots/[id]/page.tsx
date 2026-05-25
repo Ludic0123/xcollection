@@ -5,8 +5,6 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { isAuthed } from '@/lib/auth'
 import {
-  CATEGORY_LABELS,
-  type Category,
   type Spot,
   type Visit,
 } from '@/types'
@@ -71,10 +69,7 @@ export default async function SpotDetailPage({
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 px-8 md:px-16 pb-12 text-white">
               <p className="text-[10px] tracking-luxe opacity-80">
-                {CATEGORY_LABELS[spot.category as Category]}
-                {spot.genre && ` · ${spot.genre}`}
-                {spot.prefecture && ` · ${spot.prefecture}`}
-                {spot.city && ` · ${spot.city}`}
+                {[spot.genre, spot.prefecture, spot.city].filter(Boolean).join(' · ')}
               </p>
               <h1 className="font-serif text-5xl md:text-7xl mt-3 leading-tight">{spot.name}</h1>
             </div>
@@ -82,10 +77,7 @@ export default async function SpotDetailPage({
         ) : (
           <div className="px-8 md:px-16 pt-20 pb-12 border-b hairline">
             <p className="text-[10px] tracking-luxe text-neutral-400">
-              {CATEGORY_LABELS[spot.category as Category]}
-              {spot.genre && ` · ${spot.genre}`}
-              {spot.prefecture && ` · ${spot.prefecture}`}
-              {spot.city && ` · ${spot.city}`}
+              {[spot.genre, spot.prefecture, spot.city].filter(Boolean).join(' · ')}
             </p>
             <h1 className="font-serif text-5xl md:text-7xl mt-4 leading-tight">{spot.name}</h1>
           </div>
