@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
@@ -137,7 +137,7 @@ export default function SpotForm({
 
       <div>
         <label className="block text-xs tracking-luxe text-neutral-500 mb-2">PHOTOS</label>
-        <MultiImageUpload value={photoUrls} onChange={setPhotoUrls} folder="spots" max={20} />
+        <MultiImageUpload value={photoUrls} onChange={setPhotoUrls} folder="spots" max={40} />
       </div>
 
       <div>

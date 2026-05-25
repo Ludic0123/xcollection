@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -8,7 +8,7 @@ export default function MultiImageUpload({
   value,
   onChange,
   folder = 'visits',
-  max = 20,
+  max = 40,
 }: {
   value: string[]
   onChange: (urls: string[]) => void

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -51,7 +51,7 @@ export default function VisitForm({ spotId }: { spotId: string }) {
     <form onSubmit={handleSubmit} className="bg-white border hairline p-6 space-y-6">
       <div>
         <label className="block text-xs tracking-luxe text-neutral-500 mb-2">PHOTOS</label>
-        <MultiImageUpload value={photos} onChange={setPhotos} folder="visits" max={20} />
+        <MultiImageUpload value={photos} onChange={setPhotos} folder="visits" max={40} />
       </div>
 
       <div>

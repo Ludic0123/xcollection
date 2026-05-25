@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -96,7 +96,7 @@ export default function ChefForm({ chef }: { chef?: Chef }) {
 
       <div>
         <label className="block text-xs tracking-luxe text-neutral-500 mb-2">GALLERY</label>
-        <MultiImageUpload value={photos} onChange={setPhotos} folder="chefs" max={20} />
+        <MultiImageUpload value={photos} onChange={setPhotos} folder="chefs" max={40} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
