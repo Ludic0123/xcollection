@@ -25,7 +25,6 @@ export default function LoginPage() {
       return
     }
 
-    // ?redirect= があれば優先。なければ admin/通常ユーザーで分岐
     const redirectParam = sp.get('redirect')
     let target = redirectParam ?? '/'
     if (!redirectParam && data.user) {
@@ -46,7 +45,8 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <Link href="/" className="block text-center mb-12">
           <p className="text-[10px] tracking-luxe text-neutral-400">COLLECTION</p>
-          <h1 className="font-serif text-3xl italic font-light mt-2">Editor.</h1>
+          <h1 className="font-serif text-3xl italic font-light mt-2">Welcome back.</h1>
+          <p className="text-[10px] tracking-luxe text-neutral-400 mt-4">MEMBER SIGN IN</p>
         </Link>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -79,6 +79,12 @@ export default function LoginPage() {
           </button>
         </form>
         <p className="text-[10px] tracking-luxe text-neutral-400 mt-10 text-center">
+          初めての方は{' '}
+          <Link href="/signup" className="text-black underline">
+            会員登録
+          </Link>
+        </p>
+        <p className="text-[10px] tracking-luxe text-neutral-300 mt-3 text-center">
           <Link href="/" className="hover:text-black">← BACK TO SITE</Link>
         </p>
       </div>
