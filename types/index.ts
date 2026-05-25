@@ -63,6 +63,7 @@ export type Spot = {
   cover_image_url: string | null
   photo_urls: string[]
   reservation_methods: ReservationMethod[]
+  meal_times: string[]
   is_featured: boolean
   lat: number | null
   lng: number | null
@@ -70,6 +71,8 @@ export type Spot = {
   created_at: string
   updated_at: string
 }
+
+export const MEAL_TIME_OPTIONS = ['朝', '昼', '夜', 'その他']
 
 export type Chef = {
   id: string

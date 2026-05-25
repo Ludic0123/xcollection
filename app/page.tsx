@@ -235,6 +235,19 @@ export default async function TopPage() {
         </section>
       )}
 
+      {/* ====== TASTES SECTION ====== */}
+      <CarouselSection
+        label="EATS · CAFÉS · BARS"
+        title="Tastes."
+        viewAllHref="/spots"
+      >
+        {tastes.length === 0 ? (
+          <EmptyState />
+        ) : (
+          tastes.map((s) => <SpotCard key={s.id} spot={s} />)
+        )}
+      </CarouselSection>
+
       {/* ====== SAKE SECTION ====== */}
       {sakes.length > 0 && (
         <CarouselSection label="JAPANESE SAKE" title="Sake." viewAllHref="/sake">
@@ -272,19 +285,6 @@ export default async function TopPage() {
           ))}
         </CarouselSection>
       )}
-
-      {/* ====== TASTES SECTION ====== */}
-      <CarouselSection
-        label="EATS · CAFÉS · BARS"
-        title="Tastes."
-        viewAllHref="/spots"
-      >
-        {tastes.length === 0 ? (
-          <EmptyState />
-        ) : (
-          tastes.map((s) => <SpotCard key={s.id} spot={s} />)
-        )}
-      </CarouselSection>
 
       {/* ====== STAYS SECTION ====== */}
       <CarouselSection

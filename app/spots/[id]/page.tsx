@@ -158,6 +158,21 @@ export default async function SpotDetailPage({
               )}
             </div>
           )}
+          {spot.meal_times && spot.meal_times.length > 0 && (
+            <div>
+              <p className="text-[10px] tracking-luxe text-neutral-400">MEAL TIMES</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {spot.meal_times.map((m) => (
+                  <span
+                    key={m}
+                    className="text-xs px-2 py-1 border hairline text-neutral-700"
+                  >
+                    {m}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
           {spot.reservation_methods && spot.reservation_methods.length > 0 && (
             <div>
               <p className="text-[10px] tracking-luxe text-neutral-400">RESERVATION</p>

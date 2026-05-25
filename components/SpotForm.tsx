@@ -3,13 +3,13 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { CATEGORY_OPTIONS, type Category, type Spot } from '@/types'
+import { CATEGORY_OPTIONS, MEAL_TIME_OPTIONS, type Category, type Spot } from '@/types'
 import { PREFECTURES } from '@/types/profile'
 import ImageUpload from './ImageUpload'
 import MultiImageUpload from './MultiImageUpload'
 
 export type GenreOption = { id: string; category: string; name: string }
-export type CityOption = { id: string; name: string }
+export type CityOption = { id: string; name: string; prefecture?: string | null }
 export type PriceRangeOption = { level: number; label: string }
 export type ReservationOption = { value: string; label: string }
 export type ChefOption = { id: string; name: string; specialty: string | null }
@@ -50,11 +50,26 @@ export default function SpotForm({
   const [lat, setLat] = useState<string>(spot?.lat?.toString() ?? '')
   const [lng, setLng] = useState<string>(spot?.lng?.toString() ?? '')
   const [chefId, setChefId] = useState<string>(spot?.chef_id ?? '')
+  const [mealTimes, setMealTimes] = useState<string[]>(spot?.meal_times ?? [])
 
   const genresForCategory = useMemo(
     () => genres.filter((g) => g.category === category),
     [genres, category]
   )
+
+  const citiesForPrefecture = useMemo(
+    () =>
+      prefecture
+        ? cities.filter((c) => c.prefecture === prefecture || !c.prefecture)
+        : cities,
+    [cities, prefecture]
+  )
+
+  function toggleMealTime(value: string) {
+    setMealTimes((cur) =>
+      cur.includes(value) ? cur.filter((v) => v !== value) : [...cur, value]
+    )
+  }
 
   function toggleReservation(value: string) {
     setReservationMethods((cur) =>
@@ -97,6 +112,7 @@ export default function SpotForm({
       lat: lat === '' ? null : Number(lat),
       lng: lng === '' ? null : Number(lng),
       chef_id: chefId || null,
+      meal_times: mealTimes,
     }
     if (spot) {
       const { error } = await supabase.from('spots').update(payload).eq('id', spot.id)
@@ -215,7 +231,7 @@ export default function SpotForm({
             className="w-full border border-gray-300 px-3 py-2 text-sm"
           />
           <datalist id="city-suggestions">
-            {cities.map((c) => (
+            {citiesForPrefecture.map((c) => (
               <option key={c.id} value={c.name} />
             ))}
           </datalist>
@@ -322,6 +338,31 @@ export default function SpotForm({
           rows={4}
           className="w-full border border-gray-300 px-3 py-2 text-sm"
         />
+      </div>
+
+      <div>
+        <label className="block text-xs tracking-luxe text-neutral-500 mb-2">
+          MEAL TIMES（食事時間帯・複数選択可）
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {MEAL_TIME_OPTIONS.map((t) => {
+            const active = mealTimes.includes(t)
+            return (
+              <button
+                key={t}
+                type="button"
+                onClick={() => toggleMealTime(t)}
+                className={`text-xs px-3 py-1.5 border hairline transition-colors ${
+                  active
+                    ? 'bg-black text-white border-black'
+                    : 'bg-white text-neutral-600 hover:border-black'
+                }`}
+              >
+                {t}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       <div>

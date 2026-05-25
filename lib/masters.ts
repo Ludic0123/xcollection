@@ -16,7 +16,7 @@ export async function fetchSpotMasters() {
       .order('display_order'),
     supabase
       .from('master_cities')
-      .select('id, name')
+      .select('id, name, prefecture')
       .order('display_order'),
     supabase
       .from('master_price_ranges')
