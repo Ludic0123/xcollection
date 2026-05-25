@@ -10,6 +10,7 @@ export type GenreOption = { id: string; category: string; name: string }
 export type CityOption = { id: string; name: string }
 export type PriceRangeOption = { level: number; label: string }
 export type ReservationOption = { value: string; label: string }
+export type ChefOption = { id: string; name: string; specialty: string | null }
 
 export default function SpotForm({
   spot,
@@ -17,12 +18,14 @@ export default function SpotForm({
   cities,
   priceRanges,
   reservations,
+  chefs,
 }: {
   spot?: Spot
   genres: GenreOption[]
   cities: CityOption[]
   priceRanges: PriceRangeOption[]
   reservations: ReservationOption[]
+  chefs: ChefOption[]
 }) {
   const router = useRouter()
   const [name, setName] = useState(spot?.name ?? '')
@@ -42,6 +45,7 @@ export default function SpotForm({
   const [isFeatured, setIsFeatured] = useState(spot?.is_featured ?? false)
   const [lat, setLat] = useState<string>(spot?.lat?.toString() ?? '')
   const [lng, setLng] = useState<string>(spot?.lng?.toString() ?? '')
+  const [chefId, setChefId] = useState<string>(spot?.chef_id ?? '')
 
   const genresForCategory = useMemo(
     () => genres.filter((g) => g.category === category),
@@ -86,6 +90,7 @@ export default function SpotForm({
       is_featured: isFeatured,
       lat: lat === '' ? null : Number(lat),
       lng: lng === '' ? null : Number(lng),
+      chef_id: chefId || null,
     }
     if (spot) {
       const { error } = await supabase.from('spots').update(payload).eq('id', spot.id)
@@ -207,6 +212,26 @@ export default function SpotForm({
             ))}
           </select>
         </div>
+      </div>
+
+      <div>
+        <label className="block text-sm text-gray-700 mb-1">大将・シェフ</label>
+        <select
+          value={chefId}
+          onChange={(e) => setChefId(e.target.value)}
+          className="w-full border border-gray-300 px-3 py-2 text-sm"
+        >
+          <option value="">未設定</option>
+          {chefs.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+              {c.specialty && ` (${c.specialty})`}
+            </option>
+          ))}
+        </select>
+        <p className="text-[10px] text-neutral-400 mt-1">
+          選択肢にない場合は <a href="/chefs/new" target="_blank" className="underline">新しい大将を登録</a> してください
+        </p>
       </div>
 
       <div>

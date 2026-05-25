@@ -10,6 +10,7 @@ const PUBLIC_NAV = [
   { href: '/spots', label: 'TASTES' },
   { href: '/hotels', label: 'STAYS' },
   { href: '/sake', label: 'SAKE' },
+  { href: '/chefs', label: 'CHEFS' },
   { href: '/trips', label: 'JOURNEYS' },
   { href: '/map', label: 'MAP' },
 ]

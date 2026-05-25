@@ -64,6 +64,25 @@ export type Spot = {
   is_featured: boolean
   lat: number | null
   lng: number | null
+  chef_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type Chef = {
+  id: string
+  user_id: string
+  name: string
+  name_kana: string | null
+  specialty: string | null
+  birth_year: number | null
+  hometown: string | null
+  bio: string | null
+  training_history: string | null
+  awards: string | null
+  cover_image_url: string | null
+  photo_urls: string[]
+  is_featured: boolean
   created_at: string
   updated_at: string
 }

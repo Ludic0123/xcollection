@@ -10,6 +10,7 @@ const ADMIN_NAV = [
   { href: '/admin', label: 'OVERVIEW', section: 'GENERAL' },
   { href: '/admin/spots', label: 'お店', section: 'CONTENTS' },
   { href: '/admin/hotels', label: 'ホテル', section: 'CONTENTS' },
+  { href: '/admin/chefs', label: '大将・シェフ', section: 'CONTENTS' },
   { href: '/admin/sake', label: '日本酒', section: 'CONTENTS' },
   { href: '/admin/trips', label: '旅行プラン', section: 'CONTENTS' },
   { href: '/admin/events', label: 'グルメ会', section: 'CONTENTS' },

@@ -26,13 +26,15 @@ export default async function SpotDetailPage({
     { data: priceRanges },
     { data: reservationMasters },
   ] = await Promise.all([
-    supabase.from('spots').select('*').eq('id', id).single(),
+    supabase.from('spots').select('*, chef:chefs(id, name, specialty)').eq('id', id).single(),
     supabase.from('visits').select('*').eq('spot_id', id).order('visited_at', { ascending: false }),
     supabase.from('master_price_ranges').select('level, label'),
     supabase.from('master_reservation_methods').select('value, label'),
   ])
   if (!spotData) notFound()
-  const spot = spotData as Spot
+  const spot = spotData as Spot & {
+    chef?: { id: string; name: string; specialty: string | null } | null
+  }
   const visits = (visitsData ?? []) as Visit[]
   const priceLabel = priceRanges?.find((p) => p.level === spot.price_range)?.label
   const reservationLabel: Record<string, string> = Object.fromEntries(
@@ -133,6 +135,20 @@ export default async function SpotDetailPage({
               </p>
             )}
           </div>
+          {spot.chef && (
+            <div>
+              <p className="text-[10px] tracking-luxe text-neutral-400">大将・シェフ</p>
+              <Link
+                href={`/chefs/${spot.chef.id}`}
+                className="font-serif text-2xl mt-2 inline-block hover:italic transition-all"
+              >
+                {spot.chef.name}
+              </Link>
+              {spot.chef.specialty && (
+                <p className="text-xs text-neutral-500 mt-1">{spot.chef.specialty}</p>
+              )}
+            </div>
+          )}
           {spot.reservation_methods && spot.reservation_methods.length > 0 && (
             <div>
               <p className="text-[10px] tracking-luxe text-neutral-400">RESERVATION</p>
