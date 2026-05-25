@@ -42,11 +42,20 @@ export async function fetchSpotMasters() {
 
 export async function fetchSakeMasters() {
   const supabase = await createClient()
-  const { data: sakeTypes } = await supabase
-    .from('master_sake_types')
-    .select('id, name')
-    .order('display_order')
-  return { sakeTypes: sakeTypes ?? [] }
+  const [
+    { data: sakeTypes },
+    { data: sakeBrands },
+    { data: sakeModels },
+  ] = await Promise.all([
+    supabase.from('master_sake_types').select('id, name').order('display_order'),
+    supabase.from('master_sake_brands').select('id, name').order('display_order'),
+    supabase.from('master_sake_models').select('id, name').order('display_order'),
+  ])
+  return {
+    sakeTypes: sakeTypes ?? [],
+    sakeBrands: sakeBrands ?? [],
+    sakeModels: sakeModels ?? [],
+  }
 }
 
 export async function fetchHotelMasters() {

@@ -13,7 +13,7 @@ export default async function EditSakePage({
 }) {
   const { id } = await params
   const supabase = await createClient()
-  const [{ data }, { sakeTypes }] = await Promise.all([
+  const [{ data }, masters] = await Promise.all([
     supabase.from('sakes').select('*').eq('id', id).single(),
     fetchSakeMasters(),
   ])
@@ -29,7 +29,7 @@ export default async function EditSakePage({
         BACK
       </Link>
       <h1 className="font-serif text-4xl italic font-light mb-6">Edit sake.</h1>
-      <SakeForm sake={data as Sake} sakeTypes={sakeTypes} />
+      <SakeForm sake={data as Sake} {...masters} />
     </div>
   )
 }

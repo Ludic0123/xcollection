@@ -1,7 +1,7 @@
 export type Category = 'restaurant' | 'cafe' | 'bar' | 'other'
 
 export const CATEGORY_LABELS: Record<Category, string> = {
-  restaurant: 'お店（食事）',
+  restaurant: '料理店',
   cafe: 'カフェ',
   bar: 'バー',
   other: 'その他',
@@ -129,6 +129,7 @@ export type Sake = {
   id: string
   user_id: string
   name: string
+  model: string | null
   brewery: string | null
   region: string | null
   sake_type: string | null

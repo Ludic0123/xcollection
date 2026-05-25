@@ -8,16 +8,23 @@ import ImageUpload from './ImageUpload'
 import MultiImageUpload from './MultiImageUpload'
 
 export type SakeTypeOption = { id: string; name: string }
+export type SakeBrandOption = { id: string; name: string }
+export type SakeModelOption = { id: string; name: string }
 
 export default function SakeForm({
   sake,
   sakeTypes,
+  sakeBrands,
+  sakeModels,
 }: {
   sake?: Sake
   sakeTypes: SakeTypeOption[]
+  sakeBrands: SakeBrandOption[]
+  sakeModels: SakeModelOption[]
 }) {
   const router = useRouter()
   const [name, setName] = useState(sake?.name ?? '')
+  const [model, setModel] = useState(sake?.model ?? '')
   const [brewery, setBrewery] = useState(sake?.brewery ?? '')
   const [region, setRegion] = useState(sake?.region ?? '')
   const [sakeType, setSakeType] = useState(sake?.sake_type ?? '')
@@ -50,6 +57,7 @@ export default function SakeForm({
     const payload = {
       user_id: user.id,
       name,
+      model: model || null,
       brewery: brewery || null,
       region: region || null,
       sake_type: sakeType || null,
@@ -111,11 +119,39 @@ export default function SakeForm({
         <label className="block text-xs tracking-luxe text-neutral-500 mb-2">銘柄 *</label>
         <input
           required
+          list="sake-brand-suggestions"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="例: 十四代"
           className="w-full border hairline px-3 py-2 text-sm"
         />
+        <datalist id="sake-brand-suggestions">
+          {sakeBrands.map((b) => (
+            <option key={b.id} value={b.name} />
+          ))}
+        </datalist>
+        <p className="text-[10px] text-neutral-400 mt-1">
+          登録済みから選ぶか、自由に入力できます
+        </p>
+      </div>
+
+      <div>
+        <label className="block text-xs tracking-luxe text-neutral-500 mb-2">モデル</label>
+        <input
+          list="sake-model-suggestions"
+          value={model}
+          onChange={(e) => setModel(e.target.value)}
+          placeholder="例: 純米大吟醸 / 龍泉 / 二割三分"
+          className="w-full border hairline px-3 py-2 text-sm"
+        />
+        <datalist id="sake-model-suggestions">
+          {sakeModels.map((m) => (
+            <option key={m.id} value={m.name} />
+          ))}
+        </datalist>
+        <p className="text-[10px] text-neutral-400 mt-1">
+          登録済みから選ぶか、自由に入力できます
+        </p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">

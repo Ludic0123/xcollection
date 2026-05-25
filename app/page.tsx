@@ -141,7 +141,7 @@ export default async function TopPage() {
               <Link
                 key={s.id}
                 href={`/spots/${s.id}`}
-                className="snap-start shrink-0 w-[85vw] md:w-[55vw] group"
+                className="snap-start shrink-0 w-[60vw] md:w-[30vw] group"
               >
                 <div className="aspect-[16/9] bg-neutral-900 overflow-hidden relative">
                   {s.cover_image_url ? (
@@ -159,14 +159,14 @@ export default async function TopPage() {
                     </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-                    <p className="text-[10px] tracking-luxe text-white/70">
+                  <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5">
+                    <p className="text-[9px] md:text-[10px] tracking-luxe text-white/70">
                       {CATEGORY_LABELS[s.category as Category]}
                     </p>
-                    <h3 className="font-serif text-3xl md:text-4xl mt-2 leading-tight">
+                    <h3 className="font-serif text-xl md:text-2xl mt-1.5 leading-tight">
                       {s.name}
                       {(s.prefecture || s.city) && (
-                        <span className="ml-3 font-sans font-light text-xs md:text-sm tracking-luxe text-white/60 align-middle">
+                        <span className="ml-2 font-sans font-light text-[10px] md:text-xs tracking-luxe text-white/60 align-middle">
                           {[s.prefecture, s.city].filter(Boolean).join(' · ')}
                         </span>
                       )}

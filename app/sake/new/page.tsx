@@ -4,7 +4,7 @@ import SakeForm from '@/components/SakeForm'
 import { fetchSakeMasters } from '@/lib/masters'
 
 export default async function NewSakePage() {
-  const { sakeTypes } = await fetchSakeMasters()
+  const masters = await fetchSakeMasters()
   return (
     <div className="bg-white min-h-screen px-8 md:px-16 py-12">
       <Link
@@ -15,7 +15,7 @@ export default async function NewSakePage() {
         BACK
       </Link>
       <h1 className="font-serif text-4xl italic font-light mb-6">New sake.</h1>
-      <SakeForm sakeTypes={sakeTypes} />
+      <SakeForm {...masters} />
     </div>
   )
 }

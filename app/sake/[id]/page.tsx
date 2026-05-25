@@ -32,6 +32,9 @@ export default async function SakeDetailPage({
               {sake.sake_type && ` · ${sake.sake_type}`}
             </p>
             <h1 className="font-serif text-5xl md:text-7xl mt-3 leading-tight">{sake.name}</h1>
+            {sake.model && (
+              <p className="font-serif text-2xl italic font-light mt-2 opacity-90">{sake.model}</p>
+            )}
             {sake.brewery && (
               <p className="text-sm mt-2 opacity-80">{sake.brewery}</p>
             )}
@@ -44,6 +47,11 @@ export default async function SakeDetailPage({
             {sake.sake_type && ` · ${sake.sake_type}`}
           </p>
           <h1 className="font-serif text-5xl md:text-7xl mt-4 leading-tight">{sake.name}</h1>
+          {sake.model && (
+            <p className="font-serif text-2xl italic font-light text-neutral-500 mt-2">
+              {sake.model}
+            </p>
+          )}
           {sake.brewery && <p className="text-sm text-neutral-500 mt-2">{sake.brewery}</p>}
         </div>
       )}
