@@ -14,7 +14,7 @@ export default async function NewSpotPage() {
         <ArrowLeft className="w-4 h-4" />
         一覧へ
       </Link>
-      <h1 className="text-2xl font-bold mb-6">お店・ホテルを新規登録</h1>
+      <h1 className="text-2xl font-bold mb-6">お店を新規登録</h1>
       <SpotForm {...masters} />
     </div>
   )

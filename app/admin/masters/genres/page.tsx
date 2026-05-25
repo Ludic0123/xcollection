@@ -14,7 +14,7 @@ export default async function GenresAdminPage() {
       <p className="text-[10px] tracking-luxe text-neutral-400">MASTERS</p>
       <h1 className="font-serif text-4xl italic font-light mt-1 mb-6">Genres.</h1>
       <p className="text-sm text-neutral-500 mb-6">
-        スポット（お店・ホテル）のジャンル選択肢。カテゴリ別に管理。
+        お店のジャンル選択肢。カテゴリ別に管理。
       </p>
       <MasterTable
         tableName="master_genres"
