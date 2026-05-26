@@ -195,7 +195,6 @@ export default function SignupForm({ isFirstUser }: { isFirstUser: boolean }) {
                     required
                     value={memberNumber}
                     onChange={(e) => setMemberNumber(e.target.value)}
-                    placeholder="例: 18900000"
                     className={inputClass + ' font-mono'}
                   />
                 </Field>
