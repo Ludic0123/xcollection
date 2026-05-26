@@ -23,10 +23,13 @@ const ADMIN_NAV = [
   { href: '/admin/masters/sake-types', label: '日本酒・タイプ', section: 'MASTERS' },
   { href: '/admin/masters/reservation-methods', label: '予約方法', section: 'MASTERS' },
   { href: '/admin/masters/price-ranges', label: '価格帯', section: 'MASTERS' },
+  { href: '/admin/masters/signup-favorite-genres', label: '会員登録・好きなジャンル', section: 'SIGNUP' },
+  { href: '/admin/masters/signup-favorite-sake-types', label: '会員登録・好きな酒の種類', section: 'SIGNUP' },
+  { href: '/admin/masters/drinking-frequencies', label: '会員登録・飲む頻度', section: 'SIGNUP' },
   { href: '/admin/users', label: '会員', section: 'PEOPLE' },
 ]
 
-const SECTIONS = ['GENERAL', 'CONTENTS', 'MASTERS', 'PEOPLE'] as const
+const SECTIONS = ['GENERAL', 'CONTENTS', 'MASTERS', 'SIGNUP', 'PEOPLE'] as const
 
 export default function AdminNav() {
   const [open, setOpen] = useState(false)

@@ -14,7 +14,7 @@ export default async function ProfilePage() {
   const { data: full } = await supabase
     .from('members')
     .select(
-      'last_name_kanji, first_name_kanji, last_name_kana, first_name_kana, phone, residence_1, residence_2, high_school, education, work_location, company, allergies, drinking_frequency, favorite_genres, favorite_sake_types, invited_by, created_at'
+      'last_name_kanji, first_name_kanji, last_name_kana, first_name_kana, phone, residence_1, residence_2, high_school, education, work_location, company, allergies, drinking_frequency, favorite_genres, favorite_sake_types, best_restaurant_1, best_restaurant_2, best_restaurant_3, invited_by, created_at'
     )
     .eq('id', member.id)
     .single()
@@ -132,6 +132,26 @@ export default async function ProfilePage() {
             />
           )}
         </dl>
+
+        {(full?.best_restaurant_1 || full?.best_restaurant_2 || full?.best_restaurant_3) && (
+          <div className="mt-10 max-w-3xl">
+            <p className="text-[10px] tracking-luxe text-neutral-400 mb-3">
+              人生最高レストラン
+            </p>
+            <ol className="space-y-2 text-sm">
+              {[full.best_restaurant_1, full.best_restaurant_2, full.best_restaurant_3]
+                .filter(Boolean)
+                .map((r, i) => (
+                  <li key={i} className="font-serif text-base">
+                    <span className="font-sans text-[10px] tracking-luxe text-neutral-400 mr-2">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    {r}
+                  </li>
+                ))}
+            </ol>
+          </div>
+        )}
       </section>
     </div>
   )

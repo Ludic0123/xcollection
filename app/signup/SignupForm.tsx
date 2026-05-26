@@ -4,17 +4,21 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import {
-  PREFECTURES,
-  WORK_LOCATIONS,
-  DRINKING_FREQUENCIES,
-  FAVORITE_GENRE_OPTIONS,
-  FAVORITE_SAKE_TYPE_OPTIONS,
-} from '@/types/profile'
+import { PREFECTURES, WORK_LOCATIONS } from '@/types/profile'
 
 type Inviter = { memberNumber: number; name: string }
 
-export default function SignupForm({ isFirstUser }: { isFirstUser: boolean }) {
+export default function SignupForm({
+  isFirstUser,
+  favoriteGenreOptions,
+  favoriteSakeTypeOptions,
+  drinkingFrequencyOptions,
+}: {
+  isFirstUser: boolean
+  favoriteGenreOptions: string[]
+  favoriteSakeTypeOptions: string[]
+  drinkingFrequencyOptions: string[]
+}) {
   const router = useRouter()
   const [step, setStep] = useState<1 | 2>(1)
 
@@ -41,6 +45,9 @@ export default function SignupForm({ isFirstUser }: { isFirstUser: boolean }) {
   const [allergies, setAllergies] = useState('')
   const [drinkingFrequency, setDrinkingFrequency] = useState('')
   const [favoriteSakeTypes, setFavoriteSakeTypes] = useState<string[]>([])
+  const [bestRestaurant1, setBestRestaurant1] = useState('')
+  const [bestRestaurant2, setBestRestaurant2] = useState('')
+  const [bestRestaurant3, setBestRestaurant3] = useState('')
 
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
@@ -112,8 +119,8 @@ export default function SignupForm({ isFirstUser }: { isFirstUser: boolean }) {
       setLoading(false)
       return
     }
-    if (favoriteSakeTypes.length === 0) {
-      setError('好きな酒の種類を1つ以上選んでください')
+    if (favoriteSakeTypes.length !== 3) {
+      setError('好きな酒の種類を好きな順に3つ選んでください')
       setLoading(false)
       return
     }
@@ -134,6 +141,9 @@ export default function SignupForm({ isFirstUser }: { isFirstUser: boolean }) {
       allergies: allergies.trim(),
       drinking_frequency: drinkingFrequency,
       favorite_sake_types: favoriteSakeTypes.join(','),
+      best_restaurant_1: bestRestaurant1.trim(),
+      best_restaurant_2: bestRestaurant2.trim(),
+      best_restaurant_3: bestRestaurant3.trim(),
     }
 
     if (!isFirstUser) {
@@ -367,7 +377,7 @@ export default function SignupForm({ isFirstUser }: { isFirstUser: boolean }) {
               </select>
             </Field>
 
-            <Field label="勤務先企業名">
+            <Field label="勤務先（企業名）">
               <input
                 required
                 value={company}
@@ -379,7 +389,7 @@ export default function SignupForm({ isFirstUser }: { isFirstUser: boolean }) {
 
             <Field label="好きなジャンル（複数選択可・1つ以上必須）">
               <div className="flex flex-wrap gap-2">
-                {FAVORITE_GENRE_OPTIONS.map((g) => {
+                {favoriteGenreOptions.map((g) => {
                   const active = favoriteGenres.includes(g)
                   return (
                     <button
@@ -413,7 +423,7 @@ export default function SignupForm({ isFirstUser }: { isFirstUser: boolean }) {
                 className={inputClass}
               >
                 <option value="">選択してください</option>
-                {DRINKING_FREQUENCIES.map((d) => (
+                {drinkingFrequencyOptions.map((d) => (
                   <option key={d} value={d}>
                     {d}
                   </option>
@@ -421,21 +431,68 @@ export default function SignupForm({ isFirstUser }: { isFirstUser: boolean }) {
               </select>
             </Field>
 
-            <Field label="好きな酒の種類（複数選択可・1つ以上必須）">
+            <Field label="好きな酒の種類（好きな順に上位3つ）">
+              <p className="text-[10px] text-neutral-400 mb-2">
+                クリックで1位→2位→3位の順に追加されます。もう一度クリックで解除。
+              </p>
               <div className="flex flex-wrap gap-2">
-                {FAVORITE_SAKE_TYPE_OPTIONS.map((s) => {
-                  const active = favoriteSakeTypes.includes(s)
+                {favoriteSakeTypeOptions.map((s) => {
+                  const rank = favoriteSakeTypes.indexOf(s)
+                  const active = rank >= 0
+                  const disabled = !active && favoriteSakeTypes.length >= 3
                   return (
                     <button
                       key={s}
                       type="button"
-                      onClick={() => toggleArr(s, favoriteSakeTypes, setFavoriteSakeTypes)}
-                      className={chipClass(active)}
+                      disabled={disabled}
+                      onClick={() => {
+                        if (active) {
+                          setFavoriteSakeTypes(favoriteSakeTypes.filter((v) => v !== s))
+                        } else if (favoriteSakeTypes.length < 3) {
+                          setFavoriteSakeTypes([...favoriteSakeTypes, s])
+                        }
+                      }}
+                      className={`text-xs px-3 py-1.5 border hairline transition-colors ${
+                        active
+                          ? 'bg-black text-white border-black'
+                          : disabled
+                          ? 'bg-neutral-50 text-neutral-300 border-neutral-200 cursor-not-allowed'
+                          : 'bg-white text-neutral-600 hover:border-black'
+                      }`}
                     >
+                      {active && (
+                        <span className="font-serif italic mr-1.5">{rank + 1}.</span>
+                      )}
                       {s}
                     </button>
                   )
                 })}
+              </div>
+            </Field>
+
+            <Field label="人生最高レストラン（任意・3つまで）">
+              <p className="text-[10px] text-neutral-400 mb-2">
+                記憶に残るお店の名前を自由に。空欄でもOK。
+              </p>
+              <div className="space-y-3">
+                <input
+                  value={bestRestaurant1}
+                  onChange={(e) => setBestRestaurant1(e.target.value)}
+                  placeholder="① 例: すきやばし次郎"
+                  className={inputClass}
+                />
+                <input
+                  value={bestRestaurant2}
+                  onChange={(e) => setBestRestaurant2(e.target.value)}
+                  placeholder="② 例: 神田 雲林"
+                  className={inputClass}
+                />
+                <input
+                  value={bestRestaurant3}
+                  onChange={(e) => setBestRestaurant3(e.target.value)}
+                  placeholder="③ 例: 龍吟"
+                  className={inputClass}
+                />
               </div>
             </Field>
 
