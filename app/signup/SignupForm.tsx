@@ -7,7 +7,6 @@ import { createClient } from '@/lib/supabase/client'
 import {
   PREFECTURES,
   WORK_LOCATIONS,
-  EDUCATION_LEVELS,
   DRINKING_FREQUENCIES,
   FAVORITE_GENRE_OPTIONS,
   FAVORITE_SAKE_TYPE_OPTIONS,
@@ -343,20 +342,14 @@ export default function SignupForm({ isFirstUser }: { isFirstUser: boolean }) {
               />
             </Field>
 
-            <Field label="最終学歴">
-              <select
+            <Field label="最終学歴（学校名）">
+              <input
                 required
                 value={education}
                 onChange={(e) => setEducation(e.target.value)}
+                placeholder="例: ○○大学 / ○○大学院"
                 className={inputClass}
-              >
-                <option value="">選択してください</option>
-                {EDUCATION_LEVELS.map((l) => (
-                  <option key={l} value={l}>
-                    {l}
-                  </option>
-                ))}
-              </select>
+              />
             </Field>
 
             <Field label="勤務地">
