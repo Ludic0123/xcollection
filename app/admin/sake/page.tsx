@@ -42,7 +42,7 @@ export default async function AdminSakePage() {
               <tr key={s.id} className="border-b hairline">
                 <td className="py-2 px-3">
                   <Link href={`/sake/${s.id}`} className="hover:underline">
-                    {s.name}
+                    {[s.name, s.model].filter(Boolean).join(' ')}
                   </Link>
                 </td>
                 <td className="py-2 px-3 text-xs text-neutral-500">{s.brewery ?? '-'}</td>

@@ -181,7 +181,7 @@ export type AppEvent = {
   created_at: string
   updated_at: string
   spot?: Pick<Spot, 'id' | 'name' | 'city'> | null
-  sake?: Pick<Sake, 'id' | 'name' | 'brewery'> | null
+  sake?: Pick<Sake, 'id' | 'name' | 'model' | 'brewery'> | null
 }
 
 export type EventParticipant = {

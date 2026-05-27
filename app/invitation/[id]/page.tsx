@@ -20,7 +20,7 @@ export default async function EventDetailPage({
   const supabase = await createClient()
   const { data: eventData } = await supabase
     .from('events')
-    .select('*, spot:spots(id, name, city), sake:sakes(id, name, brewery)')
+    .select('*, spot:spots(id, name, city), sake:sakes(id, name, model, brewery)')
     .eq('id', id)
     .single()
   if (!eventData) notFound()
@@ -155,7 +155,7 @@ export default async function EventDetailPage({
                     href={`/sake/${event.sake.id}`}
                     className="font-serif text-xl hover:underline"
                   >
-                    {event.sake.name}
+                    {[event.sake.name, event.sake.model].filter(Boolean).join(' ')}
                     {event.sake.brewery && (
                       <span className="text-neutral-400 text-sm ml-2">
                         {event.sake.brewery}

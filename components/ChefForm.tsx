@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Chef } from '@/types'
+import { PREFECTURES } from '@/types/profile'
 import ImageUpload from './ImageUpload'
 import MultiImageUpload from './MultiImageUpload'
 
@@ -147,12 +148,16 @@ export default function ChefForm({ chef }: { chef?: Chef }) {
 
       <div>
         <label className="block text-sm text-gray-700 mb-1">出身地</label>
-        <input
+        <select
           value={hometown}
           onChange={(e) => setHometown(e.target.value)}
-          placeholder="例: 京都府"
-          className="w-full border border-gray-300 px-3 py-2 text-sm"
-        />
+          className="w-full border border-gray-300 px-3 py-2 text-sm bg-white"
+        >
+          <option value="">選択してください</option>
+          {PREFECTURES.map((p) => (
+            <option key={p} value={p}>{p}</option>
+          ))}
+        </select>
       </div>
 
       <div>

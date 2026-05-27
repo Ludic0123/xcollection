@@ -68,7 +68,7 @@ export default async function SakeListPage() {
                       {s.sake_type && ` · ${s.sake_type}`}
                     </p>
                     <h3 className="font-serif text-base md:text-lg mt-1 leading-snug truncate">
-                      {s.name}
+                      {[s.name, s.model].filter(Boolean).join(' ')}
                     </h3>
                     {s.brewery && (
                       <p className="text-xs text-neutral-500 mt-1 truncate">{s.brewery}</p>

@@ -250,7 +250,9 @@ export default async function TopPage() {
                 <p className="text-[9px] tracking-luxe text-neutral-400">
                   {s.region ?? 'JAPAN'}
                 </p>
-                <h3 className="font-serif text-base mt-0.5 leading-snug">{s.name}</h3>
+                <h3 className="font-serif text-base mt-0.5 leading-snug">
+                  {[s.name, s.model].filter(Boolean).join(' ')}
+                </h3>
                 {s.brewery && (
                   <p className="text-[10px] text-neutral-500 mt-0.5">{s.brewery}</p>
                 )}

@@ -27,7 +27,7 @@ export default async function InvitationPage({
 
   let q = supabase
     .from('events')
-    .select('*, spot:spots(id, name, city), sake:sakes(id, name, brewery)')
+    .select('*, spot:spots(id, name, city), sake:sakes(id, name, model, brewery)')
     .order('event_date', { ascending: true, nullsFirst: false })
     .order('created_at', { ascending: false })
   if (params.type) q = q.eq('event_type', params.type)
@@ -120,7 +120,9 @@ export default async function InvitationPage({
                     <div className="flex flex-wrap gap-4 mt-2 text-xs text-neutral-500">
                       {e.location_text && <span>📍 {e.location_text}</span>}
                       {e.spot && <span>📍 {e.spot.name}</span>}
-                      {e.sake && <span>🍶 {e.sake.name}</span>}
+                      {e.sake && (
+                        <span>🍶 {[e.sake.name, e.sake.model].filter(Boolean).join(' ')}</span>
+                      )}
                       {e.budget_yen != null && <span>¥{e.budget_yen.toLocaleString()}</span>}
                       {e.max_participants != null && (
                         <span>

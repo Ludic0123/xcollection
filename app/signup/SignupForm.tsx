@@ -124,6 +124,11 @@ export default function SignupForm({
       setLoading(false)
       return
     }
+    if (!bestRestaurant1.trim() || !bestRestaurant2.trim() || !bestRestaurant3.trim()) {
+      setError('人生最高レストランを3つすべて記入してください')
+      setLoading(false)
+      return
+    }
 
     const metadata: Record<string, string | number> = {
       last_name_kanji: lastNameKanji.trim(),
@@ -470,24 +475,27 @@ export default function SignupForm({
               </div>
             </Field>
 
-            <Field label="人生最高レストラン（任意・3つまで）">
+            <Field label="人生最高レストラン（3つすべて必須）">
               <p className="text-[10px] text-neutral-400 mb-2">
-                記憶に残るお店の名前を自由に。空欄でもOK。
+                記憶に残るお店の名前を3つ。
               </p>
               <div className="space-y-3">
                 <input
+                  required
                   value={bestRestaurant1}
                   onChange={(e) => setBestRestaurant1(e.target.value)}
                   placeholder="① 例: すきやばし次郎"
                   className={inputClass}
                 />
                 <input
+                  required
                   value={bestRestaurant2}
                   onChange={(e) => setBestRestaurant2(e.target.value)}
                   placeholder="② 例: 神田 雲林"
                   className={inputClass}
                 />
                 <input
+                  required
                   value={bestRestaurant3}
                   onChange={(e) => setBestRestaurant3(e.target.value)}
                   placeholder="③ 例: 龍吟"
