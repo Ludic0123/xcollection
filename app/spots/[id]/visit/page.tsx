@@ -12,8 +12,20 @@ export default async function NewVisitPage({
 }) {
   const { id } = await params
   const supabase = await createClient()
-  const { data } = await supabase.from('spots').select('id, name').eq('id', id).single()
+  const { data } = await supabase.from('spots').select('id, name, genre').eq('id', id).single()
   if (!data) notFound()
+
+  // お店のジャンルに対応する食材
+  let ingredientOptions: { genre: string; name: string }[] = []
+  if (data.genre) {
+    const { data: ing } = await supabase
+      .from('master_ingredients')
+      .select('genre, name')
+      .eq('genre', data.genre)
+      .order('display_order')
+      .order('name')
+    ingredientOptions = ing ?? []
+  }
 
   return (
     <div className="max-w-2xl">
@@ -26,7 +38,7 @@ export default async function NewVisitPage({
       </Link>
       <h1 className="text-2xl font-bold mb-1">訪問記録を追加</h1>
       <p className="text-sm text-gray-500 mb-6">{(data as Spot).name}</p>
-      <VisitForm spotId={id} />
+      <VisitForm spotId={id} ingredientOptions={ingredientOptions} />
     </div>
   )
 }

@@ -200,6 +200,10 @@ export type VisitPhoto =
   | string
   | { url: string; caption?: string | null; ingredients?: string[] | null }
 
+export type BlogBlock =
+  | { type: 'text'; text: string }
+  | { type: 'image'; url: string; caption?: string | null; ingredients?: string[] | null }
+
 export type Visit = {
   id: string
   user_id: string
@@ -207,7 +211,9 @@ export type Visit = {
   visited_at: string
   rating: number | null
   price: number | null
+  title: string | null
   comment: string | null
+  body_blocks: BlogBlock[]
   photo_urls: VisitPhoto[]
   created_at: string
 }

@@ -1,22 +1,43 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import CaptionedImageUpload, { type CaptionedPhoto } from './CaptionedImageUpload'
+import BlogComposer, { type ComposerBlock, type IngredientOption } from './BlogComposer'
 
-export type SpotLite = { id: string; name: string; prefecture: string | null; city: string | null }
+export type SpotLite = {
+  id: string
+  name: string
+  prefecture: string | null
+  city: string | null
+  genre?: string | null
+}
 
-export default function VisitFormWithPicker({ spots }: { spots: SpotLite[] }) {
+export default function VisitFormWithPicker({
+  spots,
+  ingredients = [],
+}: {
+  spots: SpotLite[]
+  ingredients?: IngredientOption[]
+}) {
   const router = useRouter()
   const [spotId, setSpotId] = useState('')
   const [visitedAt, setVisitedAt] = useState(new Date().toISOString().slice(0, 10))
   const [rating, setRating] = useState<number | ''>('')
   const [price, setPrice] = useState('')
-  const [comment, setComment] = useState('')
-  const [photos, setPhotos] = useState<CaptionedPhoto[]>([])
+  const [title, setTitle] = useState('')
+  const [blocks, setBlocks] = useState<ComposerBlock[]>([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const selectedGenre = useMemo(
+    () => spots.find((s) => s.id === spotId)?.genre ?? null,
+    [spots, spotId]
+  )
+  const ingredientOptions = useMemo(
+    () => (selectedGenre ? ingredients.filter((i) => i.genre === selectedGenre) : []),
+    [ingredients, selectedGenre]
+  )
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -35,14 +56,38 @@ export default function VisitFormWithPicker({ spots }: { spots: SpotLite[] }) {
       setSaving(false)
       return
     }
+    const imageBlocks = blocks.filter(
+      (b): b is Extract<ComposerBlock, { type: 'image' }> => b.type === 'image' && !!b.url
+    )
+    const textConcat = blocks
+      .filter((b): b is Extract<ComposerBlock, { type: 'text' }> => b.type === 'text')
+      .map((b) => b.text.trim())
+      .filter(Boolean)
+      .join('\n\n')
+    if (!title.trim()) {
+      setError('ブログタイトルを入力してください')
+      setSaving(false)
+      return
+    }
+    if (blocks.length === 0 || (!textConcat && imageBlocks.length === 0)) {
+      setError('本文（文章または写真）を1つ以上入れてください')
+      setSaving(false)
+      return
+    }
     const { error } = await supabase.from('visits').insert({
       user_id: user.id,
       spot_id: spotId,
       visited_at: visitedAt,
       rating: rating === '' ? null : Number(rating),
       price: price === '' ? null : Number(price),
-      comment: comment || null,
-      photo_urls: photos,
+      title: title.trim(),
+      comment: textConcat || null,
+      body_blocks: blocks,
+      photo_urls: imageBlocks.map((b) => ({
+        url: b.url,
+        caption: b.caption,
+        ingredients: b.ingredients,
+      })),
     })
     if (error) {
       setError(error.message)
@@ -74,13 +119,6 @@ export default function VisitFormWithPicker({ spots }: { spots: SpotLite[] }) {
       </div>
 
       <div>
-        <label className="block text-xs tracking-luxe text-neutral-500 mb-2">
-          PHOTOS（各写真に名前をつけられます）
-        </label>
-        <CaptionedImageUpload value={photos} onChange={setPhotos} folder="visits" max={40} />
-      </div>
-
-      <div>
         <label className="block text-xs tracking-luxe text-neutral-500 mb-2">訪問日 *</label>
         <input
           type="date"
@@ -88,6 +126,28 @@ export default function VisitFormWithPicker({ spots }: { spots: SpotLite[] }) {
           value={visitedAt}
           onChange={(e) => setVisitedAt(e.target.value)}
           className="border hairline px-3 py-2 text-sm"
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs tracking-luxe text-neutral-500 mb-2">タイトル *</label>
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="例: 再訪、やっぱり最高"
+          className="w-full border hairline px-3 py-2 text-sm focus:outline-none focus:border-black"
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs tracking-luxe text-neutral-500 mb-2">
+          本文 *（文章・写真ブロック）
+        </label>
+        <BlogComposer
+          blocks={blocks}
+          onChange={setBlocks}
+          ingredientOptions={ingredientOptions}
+          folder="visits"
         />
       </div>
 
@@ -121,17 +181,6 @@ export default function VisitFormWithPicker({ spots }: { spots: SpotLite[] }) {
           value={price}
           onChange={(e) => setPrice(e.target.value)}
           className="border hairline px-3 py-2 text-sm w-40"
-        />
-      </div>
-
-      <div>
-        <label className="block text-xs tracking-luxe text-neutral-500 mb-2">NOTES</label>
-        <textarea
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          rows={5}
-          placeholder="頼んだメニュー / 印象 / 次回試したいもの"
-          className="w-full border hairline px-3 py-2 text-sm focus:outline-none focus:border-black"
         />
       </div>
 

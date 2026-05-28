@@ -33,6 +33,8 @@ export default function VisitItem({
     router.refresh()
   }
 
+  const blocks = visit.body_blocks ?? []
+  const hasBlocks = blocks.length > 0
   const photos = (visit.photo_urls ?? [])
     .map((p) =>
       typeof p === 'string'
@@ -61,46 +63,95 @@ export default function VisitItem({
             </p>
           )}
         </div>
-        {visit.comment && (
-          <p className="text-sm text-neutral-700 mt-3 whitespace-pre-wrap leading-relaxed">
-            {visit.comment}
-          </p>
+
+        {visit.title && (
+          <h3 className="font-serif text-xl mt-2 leading-snug">{visit.title}</h3>
         )}
-        {photos.length > 0 && (
-          <div className="mt-4 grid grid-cols-3 md:grid-cols-4 gap-2">
-            {photos.map((p, idx) => (
-              <figure key={idx}>
-                <a
-                  href={p.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block aspect-square bg-neutral-100 overflow-hidden group"
+
+        {hasBlocks ? (
+          <div className="mt-3 space-y-4">
+            {blocks.map((b, i) =>
+              b.type === 'text' ? (
+                <p
+                  key={i}
+                  className="text-sm text-neutral-700 whitespace-pre-wrap leading-relaxed"
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={p.url}
-                    alt={p.caption || ''}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </a>
-                {p.caption && (
-                  <figcaption className="text-[11px] text-neutral-500 mt-1">{p.caption}</figcaption>
-                )}
-                {p.ingredients.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {p.ingredients.map((ing) => (
-                      <span
-                        key={ing}
-                        className="text-[9px] tracking-luxe text-neutral-500 bg-neutral-100 px-1 py-0.5"
-                      >
-                        {ing}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </figure>
-            ))}
+                  {b.text}
+                </p>
+              ) : b.url ? (
+                <figure key={i}>
+                  <a
+                    href={b.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block bg-neutral-100 overflow-hidden max-w-md"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={b.url} alt={b.caption ?? ''} className="w-full object-cover" />
+                  </a>
+                  {b.caption && (
+                    <figcaption className="text-[11px] text-neutral-500 mt-1">{b.caption}</figcaption>
+                  )}
+                  {b.ingredients && b.ingredients.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {b.ingredients.map((ing) => (
+                        <span
+                          key={ing}
+                          className="text-[9px] tracking-luxe text-neutral-500 bg-neutral-100 px-1 py-0.5"
+                        >
+                          {ing}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </figure>
+              ) : null
+            )}
           </div>
+        ) : (
+          <>
+            {visit.comment && (
+              <p className="text-sm text-neutral-700 mt-3 whitespace-pre-wrap leading-relaxed">
+                {visit.comment}
+              </p>
+            )}
+            {photos.length > 0 && (
+              <div className="mt-4 grid grid-cols-3 md:grid-cols-4 gap-2">
+                {photos.map((p, idx) => (
+                  <figure key={idx}>
+                    <a
+                      href={p.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block aspect-square bg-neutral-100 overflow-hidden group"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={p.url}
+                        alt={p.caption || ''}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </a>
+                    {p.caption && (
+                      <figcaption className="text-[11px] text-neutral-500 mt-1">{p.caption}</figcaption>
+                    )}
+                    {p.ingredients.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {p.ingredients.map((ing) => (
+                          <span
+                            key={ing}
+                            className="text-[9px] tracking-luxe text-neutral-500 bg-neutral-100 px-1 py-0.5"
+                          >
+                            {ing}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </figure>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
       {canEdit && (

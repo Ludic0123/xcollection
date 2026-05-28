@@ -3,10 +3,42 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { CATEGORY_OPTIONS, MEAL_TIME_OPTIONS, type Category, type Spot } from '@/types'
+import { CATEGORY_OPTIONS, MEAL_TIME_OPTIONS, type Category, type Spot, type Visit } from '@/types'
 import { PREFECTURES } from '@/types/profile'
-import MultiImageUpload from './MultiImageUpload'
-import CaptionedImageUpload, { type CaptionedPhoto } from './CaptionedImageUpload'
+import BlogComposer, { type ComposerBlock } from './BlogComposer'
+
+// 訪問記録(旧データ含む)を ComposerBlock[] に変換
+function visitToBlocks(visit: Visit | null | undefined): ComposerBlock[] {
+  if (!visit) return []
+  if (visit.body_blocks && visit.body_blocks.length > 0) {
+    return visit.body_blocks.map((b) =>
+      b.type === 'image'
+        ? {
+            type: 'image' as const,
+            url: b.url,
+            caption: b.caption ?? '',
+            ingredients: b.ingredients ?? [],
+          }
+        : { type: 'text' as const, text: b.text }
+    )
+  }
+  // 旧データ: comment + photo_urls からブロックを組み立て
+  const blocks: ComposerBlock[] = []
+  if (visit.comment) blocks.push({ type: 'text', text: visit.comment })
+  for (const p of visit.photo_urls ?? []) {
+    if (typeof p === 'string') {
+      blocks.push({ type: 'image', url: p, caption: '', ingredients: [] })
+    } else if (p?.url) {
+      blocks.push({
+        type: 'image',
+        url: p.url,
+        caption: p.caption ?? '',
+        ingredients: p.ingredients ?? [],
+      })
+    }
+  }
+  return blocks
+}
 
 export type GenreOption = { id: string; category: string; name: string }
 export type CityOption = { id: string; name: string; prefecture?: string | null }
@@ -17,6 +49,7 @@ export type IngredientMaster = { genre: string; name: string }
 
 export default function SpotForm({
   spot,
+  firstVisit,
   genres,
   cities,
   priceRanges,
@@ -25,6 +58,7 @@ export default function SpotForm({
   ingredients = [],
 }: {
   spot?: Spot
+  firstVisit?: Visit | null
   genres: GenreOption[]
   cities: CityOption[]
   priceRanges: PriceRangeOption[]
@@ -59,7 +93,6 @@ export default function SpotForm({
       ? 'food'
       : 'exterior'
   )
-  const [photoUrls, setPhotoUrls] = useState<string[]>(spot?.photo_urls ?? [])
   const [reservationMethods, setReservationMethods] = useState<string[]>(
     spot?.reservation_methods ?? []
   )
@@ -68,14 +101,18 @@ export default function SpotForm({
   const [lng, setLng] = useState<string>(spot?.lng?.toString() ?? '')
   const [chefId, setChefId] = useState<string>(spot?.chef_id ?? '')
   const [mealTimes, setMealTimes] = useState<string[]>(spot?.meal_times ?? [])
-  // 新規登録時のみ使用: ブログ用の初回訪問記録
+  // ブログ（初回訪問記録）: 新規=空 / 編集=firstVisit から復元
   const [firstVisitDate, setFirstVisitDate] = useState<string>(
-    new Date().toISOString().slice(0, 10)
+    firstVisit?.visited_at ?? new Date().toISOString().slice(0, 10)
   )
-  const [firstVisitBlog, setFirstVisitBlog] = useState<string>('')
-  const [firstVisitRating, setFirstVisitRating] = useState<number | ''>('')
-  const [firstVisitPrice, setFirstVisitPrice] = useState<string>('')
-  const [blogPhotos, setBlogPhotos] = useState<CaptionedPhoto[]>([]) // 新規登録時のブログ写真（キャプション付き）
+  const [blogTitle, setBlogTitle] = useState<string>(firstVisit?.title ?? '')
+  const [blogBlocks, setBlogBlocks] = useState<ComposerBlock[]>(visitToBlocks(firstVisit))
+  const [firstVisitRating, setFirstVisitRating] = useState<number | ''>(
+    firstVisit?.rating ?? ''
+  )
+  const [firstVisitPrice, setFirstVisitPrice] = useState<string>(
+    firstVisit?.price?.toString() ?? ''
+  )
 
   const genresForCategory = useMemo(
     () => genres.filter((g) => g.category === category),
@@ -88,11 +125,17 @@ export default function SpotForm({
     [ingredients, genre]
   )
 
-  // トップ画像の候補（新規=アップロード写真 / 編集=ギャラリー）
-  const coverCandidates = useMemo(
-    () => (spot ? photoUrls : blogPhotos.map((p) => p.url)),
-    [spot, photoUrls, blogPhotos]
-  )
+  // トップ画像の候補 = 本文に入れた写真（新規・編集とも）
+  const coverCandidates = useMemo(() => {
+    const fromBlocks = blogBlocks
+      .filter((b): b is Extract<ComposerBlock, { type: 'image' }> => b.type === 'image')
+      .map((b) => b.url)
+      .filter(Boolean)
+    // 既存のトップ画像が本文外でも選べるよう候補に含める
+    const extras = [spot?.cover_image_exterior, spot?.cover_image_food, spot?.cover_image_url]
+      .filter((u): u is string => !!u)
+    return Array.from(new Set([...fromBlocks, ...extras]))
+  }, [blogBlocks, spot])
 
   const citiesForPrefecture = useMemo(
     () =>
@@ -135,6 +178,42 @@ export default function SpotForm({
       coverExterior ||
       coverFood ||
       coverImageUrl
+
+    // ブログ本文の整形
+    const imageBlocks = blogBlocks.filter(
+      (b): b is Extract<ComposerBlock, { type: 'image' }> => b.type === 'image' && !!b.url
+    )
+    const textConcat = blogBlocks
+      .filter((b): b is Extract<ComposerBlock, { type: 'text' }> => b.type === 'text')
+      .map((b) => b.text.trim())
+      .filter(Boolean)
+      .join('\n\n')
+    const visitPhotoPayload = imageBlocks.map((b) => ({
+      url: b.url,
+      caption: b.caption,
+      ingredients: b.ingredients,
+    }))
+
+    // ブログのバリデーション（編集時は firstVisit がある場合のみ必須）
+    const blogRequired = !spot || !!firstVisit
+    if (blogRequired) {
+      if (!firstVisitDate) {
+        setError('訪問日を入力してください')
+        setSaving(false)
+        return
+      }
+      if (!blogTitle.trim()) {
+        setError('ブログタイトルを入力してください')
+        setSaving(false)
+        return
+      }
+      if (blogBlocks.length === 0 || (!textConcat && imageBlocks.length === 0)) {
+        setError('ブログ本文（文章または写真）を1つ以上入れてください')
+        setSaving(false)
+        return
+      }
+    }
+
     const payload = {
       user_id: user.id,
       name,
@@ -152,7 +231,7 @@ export default function SpotForm({
       cover_image_url: primaryCover,
       cover_image_exterior: coverExterior,
       cover_image_food: coverFood,
-      photo_urls: photoUrls,
+      photo_urls: imageBlocks.map((b) => b.url),
       reservation_methods: reservationMethods,
       is_featured: isFeatured,
       lat: lat === '' ? null : Number(lat),
@@ -160,6 +239,17 @@ export default function SpotForm({
       chef_id: chefId || null,
       meal_times: mealTimes,
     }
+
+    const visitPayload = {
+      visited_at: firstVisitDate,
+      rating: firstVisitRating === '' ? null : Number(firstVisitRating),
+      price: firstVisitPrice === '' ? null : Number(firstVisitPrice),
+      title: blogTitle.trim() || null,
+      comment: textConcat || null,
+      body_blocks: blogBlocks,
+      photo_urls: visitPhotoPayload,
+    }
+
     if (spot) {
       const { error } = await supabase.from('spots').update(payload).eq('id', spot.id)
       if (error) {
@@ -167,18 +257,32 @@ export default function SpotForm({
         setSaving(false)
         return
       }
+      // 初回ブログ（訪問記録）も更新 / 無ければ新規作成
+      if (firstVisit) {
+        const { error: vErr } = await supabase
+          .from('visits')
+          .update(visitPayload)
+          .eq('id', firstVisit.id)
+        if (vErr) {
+          setError('お店は更新されましたがブログの保存に失敗: ' + vErr.message)
+          setSaving(false)
+          return
+        }
+      } else if (blogTitle.trim() || blogBlocks.length > 0) {
+        const { error: vErr } = await supabase
+          .from('visits')
+          .insert({ ...visitPayload, user_id: user.id, spot_id: spot.id })
+        if (vErr) {
+          setError('お店は更新されましたがブログの保存に失敗: ' + vErr.message)
+          setSaving(false)
+          return
+        }
+      }
       router.push(`/spots/${spot.id}`)
     } else {
-      // 新規登録: ブログ用フィールド（訪問日 + ブログ文章）は必須
-      if (!firstVisitDate || !firstVisitBlog.trim()) {
-        setError('訪問日とブログ文章を入力してください')
-        setSaving(false)
-        return
-      }
-      // スポットのギャラリーには URL のみ保存
       const { data, error } = await supabase
         .from('spots')
-        .insert({ ...payload, photo_urls: blogPhotos.map((p) => p.url) })
+        .insert(payload)
         .select('id')
         .single()
       if (error) {
@@ -186,16 +290,9 @@ export default function SpotForm({
         setSaving(false)
         return
       }
-      // ブログ = 訪問記録 として visits に1行作成（写真はキャプション付きで保存）
-      const { error: visitError } = await supabase.from('visits').insert({
-        user_id: user.id,
-        spot_id: data.id,
-        visited_at: firstVisitDate,
-        rating: firstVisitRating === '' ? null : Number(firstVisitRating),
-        price: firstVisitPrice === '' ? null : Number(firstVisitPrice),
-        comment: firstVisitBlog,
-        photo_urls: blogPhotos,
-      })
+      const { error: visitError } = await supabase
+        .from('visits')
+        .insert({ ...visitPayload, user_id: user.id, spot_id: data.id })
       if (visitError) {
         setError('スポットは登録されましたが訪問記録の保存に失敗: ' + visitError.message)
         setSaving(false)
@@ -221,80 +318,6 @@ export default function SpotForm({
 
   return (
     <form onSubmit={handleSubmit} className="bg-white border hairline p-6 max-w-2xl space-y-5">
-      {spot ? (
-        <div>
-          <label className="block text-xs tracking-luxe text-neutral-500 mb-2">PHOTOS</label>
-          <MultiImageUpload value={photoUrls} onChange={setPhotoUrls} folder="spots" max={40} />
-        </div>
-      ) : (
-        <div>
-          <label className="block text-xs tracking-luxe text-neutral-500 mb-2">
-            PHOTOS（各写真に名前・食材をつけられます・ブログに掲載されます）
-          </label>
-          <CaptionedImageUpload
-            value={blogPhotos}
-            onChange={setBlogPhotos}
-            folder="visits"
-            max={40}
-            ingredientOptions={ingredientsForGenre}
-          />
-        </div>
-      )}
-
-      {/* ============================================================
-          トップ画像（アップロード写真から選択：店構え / 料理）
-          ============================================================ */}
-      <div className="border-t hairline pt-5">
-        <label className="block text-xs tracking-luxe text-neutral-500 mb-1">
-          トップ画像（登録した写真から選択）
-        </label>
-        {coverCandidates.length === 0 ? (
-          <p className="text-xs text-neutral-400 mt-2">
-            先に写真をアップロードすると、ここから店構え・料理のトップ画像を選べます。
-          </p>
-        ) : (
-          <div className="space-y-5 mt-3">
-            <CoverPicker
-              label="店構え"
-              candidates={coverCandidates}
-              selected={coverExterior}
-              onSelect={setCoverExterior}
-            />
-            <CoverPicker
-              label="料理"
-              candidates={coverCandidates}
-              selected={coverFood}
-              onSelect={setCoverFood}
-            />
-            <div>
-              <p className="text-[10px] tracking-luxe text-neutral-400 mb-2">
-                プロフィール画像（一覧・トップに表示）
-              </p>
-              <div className="flex gap-4 text-sm">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="coverPrimary"
-                    checked={coverPrimary === 'exterior'}
-                    onChange={() => setCoverPrimary('exterior')}
-                  />
-                  店構え
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="coverPrimary"
-                    checked={coverPrimary === 'food'}
-                    onChange={() => setCoverPrimary('food')}
-                  />
-                  料理
-                </label>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
       <div>
         <label className="block text-sm text-gray-700 mb-1">名前 *</label>
         <input
@@ -565,14 +588,16 @@ export default function SpotForm({
       </label>
 
       {/* ============================================================
-          BLOG / 初回訪問記録 (新規登録時のみ・必須)
+          BLOG / 初回訪問記録（新規 or 既存ブログがある編集時）
           ============================================================ */}
-      {!spot && (
+      {(!spot || firstVisit) && (
         <div className="border-t hairline pt-6 mt-2 space-y-4">
           <div>
             <p className="text-[10px] tracking-luxe text-neutral-400">BLOG / FIRST VISIT</p>
             <p className="text-xs text-neutral-500 mt-1">
-              この登録は初回訪問のブログ投稿としても保存されます。
+              {spot
+                ? '初回訪問のブログを編集します。文章と写真を好きな順に並べられます。'
+                : 'この登録は初回訪問のブログ投稿としても保存されます。文章と写真を好きな順に並べられます。'}
             </p>
           </div>
 
@@ -588,15 +613,75 @@ export default function SpotForm({
           </div>
 
           <div>
-            <label className="block text-sm text-gray-700 mb-1">ブログ文章 *</label>
-            <textarea
-              required
-              value={firstVisitBlog}
-              onChange={(e) => setFirstVisitBlog(e.target.value)}
-              rows={6}
-              placeholder="頼んだメニュー / 印象 / 同伴者 / 次回試したいものなど"
+            <label className="block text-sm text-gray-700 mb-1">ブログタイトル *</label>
+            <input
+              value={blogTitle}
+              onChange={(e) => setBlogTitle(e.target.value)}
+              placeholder="例: 念願の初訪問"
               className="w-full border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-black"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-700 mb-2">本文 *（文章・写真ブロック）</label>
+            <BlogComposer
+              blocks={blogBlocks}
+              onChange={setBlogBlocks}
+              ingredientOptions={ingredientsForGenre}
+              folder="visits"
+            />
+          </div>
+
+          {/* トップ画像（本文の写真から選択） */}
+          <div className="border-t hairline pt-4">
+            <label className="block text-xs tracking-luxe text-neutral-500 mb-1">
+              トップ画像（本文に入れた写真から選択）
+            </label>
+            {coverCandidates.length === 0 ? (
+              <p className="text-xs text-neutral-400 mt-2">
+                本文に写真を追加すると、ここから店構え・料理のトップ画像を選べます。
+              </p>
+            ) : (
+              <div className="space-y-5 mt-3">
+                <CoverPicker
+                  label="店構え"
+                  candidates={coverCandidates}
+                  selected={coverExterior}
+                  onSelect={setCoverExterior}
+                />
+                <CoverPicker
+                  label="料理"
+                  candidates={coverCandidates}
+                  selected={coverFood}
+                  onSelect={setCoverFood}
+                />
+                <div>
+                  <p className="text-[10px] tracking-luxe text-neutral-400 mb-2">
+                    プロフィール画像（一覧・トップに表示）
+                  </p>
+                  <div className="flex gap-4 text-sm">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="coverPrimary"
+                        checked={coverPrimary === 'exterior'}
+                        onChange={() => setCoverPrimary('exterior')}
+                      />
+                      店構え
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="coverPrimary"
+                        checked={coverPrimary === 'food'}
+                        onChange={() => setCoverPrimary('food')}
+                      />
+                      料理
+                    </label>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -628,6 +713,54 @@ export default function SpotForm({
                 onChange={(e) => setFirstVisitPrice(e.target.value)}
                 className="border border-gray-300 px-3 py-2 text-sm w-40"
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 編集モード(ブログ無しの旧データ): トップ画像選択 */}
+      {spot && !firstVisit && coverCandidates.length > 0 && (
+        <div className="border-t hairline pt-5">
+          <label className="block text-xs tracking-luxe text-neutral-500 mb-1">
+            トップ画像（登録した写真から選択）
+          </label>
+          <div className="space-y-5 mt-3">
+            <CoverPicker
+              label="店構え"
+              candidates={coverCandidates}
+              selected={coverExterior}
+              onSelect={setCoverExterior}
+            />
+            <CoverPicker
+              label="料理"
+              candidates={coverCandidates}
+              selected={coverFood}
+              onSelect={setCoverFood}
+            />
+            <div>
+              <p className="text-[10px] tracking-luxe text-neutral-400 mb-2">
+                プロフィール画像（一覧・トップに表示）
+              </p>
+              <div className="flex gap-4 text-sm">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="coverPrimaryEdit"
+                    checked={coverPrimary === 'exterior'}
+                    onChange={() => setCoverPrimary('exterior')}
+                  />
+                  店構え
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="coverPrimaryEdit"
+                    checked={coverPrimary === 'food'}
+                    onChange={() => setCoverPrimary('food')}
+                  />
+                  料理
+                </label>
+              </div>
             </div>
           </div>
         </div>
