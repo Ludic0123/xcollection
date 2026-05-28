@@ -36,16 +36,27 @@ export default async function SpotDetailPage({
     chef?: { id: string; name: string; specialty: string | null } | null
   }
   const visits = (visitsData ?? []) as Visit[]
-  const priceLabel = priceRanges?.find((p) => p.level === spot.price_range)?.label
+  const priceLabelOf = (lv: number | null | undefined) =>
+    lv == null ? null : priceRanges?.find((p) => p.level === lv)?.label ?? `Lv. ${lv}`
+  const lunchLabel = priceLabelOf(spot.price_range_lunch)
+  const dinnerLabel = priceLabelOf(spot.price_range_dinner ?? spot.price_range)
   const reservationLabel: Record<string, string> = Object.fromEntries(
     (reservationMasters ?? []).map((r) => [r.value, r.label])
   )
 
   const totalPaid = visits.reduce((a, v) => a + (v.price ?? 0), 0)
+  const photoUrl = (p: unknown): string | null =>
+    typeof p === 'string'
+      ? p
+      : p && typeof p === 'object' && 'url' in p
+      ? ((p as { url: string }).url ?? null)
+      : null
   const allPhotos = [
     ...(spot.photo_urls ?? []),
     ...visits.flatMap((v) => v.photo_urls ?? []),
   ]
+    .map(photoUrl)
+    .filter((u): u is string => !!u)
 
   // 評価平均はエディターにだけ計算
   const rated = visits.filter((v) => v.rating != null)
@@ -119,10 +130,21 @@ export default async function SpotDetailPage({
               <p className="text-xs text-neutral-500 mt-1">{rated.length}回評価</p>
             </div>
           )}
-          {spot.price_range && (
+          {(lunchLabel || dinnerLabel) && (
             <div>
               <p className="text-[10px] tracking-luxe text-neutral-400">PRICE</p>
-              <p className="font-serif text-2xl mt-2">{priceLabel ?? `Lv. ${spot.price_range}`}</p>
+              {lunchLabel && (
+                <p className="font-serif text-lg mt-2">
+                  <span className="text-xs text-neutral-400 mr-2">昼</span>
+                  {lunchLabel}
+                </p>
+              )}
+              {dinnerLabel && (
+                <p className="font-serif text-lg mt-1">
+                  <span className="text-xs text-neutral-400 mr-2">夜</span>
+                  {dinnerLabel}
+                </p>
+              )}
             </div>
           )}
           {visits.length > 0 && (

@@ -8,6 +8,7 @@ export async function fetchSpotMasters() {
     { data: priceRanges },
     { data: reservations },
     { data: chefs },
+    { data: ingredients },
   ] = await Promise.all([
     supabase
       .from('master_genres')
@@ -30,6 +31,12 @@ export async function fetchSpotMasters() {
       .from('chefs')
       .select('id, name, specialty')
       .order('name'),
+    supabase
+      .from('master_ingredients')
+      .select('genre, name')
+      .order('genre')
+      .order('display_order')
+      .order('name'),
   ])
   return {
     genres: genres ?? [],
@@ -37,6 +44,7 @@ export async function fetchSpotMasters() {
     priceRanges: priceRanges ?? [],
     reservations: reservations ?? [],
     chefs: chefs ?? [],
+    ingredients: ingredients ?? [],
   }
 }
 

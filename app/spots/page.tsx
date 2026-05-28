@@ -164,9 +164,15 @@ export default async function SpotsPage({
                       </h3>
                       <div className="flex items-center gap-3 mt-1 text-xs text-neutral-500 flex-wrap">
                         {authed && r && <span>★ {r.avg.toFixed(1)}</span>}
-                        {spot.price_range && (
-                          <span className="text-neutral-400">{'¥'.repeat(spot.price_range)}</span>
-                        )}
+                        {(() => {
+                          const lv =
+                            spot.price_range_dinner ?? spot.price_range_lunch ?? spot.price_range
+                          return lv ? (
+                            <span className="text-neutral-400">
+                              {lv <= 5 ? '¥'.repeat(lv) : '¥¥¥¥¥+'}
+                            </span>
+                          ) : null
+                        })()}
                         {spot.genre && <span className="text-neutral-400">{spot.genre}</span>}
                         {spot.want_to_visit && (
                           <span className="text-[9px] tracking-luxe bg-neutral-100 px-1.5 py-0.5">

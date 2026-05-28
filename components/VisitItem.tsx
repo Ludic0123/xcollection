@@ -33,7 +33,13 @@ export default function VisitItem({
     router.refresh()
   }
 
-  const photos = visit.photo_urls ?? []
+  const photos = (visit.photo_urls ?? [])
+    .map((p) =>
+      typeof p === 'string'
+        ? { url: p, caption: '', ingredients: [] as string[] }
+        : { url: p.url, caption: p.caption ?? '', ingredients: p.ingredients ?? [] }
+    )
+    .filter((p) => p.url)
 
   return (
     <li className="bg-white px-6 py-6 flex justify-between items-start gap-4">
@@ -62,21 +68,37 @@ export default function VisitItem({
         )}
         {photos.length > 0 && (
           <div className="mt-4 grid grid-cols-3 md:grid-cols-4 gap-2">
-            {photos.map((url, idx) => (
-              <a
-                key={idx}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block aspect-square bg-neutral-100 overflow-hidden group"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={url}
-                  alt=""
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              </a>
+            {photos.map((p, idx) => (
+              <figure key={idx}>
+                <a
+                  href={p.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block aspect-square bg-neutral-100 overflow-hidden group"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={p.url}
+                    alt={p.caption || ''}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </a>
+                {p.caption && (
+                  <figcaption className="text-[11px] text-neutral-500 mt-1">{p.caption}</figcaption>
+                )}
+                {p.ingredients.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {p.ingredients.map((ing) => (
+                      <span
+                        key={ing}
+                        className="text-[9px] tracking-luxe text-neutral-500 bg-neutral-100 px-1 py-0.5"
+                      >
+                        {ing}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </figure>
             ))}
           </div>
         )}

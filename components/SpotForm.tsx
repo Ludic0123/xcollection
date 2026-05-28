@@ -5,14 +5,15 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { CATEGORY_OPTIONS, MEAL_TIME_OPTIONS, type Category, type Spot } from '@/types'
 import { PREFECTURES } from '@/types/profile'
-import ImageUpload from './ImageUpload'
 import MultiImageUpload from './MultiImageUpload'
+import CaptionedImageUpload, { type CaptionedPhoto } from './CaptionedImageUpload'
 
 export type GenreOption = { id: string; category: string; name: string }
 export type CityOption = { id: string; name: string; prefecture?: string | null }
 export type PriceRangeOption = { level: number; label: string }
 export type ReservationOption = { value: string; label: string }
 export type ChefOption = { id: string; name: string; specialty: string | null }
+export type IngredientMaster = { genre: string; name: string }
 
 export default function SpotForm({
   spot,
@@ -21,6 +22,7 @@ export default function SpotForm({
   priceRanges,
   reservations,
   chefs,
+  ingredients = [],
 }: {
   spot?: Spot
   genres: GenreOption[]
@@ -28,6 +30,7 @@ export default function SpotForm({
   priceRanges: PriceRangeOption[]
   reservations: ReservationOption[]
   chefs: ChefOption[]
+  ingredients?: IngredientMaster[]
 }) {
   const router = useRouter()
   const [name, setName] = useState(spot?.name ?? '')
@@ -36,12 +39,26 @@ export default function SpotForm({
   const [prefecture, setPrefecture] = useState(spot?.prefecture ?? '')
   const [city, setCity] = useState(spot?.city ?? '')
   const [address, setAddress] = useState(spot?.address ?? '')
-  const [priceRange, setPriceRange] = useState<number | ''>(spot?.price_range ?? '')
+  const [priceRangeLunch, setPriceRangeLunch] = useState<number | ''>(
+    spot?.price_range_lunch ?? ''
+  )
+  const [priceRangeDinner, setPriceRangeDinner] = useState<number | ''>(
+    spot?.price_range_dinner ?? spot?.price_range ?? ''
+  )
   const [url, setUrl] = useState(spot?.url ?? '')
   const [mapUrl, setMapUrl] = useState(spot?.map_url ?? '')
   const [notes, setNotes] = useState(spot?.notes ?? '')
   const [wantToVisit, setWantToVisit] = useState(spot?.want_to_visit ?? false)
-  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(spot?.cover_image_url ?? null)
+  const [coverImageUrl] = useState<string | null>(spot?.cover_image_url ?? null)
+  const [coverExterior, setCoverExterior] = useState<string | null>(
+    spot?.cover_image_exterior ?? null
+  )
+  const [coverFood, setCoverFood] = useState<string | null>(spot?.cover_image_food ?? null)
+  const [coverPrimary, setCoverPrimary] = useState<'exterior' | 'food'>(
+    spot?.cover_image_food && spot?.cover_image_url === spot?.cover_image_food
+      ? 'food'
+      : 'exterior'
+  )
   const [photoUrls, setPhotoUrls] = useState<string[]>(spot?.photo_urls ?? [])
   const [reservationMethods, setReservationMethods] = useState<string[]>(
     spot?.reservation_methods ?? []
@@ -51,11 +68,30 @@ export default function SpotForm({
   const [lng, setLng] = useState<string>(spot?.lng?.toString() ?? '')
   const [chefId, setChefId] = useState<string>(spot?.chef_id ?? '')
   const [mealTimes, setMealTimes] = useState<string[]>(spot?.meal_times ?? [])
-  const [firstVisitMonth, setFirstVisitMonth] = useState<string>('') // 新規登録時のみ使用 (YYYY-MM)
+  // 新規登録時のみ使用: ブログ用の初回訪問記録
+  const [firstVisitDate, setFirstVisitDate] = useState<string>(
+    new Date().toISOString().slice(0, 10)
+  )
+  const [firstVisitBlog, setFirstVisitBlog] = useState<string>('')
+  const [firstVisitRating, setFirstVisitRating] = useState<number | ''>('')
+  const [firstVisitPrice, setFirstVisitPrice] = useState<string>('')
+  const [blogPhotos, setBlogPhotos] = useState<CaptionedPhoto[]>([]) // 新規登録時のブログ写真（キャプション付き）
 
   const genresForCategory = useMemo(
     () => genres.filter((g) => g.category === category),
     [genres, category]
+  )
+
+  // 選択中ジャンルに対応する食材（ジャンル未選択時は全件）
+  const ingredientsForGenre = useMemo(
+    () => (genre ? ingredients.filter((i) => i.genre === genre) : ingredients),
+    [ingredients, genre]
+  )
+
+  // トップ画像の候補（新規=アップロード写真 / 編集=ギャラリー）
+  const coverCandidates = useMemo(
+    () => (spot ? photoUrls : blogPhotos.map((p) => p.url)),
+    [spot, photoUrls, blogPhotos]
   )
 
   const citiesForPrefecture = useMemo(
@@ -93,6 +129,12 @@ export default function SpotForm({
       setSaving(false)
       return
     }
+    // プロフィール画像 = チェックした方（無ければもう片方）
+    const primaryCover =
+      (coverPrimary === 'food' ? coverFood : coverExterior) ||
+      coverExterior ||
+      coverFood ||
+      coverImageUrl
     const payload = {
       user_id: user.id,
       name,
@@ -101,12 +143,15 @@ export default function SpotForm({
       prefecture: prefecture || null,
       city: city || null,
       address: address || null,
-      price_range: priceRange === '' ? null : Number(priceRange),
+      price_range_lunch: priceRangeLunch === '' ? null : Number(priceRangeLunch),
+      price_range_dinner: priceRangeDinner === '' ? null : Number(priceRangeDinner),
       url: url || null,
       map_url: mapUrl || null,
       notes: notes || null,
       want_to_visit: wantToVisit,
-      cover_image_url: coverImageUrl,
+      cover_image_url: primaryCover,
+      cover_image_exterior: coverExterior,
+      cover_image_food: coverFood,
       photo_urls: photoUrls,
       reservation_methods: reservationMethods,
       is_featured: isFeatured,
@@ -124,19 +169,37 @@ export default function SpotForm({
       }
       router.push(`/spots/${spot.id}`)
     } else {
-      const { data, error } = await supabase.from('spots').insert(payload).select('id').single()
+      // 新規登録: ブログ用フィールド（訪問日 + ブログ文章）は必須
+      if (!firstVisitDate || !firstVisitBlog.trim()) {
+        setError('訪問日とブログ文章を入力してください')
+        setSaving(false)
+        return
+      }
+      // スポットのギャラリーには URL のみ保存
+      const { data, error } = await supabase
+        .from('spots')
+        .insert({ ...payload, photo_urls: blogPhotos.map((p) => p.url) })
+        .select('id')
+        .single()
       if (error) {
         setError(error.message)
         setSaving(false)
         return
       }
-      // 初訪問年月が入力されていれば、訪問記録を1件作成
-      if (firstVisitMonth) {
-        await supabase.from('visits').insert({
-          user_id: user.id,
-          spot_id: data.id,
-          visited_at: `${firstVisitMonth}-01`, // YYYY-MM → YYYY-MM-01
-        })
+      // ブログ = 訪問記録 として visits に1行作成（写真はキャプション付きで保存）
+      const { error: visitError } = await supabase.from('visits').insert({
+        user_id: user.id,
+        spot_id: data.id,
+        visited_at: firstVisitDate,
+        rating: firstVisitRating === '' ? null : Number(firstVisitRating),
+        price: firstVisitPrice === '' ? null : Number(firstVisitPrice),
+        comment: firstVisitBlog,
+        photo_urls: blogPhotos,
+      })
+      if (visitError) {
+        setError('スポットは登録されましたが訪問記録の保存に失敗: ' + visitError.message)
+        setSaving(false)
+        return
       }
       router.push(`/spots/${data.id}`)
     }
@@ -158,14 +221,78 @@ export default function SpotForm({
 
   return (
     <form onSubmit={handleSubmit} className="bg-white border hairline p-6 max-w-2xl space-y-5">
-      <div>
-        <label className="block text-xs tracking-luxe text-neutral-500 mb-2">COVER IMAGE</label>
-        <ImageUpload value={coverImageUrl} onChange={setCoverImageUrl} folder="spots" />
-      </div>
+      {spot ? (
+        <div>
+          <label className="block text-xs tracking-luxe text-neutral-500 mb-2">PHOTOS</label>
+          <MultiImageUpload value={photoUrls} onChange={setPhotoUrls} folder="spots" max={40} />
+        </div>
+      ) : (
+        <div>
+          <label className="block text-xs tracking-luxe text-neutral-500 mb-2">
+            PHOTOS（各写真に名前・食材をつけられます・ブログに掲載されます）
+          </label>
+          <CaptionedImageUpload
+            value={blogPhotos}
+            onChange={setBlogPhotos}
+            folder="visits"
+            max={40}
+            ingredientOptions={ingredientsForGenre}
+          />
+        </div>
+      )}
 
-      <div>
-        <label className="block text-xs tracking-luxe text-neutral-500 mb-2">PHOTOS</label>
-        <MultiImageUpload value={photoUrls} onChange={setPhotoUrls} folder="spots" max={40} />
+      {/* ============================================================
+          トップ画像（アップロード写真から選択：店構え / 料理）
+          ============================================================ */}
+      <div className="border-t hairline pt-5">
+        <label className="block text-xs tracking-luxe text-neutral-500 mb-1">
+          トップ画像（登録した写真から選択）
+        </label>
+        {coverCandidates.length === 0 ? (
+          <p className="text-xs text-neutral-400 mt-2">
+            先に写真をアップロードすると、ここから店構え・料理のトップ画像を選べます。
+          </p>
+        ) : (
+          <div className="space-y-5 mt-3">
+            <CoverPicker
+              label="店構え"
+              candidates={coverCandidates}
+              selected={coverExterior}
+              onSelect={setCoverExterior}
+            />
+            <CoverPicker
+              label="料理"
+              candidates={coverCandidates}
+              selected={coverFood}
+              onSelect={setCoverFood}
+            />
+            <div>
+              <p className="text-[10px] tracking-luxe text-neutral-400 mb-2">
+                プロフィール画像（一覧・トップに表示）
+              </p>
+              <div className="flex gap-4 text-sm">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="coverPrimary"
+                    checked={coverPrimary === 'exterior'}
+                    onChange={() => setCoverPrimary('exterior')}
+                  />
+                  店構え
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="coverPrimary"
+                    checked={coverPrimary === 'food'}
+                    onChange={() => setCoverPrimary('food')}
+                  />
+                  料理
+                </label>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div>
@@ -250,20 +377,41 @@ export default function SpotForm({
         </div>
       </div>
 
-      <div>
-        <label className="block text-sm text-gray-700 mb-1">価格帯</label>
-        <select
-          value={priceRange}
-          onChange={(e) => setPriceRange(e.target.value === '' ? '' : Number(e.target.value))}
-          className="w-full border border-gray-300 px-3 py-2 text-sm"
-        >
-          <option value="">未設定</option>
-          {priceRanges.map((p) => (
-            <option key={p.level} value={p.level}>
-              {p.label}
-            </option>
-          ))}
-        </select>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm text-gray-700 mb-1">価格帯（昼）</label>
+          <select
+            value={priceRangeLunch}
+            onChange={(e) =>
+              setPriceRangeLunch(e.target.value === '' ? '' : Number(e.target.value))
+            }
+            className="w-full border border-gray-300 px-3 py-2 text-sm"
+          >
+            <option value="">未設定</option>
+            {priceRanges.map((p) => (
+              <option key={p.level} value={p.level}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm text-gray-700 mb-1">価格帯（夜）</label>
+          <select
+            value={priceRangeDinner}
+            onChange={(e) =>
+              setPriceRangeDinner(e.target.value === '' ? '' : Number(e.target.value))
+            }
+            className="w-full border border-gray-300 px-3 py-2 text-sm"
+          >
+            <option value="">未設定</option>
+            {priceRanges.map((p) => (
+              <option key={p.level} value={p.level}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div>
@@ -349,22 +497,6 @@ export default function SpotForm({
         />
       </div>
 
-      {!spot && (
-        <div>
-          <label className="block text-sm text-gray-700 mb-1">
-            初訪問年月（任意）
-          </label>
-          <input
-            type="month"
-            value={firstVisitMonth}
-            onChange={(e) => setFirstVisitMonth(e.target.value)}
-            className="border border-gray-300 px-3 py-2 text-sm"
-          />
-          <p className="text-[10px] text-neutral-400 mt-1">
-            入力すると同時に訪問記録が1件作成されます。2回目以降の訪問は別途追加できます
-          </p>
-        </div>
-      )}
 
       <div>
         <label className="block text-xs tracking-luxe text-neutral-500 mb-2">
@@ -432,6 +564,75 @@ export default function SpotForm({
         トップページのFEATUREDで取り上げる
       </label>
 
+      {/* ============================================================
+          BLOG / 初回訪問記録 (新規登録時のみ・必須)
+          ============================================================ */}
+      {!spot && (
+        <div className="border-t hairline pt-6 mt-2 space-y-4">
+          <div>
+            <p className="text-[10px] tracking-luxe text-neutral-400">BLOG / FIRST VISIT</p>
+            <p className="text-xs text-neutral-500 mt-1">
+              この登録は初回訪問のブログ投稿としても保存されます。
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-700 mb-1">訪問日 *</label>
+            <input
+              type="date"
+              required
+              value={firstVisitDate}
+              onChange={(e) => setFirstVisitDate(e.target.value)}
+              className="border border-gray-300 px-3 py-2 text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-700 mb-1">ブログ文章 *</label>
+            <textarea
+              required
+              value={firstVisitBlog}
+              onChange={(e) => setFirstVisitBlog(e.target.value)}
+              rows={6}
+              placeholder="頼んだメニュー / 印象 / 同伴者 / 次回試したいものなど"
+              className="w-full border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-black"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-gray-700 mb-1">評価（任意・非公開）</label>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setFirstVisitRating(firstVisitRating === n ? '' : n)}
+                    className={`w-9 h-9 border hairline text-sm ${
+                      firstVisitRating !== '' && n <= firstVisitRating
+                        ? 'bg-black border-black text-white'
+                        : 'bg-white text-neutral-300'
+                    }`}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm text-gray-700 mb-1">支払い金額（円・任意）</label>
+              <input
+                type="number"
+                min={0}
+                value={firstVisitPrice}
+                onChange={(e) => setFirstVisitPrice(e.target.value)}
+                className="border border-gray-300 px-3 py-2 text-sm w-40"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <div className="flex gap-2 pt-2">
@@ -453,5 +654,46 @@ export default function SpotForm({
         )}
       </div>
     </form>
+  )
+}
+
+function CoverPicker({
+  label,
+  candidates,
+  selected,
+  onSelect,
+}: {
+  label: string
+  candidates: string[]
+  selected: string | null
+  onSelect: (url: string | null) => void
+}) {
+  return (
+    <div>
+      <p className="text-[10px] tracking-luxe text-neutral-400 mb-2">{label}</p>
+      <div className="flex flex-wrap gap-2">
+        {candidates.map((url) => {
+          const active = selected === url
+          return (
+            <button
+              key={url}
+              type="button"
+              onClick={() => onSelect(active ? null : url)}
+              className={`relative w-16 h-16 overflow-hidden border-2 ${
+                active ? 'border-black' : 'border-transparent hover:border-neutral-300'
+              }`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={url} alt="" className="w-full h-full object-cover" />
+              {active && (
+                <span className="absolute inset-0 bg-black/30 flex items-center justify-center text-white text-[10px] tracking-luxe">
+                  選択中
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+    </div>
   )
 }

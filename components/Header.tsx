@@ -13,6 +13,7 @@ const PUBLIC_NAV = [
   { href: '/sake', label: 'SAKE' },
   { href: '/chefs', label: 'CHEFS' },
   { href: '/trips', label: 'JOURNEYS' },
+  { href: '/blog', label: 'BLOG' },
   { href: '/map', label: 'MAP' },
 ]
 

@@ -56,11 +56,15 @@ export type Spot = {
   city: string | null
   address: string | null
   price_range: number | null
+  price_range_lunch: number | null
+  price_range_dinner: number | null
   url: string | null
   map_url: string | null
   notes: string | null
   want_to_visit: boolean
   cover_image_url: string | null
+  cover_image_exterior: string | null
+  cover_image_food: string | null
   photo_urls: string[]
   reservation_methods: ReservationMethod[]
   meal_times: string[]
@@ -192,6 +196,10 @@ export type EventParticipant = {
   comment: string | null
 }
 
+export type VisitPhoto =
+  | string
+  | { url: string; caption?: string | null; ingredients?: string[] | null }
+
 export type Visit = {
   id: string
   user_id: string
@@ -200,7 +208,7 @@ export type Visit = {
   rating: number | null
   price: number | null
   comment: string | null
-  photo_urls: string[]
+  photo_urls: VisitPhoto[]
   created_at: string
 }
 

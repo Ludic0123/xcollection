@@ -24,7 +24,7 @@ export default async function NewVisitPage() {
       </Link>
       <h1 className="font-serif text-4xl italic font-light mb-2">Log a visit.</h1>
       <p className="text-sm text-neutral-500 mb-6">
-        2回目以降の訪問記録。お店を選んで詳細を記録します。
+        2回目以降の訪問記録（ブログ投稿）。お店を選んで詳細を記録します。初回はお店の登録画面と同時に記入してください。
       </p>
       <VisitFormWithPicker spots={spots} />
     </div>

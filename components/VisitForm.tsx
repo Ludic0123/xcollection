@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import MultiImageUpload from './MultiImageUpload'
+import CaptionedImageUpload, { type CaptionedPhoto } from './CaptionedImageUpload'
 
 export default function VisitForm({ spotId }: { spotId: string }) {
   const router = useRouter()
@@ -12,7 +12,7 @@ export default function VisitForm({ spotId }: { spotId: string }) {
   const [rating, setRating] = useState<number | ''>('')
   const [price, setPrice] = useState<string>('')
   const [comment, setComment] = useState('')
-  const [photos, setPhotos] = useState<string[]>([])
+  const [photos, setPhotos] = useState<CaptionedPhoto[]>([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -50,8 +50,10 @@ export default function VisitForm({ spotId }: { spotId: string }) {
   return (
     <form onSubmit={handleSubmit} className="bg-white border hairline p-6 space-y-6">
       <div>
-        <label className="block text-xs tracking-luxe text-neutral-500 mb-2">PHOTOS</label>
-        <MultiImageUpload value={photos} onChange={setPhotos} folder="visits" max={40} />
+        <label className="block text-xs tracking-luxe text-neutral-500 mb-2">
+          PHOTOS（各写真に名前をつけられます）
+        </label>
+        <CaptionedImageUpload value={photos} onChange={setPhotos} folder="visits" max={40} />
       </div>
 
       <div>

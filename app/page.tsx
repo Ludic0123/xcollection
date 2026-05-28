@@ -346,10 +346,11 @@ function Carousel({ children }: { children: React.ReactNode }) {
 
 function SpotCard({ spot }: { spot: Spot }) {
   const location = [spot.prefecture, spot.city].filter(Boolean).join(' · ')
+  const priceLevel = spot.price_range_dinner ?? spot.price_range_lunch ?? spot.price_range
   const priceMark =
-    spot.price_range != null
-      ? spot.price_range <= 5
-        ? '¥'.repeat(spot.price_range)
+    priceLevel != null
+      ? priceLevel <= 5
+        ? '¥'.repeat(priceLevel)
         : '¥¥¥¥¥+'
       : null
   const subParts = [spot.genre, priceMark].filter(Boolean)

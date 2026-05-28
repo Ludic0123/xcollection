@@ -8,7 +8,7 @@ import AdminSignOut from './AdminSignOut'
 
 const ADMIN_NAV = [
   { href: '/admin', label: 'OVERVIEW', section: 'GENERAL' },
-  { href: '/visits/new', label: '+ 訪問記録', section: 'GENERAL' },
+  { href: '/visits/new', label: '+ ブログ / 訪問記録', section: 'GENERAL' },
   { href: '/admin/spots', label: 'お店', section: 'CONTENTS' },
   { href: '/admin/hotels', label: 'ホテル', section: 'CONTENTS' },
   { href: '/admin/chefs', label: '大将・シェフ', section: 'CONTENTS' },
@@ -23,6 +23,7 @@ const ADMIN_NAV = [
   { href: '/admin/masters/sake-types', label: '日本酒・タイプ', section: 'MASTERS' },
   { href: '/admin/masters/reservation-methods', label: '予約方法', section: 'MASTERS' },
   { href: '/admin/masters/price-ranges', label: '価格帯', section: 'MASTERS' },
+  { href: '/admin/masters/ingredients', label: '食材', section: 'MASTERS' },
   { href: '/admin/masters/signup-favorite-genres', label: '会員登録・好きなジャンル', section: 'SIGNUP' },
   { href: '/admin/masters/signup-favorite-sake-types', label: '会員登録・好きな酒の種類', section: 'SIGNUP' },
   { href: '/admin/masters/drinking-frequencies', label: '会員登録・飲む頻度', section: 'SIGNUP' },
