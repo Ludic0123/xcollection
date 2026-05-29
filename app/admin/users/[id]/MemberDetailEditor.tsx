@@ -12,6 +12,7 @@ type Member = {
   is_admin: boolean
   email: string | null
   phone: string | null
+  birth_date: string | null
   last_name_kanji: string | null
   first_name_kanji: string | null
   last_name_kana: string | null
@@ -264,10 +265,14 @@ function ContactSection({
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [phone, setPhone] = useState(m.phone ?? '')
+  const [birthDate, setBirthDate] = useState(m.birth_date ?? '')
 
   async function handleSave() {
     setSaving(true)
-    const ok = await onSave({ phone: phone.trim() || null })
+    const ok = await onSave({
+      phone: phone.trim() || null,
+      birth_date: birthDate || null,
+    })
     setSaving(false)
     if (ok) setEditing(false)
   }
@@ -277,7 +282,10 @@ function ContactSection({
       title="CONTACT"
       editing={editing}
       setEditing={(v) => {
-        if (v) setPhone(m.phone ?? '')
+        if (v) {
+          setPhone(m.phone ?? '')
+          setBirthDate(m.birth_date ?? '')
+        }
         setEditing(v)
       }}
       saving={saving}
@@ -300,6 +308,20 @@ function ContactSection({
             />
           ) : (
             m.phone || <span className="text-neutral-300">未登録</span>
+          )}
+        </Row>
+        <Row label="生年月日">
+          {editing ? (
+            <input
+              type="date"
+              value={birthDate}
+              onChange={(e) => setBirthDate(e.target.value)}
+              className={inputClass}
+            />
+          ) : m.birth_date ? (
+            new Date(m.birth_date).toLocaleDateString('ja-JP')
+          ) : (
+            <span className="text-neutral-300">未登録</span>
           )}
         </Row>
       </dl>

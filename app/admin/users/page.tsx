@@ -8,7 +8,7 @@ export default async function UsersAdminPage() {
   const { data } = await supabase
     .from('members')
     .select(
-      'id, member_number, is_admin, last_name_kanji, first_name_kanji, last_name_kana, first_name_kana, created_at'
+      'id, member_number, is_admin, last_name_kanji, first_name_kanji, last_name_kana, first_name_kana, company, work_location, residence_1, residence_2, birth_date, created_at'
     )
     .order('member_number')
 
@@ -26,6 +26,9 @@ export default async function UsersAdminPage() {
               <th className="py-2 px-3 text-left text-[10px] tracking-luxe text-neutral-500">NO.</th>
               <th className="py-2 px-3 text-left text-[10px] tracking-luxe text-neutral-500">氏名</th>
               <th className="py-2 px-3 text-left text-[10px] tracking-luxe text-neutral-500">フリガナ</th>
+              <th className="py-2 px-3 text-left text-[10px] tracking-luxe text-neutral-500">勤務先</th>
+              <th className="py-2 px-3 text-left text-[10px] tracking-luxe text-neutral-500">居住地</th>
+              <th className="py-2 px-3 text-left text-[10px] tracking-luxe text-neutral-500">生年月日</th>
               <th className="py-2 px-3 text-left text-[10px] tracking-luxe text-neutral-500">ADMIN</th>
               <th className="py-2 px-3 text-left text-[10px] tracking-luxe text-neutral-500">登録日</th>
             </tr>
@@ -37,6 +40,11 @@ export default async function UsersAdminPage() {
                 '(未入力)'
               const fullKana =
                 [m.last_name_kana, m.first_name_kana].filter(Boolean).join(' ') || '-'
+              const residence =
+                [m.residence_1, m.residence_2].filter(Boolean).join(' / ') || '-'
+              const birth = m.birth_date
+                ? new Date(m.birth_date as string).toLocaleDateString('ja-JP')
+                : '-'
               return (
                 <tr
                   key={m.id as string}
@@ -55,6 +63,21 @@ export default async function UsersAdminPage() {
                   <td className="py-3 px-3 text-xs text-neutral-500">
                     <Link href={`/admin/users/${m.id}`} className="block">
                       {fullKana}
+                    </Link>
+                  </td>
+                  <td className="py-3 px-3 text-xs text-neutral-600">
+                    <Link href={`/admin/users/${m.id}`} className="block">
+                      {(m.company as string) || '-'}
+                    </Link>
+                  </td>
+                  <td className="py-3 px-3 text-xs text-neutral-600">
+                    <Link href={`/admin/users/${m.id}`} className="block">
+                      {residence}
+                    </Link>
+                  </td>
+                  <td className="py-3 px-3 text-xs text-neutral-600">
+                    <Link href={`/admin/users/${m.id}`} className="block">
+                      {birth}
                     </Link>
                   </td>
                   <td className="py-3 px-3">

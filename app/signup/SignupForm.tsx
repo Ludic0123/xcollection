@@ -29,6 +29,7 @@ export default function SignupForm({
   const [firstNameKanji, setFirstNameKanji] = useState('')
   const [lastNameKana, setLastNameKana] = useState('')
   const [firstNameKana, setFirstNameKana] = useState('')
+  const [birthDate, setBirthDate] = useState('')
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -135,6 +136,7 @@ export default function SignupForm({
       first_name_kanji: firstNameKanji.trim(),
       last_name_kana: lastNameKana.trim(),
       first_name_kana: firstNameKana.trim(),
+      birth_date: birthDate,
       phone: phone.trim(),
       residence_1: residence1,
       residence_2: residence2,
@@ -267,6 +269,16 @@ export default function SignupForm({
                 />
               </Field>
             </div>
+
+            <Field label="生年月日">
+              <input
+                type="date"
+                required
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
+                className={inputClass}
+              />
+            </Field>
 
             <Field label="電話番号">
               <input
