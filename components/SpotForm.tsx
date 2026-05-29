@@ -6,39 +6,13 @@ import { createClient } from '@/lib/supabase/client'
 import { CATEGORY_OPTIONS, MEAL_TIME_OPTIONS, type Category, type Spot, type Visit } from '@/types'
 import { PREFECTURES } from '@/types/profile'
 import BlogComposer, { type ComposerBlock } from './BlogComposer'
-
-// 訪問記録(旧データ含む)を ComposerBlock[] に変換
-function visitToBlocks(visit: Visit | null | undefined): ComposerBlock[] {
-  if (!visit) return []
-  if (visit.body_blocks && visit.body_blocks.length > 0) {
-    return visit.body_blocks.map((b) =>
-      b.type === 'image'
-        ? {
-            type: 'image' as const,
-            url: b.url,
-            caption: b.caption ?? '',
-            ingredients: b.ingredients ?? [],
-          }
-        : { type: 'text' as const, text: b.text }
-    )
-  }
-  // 旧データ: comment + photo_urls からブロックを組み立て
-  const blocks: ComposerBlock[] = []
-  if (visit.comment) blocks.push({ type: 'text', text: visit.comment })
-  for (const p of visit.photo_urls ?? []) {
-    if (typeof p === 'string') {
-      blocks.push({ type: 'image', url: p, caption: '', ingredients: [] })
-    } else if (p?.url) {
-      blocks.push({
-        type: 'image',
-        url: p.url,
-        caption: p.caption ?? '',
-        ingredients: p.ingredients ?? [],
-      })
-    }
-  }
-  return blocks
-}
+import PhotoPool, { type PoolPhoto } from './PhotoPool'
+import {
+  visitToPool,
+  visitToComposerBlocks,
+  buildBlogBlocks,
+  blogTextConcat,
+} from '@/lib/blog'
 
 export type GenreOption = { id: string; category: string; name: string }
 export type CityOption = { id: string; name: string; prefecture?: string | null }
@@ -106,7 +80,8 @@ export default function SpotForm({
     firstVisit?.visited_at ?? new Date().toISOString().slice(0, 10)
   )
   const [blogTitle, setBlogTitle] = useState<string>(firstVisit?.title ?? '')
-  const [blogBlocks, setBlogBlocks] = useState<ComposerBlock[]>(visitToBlocks(firstVisit))
+  const [poolPhotos, setPoolPhotos] = useState<PoolPhoto[]>(visitToPool(firstVisit))
+  const [blogBlocks, setBlogBlocks] = useState<ComposerBlock[]>(visitToComposerBlocks(firstVisit))
   const [firstVisitRating, setFirstVisitRating] = useState<number | ''>(
     firstVisit?.rating ?? ''
   )
@@ -125,17 +100,14 @@ export default function SpotForm({
     [ingredients, genre]
   )
 
-  // トップ画像の候補 = 本文に入れた写真（新規・編集とも）
+  // トップ画像の候補 = アップ済みのプール写真（新規・編集とも）
   const coverCandidates = useMemo(() => {
-    const fromBlocks = blogBlocks
-      .filter((b): b is Extract<ComposerBlock, { type: 'image' }> => b.type === 'image')
-      .map((b) => b.url)
-      .filter(Boolean)
-    // 既存のトップ画像が本文外でも選べるよう候補に含める
+    const fromPool = poolPhotos.map((p) => p.url).filter(Boolean)
+    // 既存のトップ画像がプール外でも選べるよう候補に含める
     const extras = [spot?.cover_image_exterior, spot?.cover_image_food, spot?.cover_image_url]
       .filter((u): u is string => !!u)
-    return Array.from(new Set([...fromBlocks, ...extras]))
-  }, [blogBlocks, spot])
+    return Array.from(new Set([...fromPool, ...extras]))
+  }, [poolPhotos, spot])
 
   const citiesForPrefecture = useMemo(
     () =>
@@ -179,20 +151,10 @@ export default function SpotForm({
       coverFood ||
       coverImageUrl
 
-    // ブログ本文の整形
-    const imageBlocks = blogBlocks.filter(
-      (b): b is Extract<ComposerBlock, { type: 'image' }> => b.type === 'image' && !!b.url
-    )
-    const textConcat = blogBlocks
-      .filter((b): b is Extract<ComposerBlock, { type: 'text' }> => b.type === 'text')
-      .map((b) => b.text.trim())
-      .filter(Boolean)
-      .join('\n\n')
-    const visitPhotoPayload = imageBlocks.map((b) => ({
-      url: b.url,
-      caption: b.caption,
-      ingredients: b.ingredients,
-    }))
+    // ブログ本文の整形（プールから caption/食材をスナップショット）
+    const finalBlocks = buildBlogBlocks(blogBlocks, poolPhotos)
+    const textConcat = blogTextConcat(blogBlocks)
+    const hasBody = finalBlocks.length > 0
 
     // ブログのバリデーション（編集時は firstVisit がある場合のみ必須）
     const blogRequired = !spot || !!firstVisit
@@ -207,7 +169,7 @@ export default function SpotForm({
         setSaving(false)
         return
       }
-      if (blogBlocks.length === 0 || (!textConcat && imageBlocks.length === 0)) {
+      if (!hasBody) {
         setError('ブログ本文（文章または写真）を1つ以上入れてください')
         setSaving(false)
         return
@@ -231,7 +193,7 @@ export default function SpotForm({
       cover_image_url: primaryCover,
       cover_image_exterior: coverExterior,
       cover_image_food: coverFood,
-      photo_urls: imageBlocks.map((b) => b.url),
+      photo_urls: poolPhotos.map((p) => p.url),
       reservation_methods: reservationMethods,
       is_featured: isFeatured,
       lat: lat === '' ? null : Number(lat),
@@ -246,8 +208,8 @@ export default function SpotForm({
       price: firstVisitPrice === '' ? null : Number(firstVisitPrice),
       title: blogTitle.trim() || null,
       comment: textConcat || null,
-      body_blocks: blogBlocks,
-      photo_urls: visitPhotoPayload,
+      body_blocks: finalBlocks,
+      photo_urls: poolPhotos,
     }
 
     if (spot) {
@@ -613,6 +575,19 @@ export default function SpotForm({
           </div>
 
           <div>
+            <label className="block text-xs tracking-luxe text-neutral-500 mb-2">
+              PHOTOS（まとめてアップロード・各写真に名前/食材）
+            </label>
+            <PhotoPool
+              value={poolPhotos}
+              onChange={setPoolPhotos}
+              folder="visits"
+              max={40}
+              ingredientOptions={ingredientsForGenre}
+            />
+          </div>
+
+          <div>
             <label className="block text-sm text-gray-700 mb-1">ブログタイトル *</label>
             <input
               value={blogTitle}
@@ -623,23 +598,20 @@ export default function SpotForm({
           </div>
 
           <div>
-            <label className="block text-sm text-gray-700 mb-2">本文 *（文章・写真ブロック）</label>
-            <BlogComposer
-              blocks={blogBlocks}
-              onChange={setBlogBlocks}
-              ingredientOptions={ingredientsForGenre}
-              folder="visits"
-            />
+            <label className="block text-sm text-gray-700 mb-2">
+              本文 *（文章ベース・写真ブロックは上のPHOTOSから選択）
+            </label>
+            <BlogComposer blocks={blogBlocks} onChange={setBlogBlocks} pool={poolPhotos} />
           </div>
 
-          {/* トップ画像（本文の写真から選択） */}
+          {/* トップ画像（アップ済み写真から選択） */}
           <div className="border-t hairline pt-4">
             <label className="block text-xs tracking-luxe text-neutral-500 mb-1">
-              トップ画像（本文に入れた写真から選択）
+              トップ画像（アップ済みの写真から選択）
             </label>
             {coverCandidates.length === 0 ? (
               <p className="text-xs text-neutral-400 mt-2">
-                本文に写真を追加すると、ここから店構え・料理のトップ画像を選べます。
+                上のPHOTOSに写真を追加すると、ここから店構え・料理のトップ画像を選べます。
               </p>
             ) : (
               <div className="space-y-5 mt-3">

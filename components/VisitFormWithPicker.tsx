@@ -3,7 +3,9 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import BlogComposer, { type ComposerBlock, type IngredientOption } from './BlogComposer'
+import BlogComposer, { type ComposerBlock } from './BlogComposer'
+import PhotoPool, { type PoolPhoto, type IngredientOption } from './PhotoPool'
+import { buildBlogBlocks, blogTextConcat } from '@/lib/blog'
 
 export type SpotLite = {
   id: string
@@ -26,6 +28,7 @@ export default function VisitFormWithPicker({
   const [rating, setRating] = useState<number | ''>('')
   const [price, setPrice] = useState('')
   const [title, setTitle] = useState('')
+  const [pool, setPool] = useState<PoolPhoto[]>([])
   const [blocks, setBlocks] = useState<ComposerBlock[]>([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -56,20 +59,14 @@ export default function VisitFormWithPicker({
       setSaving(false)
       return
     }
-    const imageBlocks = blocks.filter(
-      (b): b is Extract<ComposerBlock, { type: 'image' }> => b.type === 'image' && !!b.url
-    )
-    const textConcat = blocks
-      .filter((b): b is Extract<ComposerBlock, { type: 'text' }> => b.type === 'text')
-      .map((b) => b.text.trim())
-      .filter(Boolean)
-      .join('\n\n')
+    const finalBlocks = buildBlogBlocks(blocks, pool)
+    const textConcat = blogTextConcat(blocks)
     if (!title.trim()) {
       setError('ブログタイトルを入力してください')
       setSaving(false)
       return
     }
-    if (blocks.length === 0 || (!textConcat && imageBlocks.length === 0)) {
+    if (finalBlocks.length === 0) {
       setError('本文（文章または写真）を1つ以上入れてください')
       setSaving(false)
       return
@@ -82,12 +79,8 @@ export default function VisitFormWithPicker({
       price: price === '' ? null : Number(price),
       title: title.trim(),
       comment: textConcat || null,
-      body_blocks: blocks,
-      photo_urls: imageBlocks.map((b) => ({
-        url: b.url,
-        caption: b.caption,
-        ingredients: b.ingredients,
-      })),
+      body_blocks: finalBlocks,
+      photo_urls: pool,
     })
     if (error) {
       setError(error.message)
@@ -130,6 +123,19 @@ export default function VisitFormWithPicker({
       </div>
 
       <div>
+        <label className="block text-xs tracking-luxe text-neutral-500 mb-2">
+          PHOTOS（まとめてアップロード・各写真に名前/食材）
+        </label>
+        <PhotoPool
+          value={pool}
+          onChange={setPool}
+          folder="visits"
+          max={40}
+          ingredientOptions={ingredientOptions}
+        />
+      </div>
+
+      <div>
         <label className="block text-xs tracking-luxe text-neutral-500 mb-2">タイトル *</label>
         <input
           value={title}
@@ -141,14 +147,9 @@ export default function VisitFormWithPicker({
 
       <div>
         <label className="block text-xs tracking-luxe text-neutral-500 mb-2">
-          本文 *（文章・写真ブロック）
+          本文 *（文章ベース・写真ブロックは上のPHOTOSから選択）
         </label>
-        <BlogComposer
-          blocks={blocks}
-          onChange={setBlocks}
-          ingredientOptions={ingredientOptions}
-          folder="visits"
-        />
+        <BlogComposer blocks={blocks} onChange={setBlocks} pool={pool} />
       </div>
 
       <div>
