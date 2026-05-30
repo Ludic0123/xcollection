@@ -1,16 +1,23 @@
 export const dynamic = 'force-dynamic'
 
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export default async function UsersAdminPage() {
-  const supabase = await createClient()
-  const { data } = await supabase
+  const supabase = createAdminClient()
+  const { data, error } = await supabase
     .from('members')
-    .select(
-      'id, member_number, is_admin, last_name_kanji, first_name_kanji, last_name_kana, first_name_kana, company, work_location, residence_1, residence_2, birth_date, created_at'
-    )
+    .select('*')
     .order('member_number')
+  if (error) {
+    return (
+      <div className="px-4 py-6 md:px-10 md:py-10">
+        <p className="text-[10px] tracking-luxe text-neutral-400">PEOPLE</p>
+        <h1 className="font-serif text-4xl italic font-light mt-1 mb-6">Members.</h1>
+        <p className="text-sm text-red-600">読み込みエラー: {error.message}</p>
+      </div>
+    )
+  }
 
   return (
     <div className="px-4 py-6 md:px-10 md:py-10">
