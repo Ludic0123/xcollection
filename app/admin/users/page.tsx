@@ -1,16 +1,23 @@
 export const dynamic = 'force-dynamic'
 
 import Link from 'next/link'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function UsersAdminPage() {
   let data: Record<string, unknown>[] | null = null
   let errorMessage: string | null = null
   try {
-    const supabase = createAdminClient()
-    const res = await supabase.from('members').select('*').order('member_number')
-    data = res.data as Record<string, unknown>[] | null
-    if (res.error) errorMessage = res.error.message
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) {
+      errorMessage = 'ログインが必要です'
+    } else {
+      const res = await supabase.rpc('admin_list_members', { caller_id: user.id })
+      data = (res.data as Record<string, unknown>[] | null) ?? null
+      if (res.error) errorMessage = res.error.message
+    }
   } catch (e) {
     errorMessage = e instanceof Error ? e.message : '不明なエラー'
   }
