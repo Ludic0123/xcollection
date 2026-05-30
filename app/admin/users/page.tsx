@@ -4,11 +4,17 @@ import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export default async function UsersAdminPage() {
-  const supabase = createAdminClient()
-  const { data, error } = await supabase
-    .from('members')
-    .select('*')
-    .order('member_number')
+  let data: Record<string, unknown>[] | null = null
+  let errorMessage: string | null = null
+  try {
+    const supabase = createAdminClient()
+    const res = await supabase.from('members').select('*').order('member_number')
+    data = res.data as Record<string, unknown>[] | null
+    if (res.error) errorMessage = res.error.message
+  } catch (e) {
+    errorMessage = e instanceof Error ? e.message : '不明なエラー'
+  }
+  const error = errorMessage ? { message: errorMessage } : null
   if (error) {
     return (
       <div className="px-4 py-6 md:px-10 md:py-10">
