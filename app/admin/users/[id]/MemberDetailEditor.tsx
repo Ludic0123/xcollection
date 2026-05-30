@@ -51,7 +51,18 @@ export default function MemberDetailEditor({
 
   async function save(payload: Partial<Member>) {
     const supabase = createClient()
-    const { error } = await supabase.from('members').update(payload).eq('id', m.id)
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) {
+      alert('ログインが必要です')
+      return false
+    }
+    const { error } = await supabase.rpc('admin_update_member', {
+      target_id: m.id,
+      patch: payload,
+      caller_id: user.id,
+    })
     if (error) {
       alert('保存エラー: ' + error.message)
       return false
