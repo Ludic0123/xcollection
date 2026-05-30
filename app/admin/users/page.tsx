@@ -3,42 +3,63 @@ export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 
+type MemberRow = Record<string, unknown> & {
+  id?: string
+  member_number?: number
+  is_admin?: boolean
+  last_name_kanji?: string | null
+  first_name_kanji?: string | null
+  last_name_kana?: string | null
+  first_name_kana?: string | null
+  company?: string | null
+  residence_1?: string | null
+  residence_2?: string | null
+  birth_date?: string | null
+  created_at?: string
+}
+
 export default async function UsersAdminPage() {
-  let data: Record<string, unknown>[] | null = null
+  let rows: MemberRow[] = []
   let errorMessage: string | null = null
+
   try {
     const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const auth = await supabase.auth.getUser()
+    const user = auth.data.user
+
     if (!user) {
       errorMessage = 'ログインが必要です'
     } else {
-      const res = await supabase.rpc('admin_list_members', { caller_id: user.id })
-      data = (res.data as Record<string, unknown>[] | null) ?? null
-      if (res.error) errorMessage = res.error.message
+      const rpc = await supabase.rpc('admin_list_members', { caller_id: user.id })
+      if (rpc.error) {
+        // RPC が無いか、何か失敗
+        errorMessage = `RPC失敗: ${rpc.error.message}`
+      } else if (Array.isArray(rpc.data)) {
+        rows = rpc.data as MemberRow[]
+      }
     }
   } catch (e) {
-    errorMessage = e instanceof Error ? e.message : '不明なエラー'
-  }
-  const error = errorMessage ? { message: errorMessage } : null
-  if (error) {
-    return (
-      <div className="px-4 py-6 md:px-10 md:py-10">
-        <p className="text-[10px] tracking-luxe text-neutral-400">PEOPLE</p>
-        <h1 className="font-serif text-4xl italic font-light mt-1 mb-6">Members.</h1>
-        <p className="text-sm text-red-600">読み込みエラー: {error.message}</p>
-      </div>
-    )
+    errorMessage = `例外: ${e instanceof Error ? e.message : String(e)}`
   }
 
   return (
     <div className="px-4 py-6 md:px-10 md:py-10">
       <p className="text-[10px] tracking-luxe text-neutral-400">PEOPLE</p>
       <h1 className="font-serif text-4xl italic font-light mt-1 mb-6">Members.</h1>
+
+      {errorMessage && (
+        <div className="mb-6 border border-red-200 bg-red-50 p-3">
+          <p className="text-sm text-red-700">{errorMessage}</p>
+          <p className="text-xs text-red-500 mt-2">
+            画面に表示されている文言をそのまま貼って報告してください。
+          </p>
+        </div>
+      )}
+
       <p className="text-sm text-neutral-500 mb-6">
-        会員一覧。行をクリックすると詳細プロフィールを表示します。
+        会員一覧（{rows.length}名）。行をクリックすると詳細プロフィールを表示します。
       </p>
+
       <div className="bg-white border hairline overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -54,61 +75,57 @@ export default async function UsersAdminPage() {
             </tr>
           </thead>
           <tbody>
-            {(data ?? []).map((m) => {
+            {rows.map((m, idx) => {
+              const id = (m.id as string) ?? `row-${idx}`
               const fullName =
-                [m.last_name_kanji, m.first_name_kanji].filter(Boolean).join(' ') ||
-                '(未入力)'
+                [m.last_name_kanji, m.first_name_kanji].filter(Boolean).join(' ') || '(未入力)'
               const fullKana =
                 [m.last_name_kana, m.first_name_kana].filter(Boolean).join(' ') || '-'
               const residence =
                 [m.residence_1, m.residence_2].filter(Boolean).join(' / ') || '-'
-              const birth = m.birth_date
-                ? new Date(m.birth_date as string).toLocaleDateString('ja-JP')
-                : '-'
+              let birth = '-'
+              if (m.birth_date) {
+                try {
+                  birth = new Date(m.birth_date).toLocaleDateString('ja-JP')
+                } catch {
+                  birth = String(m.birth_date)
+                }
+              }
+              let created = '-'
+              if (m.created_at) {
+                try {
+                  created = new Date(m.created_at).toLocaleDateString('ja-JP')
+                } catch {
+                  created = String(m.created_at)
+                }
+              }
               return (
-                <tr
-                  key={m.id as string}
-                  className="border-b hairline hover:bg-neutral-50"
-                >
+                <tr key={id} className="border-b hairline hover:bg-neutral-50">
                   <td className="py-3 px-3 font-mono">
-                    <Link href={`/admin/users/${m.id}`} className="block">
-                      {String(m.member_number).padStart(3, '0')}
+                    <Link href={`/admin/users/${id}`} className="block">
+                      {m.member_number != null ? String(m.member_number).padStart(3, '0') : '-'}
                     </Link>
                   </td>
                   <td className="py-3 px-3">
-                    <Link href={`/admin/users/${m.id}`} className="block font-serif">
-                      {fullName}
-                    </Link>
+                    <Link href={`/admin/users/${id}`} className="block font-serif">{fullName}</Link>
                   </td>
                   <td className="py-3 px-3 text-xs text-neutral-500">
-                    <Link href={`/admin/users/${m.id}`} className="block">
-                      {fullKana}
-                    </Link>
+                    <Link href={`/admin/users/${id}`} className="block">{fullKana}</Link>
                   </td>
                   <td className="py-3 px-3 text-xs text-neutral-600">
-                    <Link href={`/admin/users/${m.id}`} className="block">
-                      {(m.company as string) || '-'}
-                    </Link>
+                    <Link href={`/admin/users/${id}`} className="block">{m.company || '-'}</Link>
                   </td>
                   <td className="py-3 px-3 text-xs text-neutral-600">
-                    <Link href={`/admin/users/${m.id}`} className="block">
-                      {residence}
-                    </Link>
+                    <Link href={`/admin/users/${id}`} className="block">{residence}</Link>
                   </td>
                   <td className="py-3 px-3 text-xs text-neutral-600">
-                    <Link href={`/admin/users/${m.id}`} className="block">
-                      {birth}
-                    </Link>
+                    <Link href={`/admin/users/${id}`} className="block">{birth}</Link>
                   </td>
                   <td className="py-3 px-3">
-                    <Link href={`/admin/users/${m.id}`} className="block">
-                      {m.is_admin ? '✓' : ''}
-                    </Link>
+                    <Link href={`/admin/users/${id}`} className="block">{m.is_admin ? '✓' : ''}</Link>
                   </td>
                   <td className="py-3 px-3 text-xs text-neutral-500">
-                    <Link href={`/admin/users/${m.id}`} className="block">
-                      {new Date(m.created_at as string).toLocaleDateString('ja-JP')}
-                    </Link>
+                    <Link href={`/admin/users/${id}`} className="block">{created}</Link>
                   </td>
                 </tr>
               )
