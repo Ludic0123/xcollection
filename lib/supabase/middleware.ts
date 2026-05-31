@@ -1,8 +1,15 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-// 書き込み系・会員専用パスは認証必須
-const PROTECTED_PATTERNS = [
+// ログイン必須（会員なら誰でもアクセス可）
+const LOGIN_REQUIRED_PATTERNS = [
+  /^\/invitation/,
+  /^\/profile/,
+]
+
+// admin 限定（書き込み系コンテンツと管理画面）
+const ADMIN_ONLY_PATTERNS = [
+  /^\/admin/,
   /^\/spots\/new$/,
   /^\/spots\/[^/]+\/edit$/,
   /^\/spots\/[^/]+\/visit$/,
@@ -17,13 +24,16 @@ const PROTECTED_PATTERNS = [
   /^\/chefs\/new$/,
   /^\/chefs\/[^/]+\/edit$/,
   /^\/visits\/new$/,
-  /^\/invitation/,
-  /^\/profile/,
-  /^\/admin/,
 ]
 
-function isProtected(path: string) {
-  return PROTECTED_PATTERNS.some((re) => re.test(path))
+function needsLogin(path: string) {
+  return (
+    LOGIN_REQUIRED_PATTERNS.some((re) => re.test(path)) ||
+    ADMIN_ONLY_PATTERNS.some((re) => re.test(path))
+  )
+}
+function needsAdmin(path: string) {
+  return ADMIN_ONLY_PATTERNS.some((re) => re.test(path))
 }
 
 export async function updateSession(request: NextRequest) {
@@ -58,12 +68,27 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // 保護パスは未ログインなら /login へ
-  if (!user && isProtected(path)) {
+  // 未ログイン × ログイン必須パス → /login
+  if (!user && needsLogin(path)) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     url.searchParams.set('redirect', path)
     return NextResponse.redirect(url)
+  }
+
+  // ログイン済み × admin限定パス → admin チェック
+  if (user && needsAdmin(path)) {
+    const { data: me } = await supabase
+      .from('members')
+      .select('is_admin')
+      .eq('id', user.id)
+      .single()
+    if (!me?.is_admin) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/'
+      url.searchParams.set('forbidden', '1')
+      return NextResponse.redirect(url)
+    }
   }
 
   return response
