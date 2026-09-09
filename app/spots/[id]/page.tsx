@@ -51,12 +51,12 @@ export default async function SpotDetailPage({
       : p && typeof p === 'object' && 'url' in p
       ? ((p as { url: string }).url ?? null)
       : null
-  const allPhotos = [
+  const allPhotos = [...new Set([
     ...(spot.photo_urls ?? []),
     ...visits.flatMap((v) => v.photo_urls ?? []),
   ]
     .map(photoUrl)
-    .filter((u): u is string => !!u)
+    .filter((u): u is string => !!u))]
 
   // 評価平均はエディターにだけ計算
   const rated = visits.filter((v) => v.rating != null)
