@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useState } from 'react'
+import PostingForm from './PostingForm'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Sake } from '@/types'
@@ -55,7 +56,7 @@ export default function SakeForm({
       return
     }
     const payload = {
-      user_id: user.id,
+      ...(!sake ? { user_id: user.id } : {}),
       name,
       model: model || null,
       brewery: brewery || null,
@@ -71,7 +72,7 @@ export default function SakeForm({
       is_featured: isFeatured,
     }
     if (sake) {
-      const { error } = await supabase.from('sakes').update(payload).eq('id', sake.id)
+      const { error } = await supabase.from('sakes').update(payload).eq('id', sake.id).select('id').single()
       if (error) {
         setError(error.message)
         setSaving(false)
@@ -104,7 +105,7 @@ export default function SakeForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border hairline p-6 max-w-2xl space-y-5">
+    <PostingForm onSubmit={handleSubmit} onError={setError} onSettled={() => setSaving(false)} className="bg-white border hairline p-6 max-w-2xl space-y-5">
       <div>
         <label className="block text-xs tracking-luxe text-neutral-500 mb-2">COVER IMAGE</label>
         <ImageUpload value={coverImage} onChange={setCoverImage} folder="sakes" />
@@ -290,6 +291,6 @@ export default function SakeForm({
           </button>
         )}
       </div>
-    </form>
+    </PostingForm>
   )
 }

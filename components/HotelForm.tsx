@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useState } from 'react'
+import PostingForm from './PostingForm'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Hotel } from '@/types'
@@ -65,7 +66,7 @@ export default function HotelForm({
       return
     }
     const payload = {
-      user_id: user.id,
+      ...(!hotel ? { user_id: user.id } : {}),
       name,
       brand: brand || null,
       prefecture: prefecture || null,
@@ -84,7 +85,7 @@ export default function HotelForm({
       is_featured: isFeatured,
     }
     if (hotel) {
-      const { error } = await supabase.from('hotels').update(payload).eq('id', hotel.id)
+      const { error } = await supabase.from('hotels').update(payload).eq('id', hotel.id).select('id').single()
       if (error) {
         setError(error.message)
         setSaving(false)
@@ -121,7 +122,7 @@ export default function HotelForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border hairline p-6 max-w-2xl space-y-5">
+    <PostingForm onSubmit={handleSubmit} onError={setError} onSettled={() => setSaving(false)} className="bg-white border hairline p-6 max-w-2xl space-y-5">
       <div>
         <label className="block text-xs tracking-luxe text-neutral-500 mb-2">COVER IMAGE</label>
         <ImageUpload value={coverImage} onChange={setCoverImage} folder="hotels" />
@@ -339,6 +340,6 @@ export default function HotelForm({
           </button>
         )}
       </div>
-    </form>
+    </PostingForm>
   )
 }

@@ -1,6 +1,7 @@
 ﻿'use client'
 
-import { useState } from 'react'
+import { useRef } from 'react'
+import { useUploadState } from './PostingForm'
 import { createClient } from '@/lib/supabase/client'
 import { Upload, X } from 'lucide-react'
 
@@ -13,10 +14,12 @@ export default function ImageUpload({
   onChange: (url: string | null) => void
   folder?: string
 }) {
-  const [uploading, setUploading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { uploading, setUploading, error, setError } = useUploadState()
+  const uploadLock = useRef(false)
 
   async function handleFile(file: File) {
+    if (uploadLock.current) return
+    uploadLock.current = true
     setUploading(true)
     setError(null)
     try {
@@ -36,6 +39,7 @@ export default function ImageUpload({
     } catch (e) {
       setError(e instanceof Error ? e.message : 'アップロード失敗')
     } finally {
+      uploadLock.current = false
       setUploading(false)
     }
   }
@@ -78,6 +82,7 @@ export default function ImageUpload({
             onChange={(e) => {
               const f = e.target.files?.[0]
               if (f) handleFile(f)
+              e.target.value = ''
             }}
           />
         </label>

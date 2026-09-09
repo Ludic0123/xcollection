@@ -13,7 +13,7 @@ export default async function EditSpotPage({
 }) {
   const { id } = await params
   const supabase = await createClient()
-  const [{ data }, masters, { data: firstVisit }] = await Promise.all([
+  const [{ data, error }, masters, { data: firstVisit, error: visitError }] = await Promise.all([
     supabase.from('spots').select('*').eq('id', id).single(),
     fetchSpotMasters(),
     supabase
@@ -24,6 +24,8 @@ export default async function EditSpotPage({
       .limit(1)
       .maybeSingle(),
   ])
+  if (visitError) throw new Error('ブログを読み込めませんでした: ' + visitError.message)
+  if (error && error.code !== 'PGRST116') throw new Error(error.message)
   if (!data) notFound()
 
   return (

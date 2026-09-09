@@ -1,6 +1,7 @@
 ﻿'use client'
 
-import { useState } from 'react'
+import { useRef } from 'react'
+import { useUploadState } from './PostingForm'
 import { createClient } from '@/lib/supabase/client'
 import { Upload, X } from 'lucide-react'
 
@@ -11,22 +12,29 @@ export default function MultiImageUpload({
   max = 40,
 }: {
   value: string[]
-  onChange: (urls: string[]) => void
+  onChange: React.Dispatch<React.SetStateAction<string[]>>
   folder?: string
   max?: number
 }) {
-  const [uploading, setUploading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { uploading, setUploading, error, setError } = useUploadState()
+  const uploadLock = useRef(false)
 
   async function handleFiles(files: FileList) {
+    if (uploadLock.current) return
     setError(null)
     const remaining = max - value.length
     if (remaining <= 0) {
       setError(`最大${max}枚までです`)
       return
     }
-    const toUpload = Array.from(files).slice(0, remaining)
+    if (files.length > remaining) {
+      setError(`あと${remaining}枚まで選択できます。写真を選び直してください`)
+      return
+    }
+    const toUpload = Array.from(files)
+    uploadLock.current = true
     setUploading(true)
+    try {
     const supabase = createClient()
 
     async function uploadOne(file: File): Promise<{ url: string | null; error: string | null }> {
@@ -54,7 +62,6 @@ export default function MultiImageUpload({
     // 5枚ずつ並列にアップロード（ブラウザ/Supabase の接続上限対策）
     const concurrency = 5
     const allResults: { url: string | null; error: string | null }[] = []
-    let accumulated = [...value]
     for (let i = 0; i < toUpload.length; i += concurrency) {
       const chunk = toUpload.slice(i, i + concurrency)
       const chunkResults = await Promise.all(chunk.map(uploadOne))
@@ -64,8 +71,7 @@ export default function MultiImageUpload({
         .filter((r): r is { url: string; error: null } => !!r.url)
         .map((r) => r.url)
       if (newUrls.length > 0) {
-        accumulated = [...accumulated, ...newUrls]
-        onChange(accumulated)
+        onChange(current => [...current, ...newUrls])
       }
     }
 
@@ -75,11 +81,16 @@ export default function MultiImageUpload({
         `${failed.length}枚のアップロードに失敗: ${failed[0].error ?? ''}`
       )
     }
-    setUploading(false)
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'アップロード失敗')
+    } finally {
+      uploadLock.current = false
+      setUploading(false)
+    }
   }
 
   function removeAt(idx: number) {
-    onChange(value.filter((_, i) => i !== idx))
+    onChange(current => current.filter((_, i) => i !== idx))
   }
 
   return (

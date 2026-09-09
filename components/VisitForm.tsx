@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { localDate } from '@/lib/date'
+import PostingForm from './PostingForm'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import BlogComposer, { type ComposerBlock } from './BlogComposer'
@@ -15,7 +17,7 @@ export default function VisitForm({
   ingredientOptions?: IngredientOption[]
 }) {
   const router = useRouter()
-  const today = new Date().toISOString().slice(0, 10)
+  const today = localDate()
   const [visitedAt, setVisitedAt] = useState(today)
   const [rating, setRating] = useState<number | ''>('')
   const [price, setPrice] = useState<string>('')
@@ -71,7 +73,7 @@ export default function VisitForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border hairline p-6 space-y-6">
+    <PostingForm onSubmit={handleSubmit} onError={setError} onSettled={() => setSaving(false)} className="bg-white border hairline p-6 space-y-6">
       <div>
         <label className="block text-xs tracking-luxe text-neutral-500 mb-2">DATE *</label>
         <input
@@ -164,6 +166,6 @@ export default function VisitForm({
       >
         {saving ? 'SAVING…' : 'SAVE VISIT'}
       </button>
-    </form>
+    </PostingForm>
   )
 }

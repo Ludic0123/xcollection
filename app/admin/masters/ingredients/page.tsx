@@ -5,12 +5,13 @@ export const dynamic = 'force-dynamic'
 
 export default async function IngredientsAdminPage() {
   const supabase = await createClient()
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('master_ingredients')
     .select('*')
     .order('genre')
     .order('display_order')
     .order('name')
+  if (error) throw new Error('マスターを取得できませんでした: ' + error.message)
   return (
     <div className="px-4 py-6 md:px-10 md:py-10">
       <p className="text-[10px] tracking-luxe text-neutral-400">MASTERS</p>

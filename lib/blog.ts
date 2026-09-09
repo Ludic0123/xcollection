@@ -16,7 +16,15 @@ export function photosToPool(photos: VisitPhoto[] | null | undefined): PoolPhoto
 
 // 既存の訪問記録 → 写真プール
 export function visitToPool(visit: Visit | null | undefined): PoolPhoto[] {
-  return photosToPool(visit?.photo_urls)
+  const photos = photosToPool(visit?.photo_urls)
+  const known = new Set(photos.map(p => p.url))
+  for (const block of visit?.body_blocks ?? []) {
+    if (block.type === 'image' && block.url && !known.has(block.url)) {
+      photos.push({ url: block.url, caption: block.caption ?? '', ingredients: block.ingredients ?? [] })
+      known.add(block.url)
+    }
+  }
+  return photos
 }
 
 // 既存の訪問記録 → 本文ブロック（ComposerBlock[]）
@@ -45,6 +53,7 @@ export function buildBlogBlocks(blocks: ComposerBlock[], pool: PoolPhoto[]): Blo
       if (b.type === 'text') return b.text.trim() ? { type: 'text', text: b.text } : null
       if (!b.url) return null
       const p = map.get(b.url)
+      if (!p) return null
       return {
         type: 'image',
         url: b.url,

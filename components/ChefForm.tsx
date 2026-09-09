@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useState } from 'react'
+import PostingForm from './PostingForm'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Chef } from '@/types'
@@ -38,7 +39,7 @@ export default function ChefForm({ chef }: { chef?: Chef }) {
       return
     }
     const payload = {
-      user_id: user.id,
+      ...(!chef ? { user_id: user.id } : {}),
       name,
       name_kana: nameKana || null,
       specialty: specialty || null,
@@ -52,7 +53,7 @@ export default function ChefForm({ chef }: { chef?: Chef }) {
       is_featured: isFeatured,
     }
     if (chef) {
-      const { error } = await supabase.from('chefs').update(payload).eq('id', chef.id)
+      const { error } = await supabase.from('chefs').update(payload).eq('id', chef.id).select('id').single()
       if (error) {
         setError(error.message)
         setSaving(false)
@@ -89,7 +90,7 @@ export default function ChefForm({ chef }: { chef?: Chef }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border hairline p-6 max-w-2xl space-y-5">
+    <PostingForm onSubmit={handleSubmit} onError={setError} onSettled={() => setSaving(false)} className="bg-white border hairline p-6 max-w-2xl space-y-5">
       <div>
         <label className="block text-xs tracking-luxe text-neutral-500 mb-2">PORTRAIT</label>
         <ImageUpload value={coverImage} onChange={setCoverImage} folder="chefs" />
@@ -222,6 +223,6 @@ export default function ChefForm({ chef }: { chef?: Chef }) {
           </button>
         )}
       </div>
-    </form>
+    </PostingForm>
   )
 }

@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useState } from 'react'
+import PostingForm from './PostingForm'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { CATEGORY_LABELS, type Category, type Spot } from '@/types'
@@ -59,7 +60,7 @@ export default function TripItemForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border border-gray-200 p-6 space-y-4">
+    <PostingForm onSubmit={handleSubmit} onError={setError} onSettled={() => setSaving(false)} className="bg-white border border-gray-200 p-6 space-y-4">
       <div>
         <label className="block text-sm text-gray-700 mb-1">追加方法</label>
         <div className="flex gap-2">
@@ -166,6 +167,6 @@ export default function TripItemForm({
       >
         {saving ? '追加中…' : '追加する'}
       </button>
-    </form>
+    </PostingForm>
   )
 }

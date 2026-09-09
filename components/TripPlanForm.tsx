@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useState } from 'react'
+import PostingForm from './PostingForm'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { TripPlan } from '@/types'
@@ -29,7 +30,7 @@ export default function TripPlanForm({ plan }: { plan?: TripPlan }) {
       return
     }
     const payload = {
-      user_id: user.id,
+      ...(!plan ? { user_id: user.id } : {}),
       title,
       city: city || null,
       start_date: startDate || null,
@@ -38,7 +39,7 @@ export default function TripPlanForm({ plan }: { plan?: TripPlan }) {
       cover_image_url: coverImageUrl,
     }
     if (plan) {
-      const { error } = await supabase.from('trip_plans').update(payload).eq('id', plan.id)
+      const { error } = await supabase.from('trip_plans').update(payload).eq('id', plan.id).select('id').single()
       if (error) {
         setError(error.message)
         setSaving(false)
@@ -75,7 +76,7 @@ export default function TripPlanForm({ plan }: { plan?: TripPlan }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border hairline p-6 max-w-2xl space-y-5">
+    <PostingForm onSubmit={handleSubmit} onError={setError} onSettled={() => setSaving(false)} className="bg-white border hairline p-6 max-w-2xl space-y-5">
       <div>
         <label className="block text-xs tracking-luxe text-neutral-500 mb-2">COVER IMAGE</label>
         <ImageUpload value={coverImageUrl} onChange={setCoverImageUrl} folder="trips" />
@@ -153,6 +154,6 @@ export default function TripPlanForm({ plan }: { plan?: TripPlan }) {
           </button>
         )}
       </div>
-    </form>
+    </PostingForm>
   )
 }

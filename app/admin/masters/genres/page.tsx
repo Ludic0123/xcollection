@@ -4,11 +4,12 @@ import { CATEGORY_LABELS } from '@/types'
 
 export default async function GenresAdminPage() {
   const supabase = await createClient()
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('master_genres')
     .select('*')
     .order('category')
     .order('display_order')
+  if (error) throw new Error('マスターを取得できませんでした: ' + error.message)
   return (
     <div className="px-4 py-6 md:px-10 md:py-10">
       <p className="text-[10px] tracking-luxe text-neutral-400">MASTERS</p>

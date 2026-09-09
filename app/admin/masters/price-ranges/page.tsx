@@ -3,10 +3,11 @@ import MasterTable from '@/components/admin/MasterTable'
 
 export default async function PriceRangesAdminPage() {
   const supabase = await createClient()
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('master_price_ranges')
     .select('*')
     .order('level')
+  if (error) throw new Error('マスターを取得できませんでした: ' + error.message)
   return (
     <div className="px-4 py-6 md:px-10 md:py-10">
       <p className="text-[10px] tracking-luxe text-neutral-400">MASTERS</p>

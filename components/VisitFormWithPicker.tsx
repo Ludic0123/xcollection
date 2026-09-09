@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { localDate } from '@/lib/date'
+import PostingForm from './PostingForm'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import BlogComposer, { type ComposerBlock } from './BlogComposer'
@@ -24,7 +26,7 @@ export default function VisitFormWithPicker({
 }) {
   const router = useRouter()
   const [spotId, setSpotId] = useState('')
-  const [visitedAt, setVisitedAt] = useState(new Date().toISOString().slice(0, 10))
+  const [visitedAt, setVisitedAt] = useState(localDate())
   const [rating, setRating] = useState<number | ''>('')
   const [price, setPrice] = useState('')
   const [title, setTitle] = useState('')
@@ -92,7 +94,7 @@ export default function VisitFormWithPicker({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border hairline p-6 space-y-6 max-w-2xl">
+    <PostingForm onSubmit={handleSubmit} onError={setError} onSettled={() => setSaving(false)} className="bg-white border hairline p-6 space-y-6 max-w-2xl">
       <div>
         <label className="block text-xs tracking-luxe text-neutral-500 mb-2">SPOT *</label>
         <select
@@ -194,6 +196,6 @@ export default function VisitFormWithPicker({
       >
         {saving ? 'SAVING…' : 'SAVE VISIT'}
       </button>
-    </form>
+    </PostingForm>
   )
 }

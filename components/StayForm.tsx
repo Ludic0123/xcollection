@@ -1,13 +1,15 @@
 ﻿'use client'
 
 import { useState } from 'react'
+import { localDate } from '@/lib/date'
+import PostingForm from './PostingForm'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import MultiImageUpload from './MultiImageUpload'
 
 export default function StayForm({ hotelId }: { hotelId: string }) {
   const router = useRouter()
-  const today = new Date().toISOString().slice(0, 10)
+  const today = localDate()
   const [checkIn, setCheckIn] = useState(today)
   const [checkOut, setCheckOut] = useState('')
   const [price, setPrice] = useState('')
@@ -50,7 +52,7 @@ export default function StayForm({ hotelId }: { hotelId: string }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border hairline p-6 space-y-6">
+    <PostingForm onSubmit={handleSubmit} onError={setError} onSettled={() => setSaving(false)} className="bg-white border hairline p-6 space-y-6">
       <div>
         <label className="block text-xs tracking-luxe text-neutral-500 mb-2">PHOTOS</label>
         <MultiImageUpload value={photos} onChange={setPhotos} folder="stays" max={40} />
@@ -131,6 +133,6 @@ export default function StayForm({ hotelId }: { hotelId: string }) {
       >
         {saving ? 'SAVING…' : 'SAVE STAY'}
       </button>
-    </form>
+    </PostingForm>
   )
 }

@@ -1,6 +1,7 @@
 'use client'
 
-import { Fragment, useState } from 'react'
+import { Fragment, useRef, useState } from 'react'
+import { postingError } from '@/components/PostingForm'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Plus, Trash2, Save } from 'lucide-react'
@@ -41,6 +42,29 @@ export default function MasterTable({
   const [newRow, setNewRow] = useState<Row>(defaultNewRow ?? {})
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const locked = useRef(false)
+
+  async function run(action: () => Promise<void>) {
+    if (locked.current) return
+    locked.current = true
+    setBusy(true)
+    setError(null)
+    try { await action() }
+    catch (error) { setError(postingError(error)) }
+    finally { locked.current = false; setBusy(false) }
+  }
+
+  function validate(payload: Row) {
+    for (const field of fields) {
+      const value = payload[field.key]
+      if (field.required && (value == null || String(value).trim() === '')) {
+        throw new Error(`${field.label}は必須です`)
+      }
+      if (field.type === 'number' && value != null && value !== '' && !Number.isFinite(Number(value))) {
+        throw new Error(`${field.label}は数値で入力してください`)
+      }
+    }
+  }
 
   const grouped: Record<string, Row[]> = {}
   if (groupBy) {
@@ -73,10 +97,13 @@ export default function MasterTable({
     const supabase = createClient()
     const payload: Row = {}
     for (const f of fields) payload[f.key] = updated[f.key]
+    validate(payload)
     const { error } = await supabase
       .from(tableName)
       .update(payload)
       .eq(pkField, row[pkField])
+      .select(pkField)
+      .single()
     setBusy(false)
     if (error) {
       setError(error.message)
@@ -91,7 +118,7 @@ export default function MasterTable({
     setBusy(true)
     setError(null)
     const supabase = createClient()
-    const { error } = await supabase.from(tableName).delete().eq(pkField, row[pkField])
+    const { error } = await supabase.from(tableName).delete().eq(pkField, row[pkField]).select(pkField).single()
     setBusy(false)
     if (error) {
       setError(error.message)
@@ -105,13 +132,7 @@ export default function MasterTable({
     setError(null)
     const supabase = createClient()
     const payload: Row = { ...newRow }
-    for (const f of fields) {
-      if (f.required && !payload[f.key]) {
-        setError(`${f.label}は必須です`)
-        setBusy(false)
-        return
-      }
-    }
+    validate(payload)
     const { error } = await supabase.from(tableName).insert(payload)
     setBusy(false)
     if (error) {
@@ -138,7 +159,7 @@ export default function MasterTable({
                   changeField(
                     row,
                     f.key,
-                    f.type === 'number' ? Number(e.target.value) : e.target.value
+                    f.type === 'number' ? (e.target.value === '' ? null : Number(e.target.value)) : e.target.value
                   )
                 }
                 className="border hairline px-2 py-1 text-sm w-full"
@@ -154,7 +175,7 @@ export default function MasterTable({
           {isEditing ? (
             <>
               <button
-                onClick={() => save(row)}
+                onClick={() => run(() => save(row))}
                 disabled={busy}
                 className="text-[10px] tracking-luxe text-black hover:underline mr-3"
               >
@@ -177,7 +198,8 @@ export default function MasterTable({
               </button>
               {allowDelete && (
                 <button
-                  onClick={() => remove(row)}
+                  onClick={() => run(() => remove(row))}
+                  disabled={busy}
                   className="text-neutral-300 hover:text-red-600"
                   aria-label="削除"
                 >
@@ -241,7 +263,7 @@ export default function MasterTable({
                         setNewRow({
                           ...newRow,
                           [f.key]:
-                            f.type === 'number' ? Number(e.target.value) : e.target.value,
+                            f.type === 'number' ? (e.target.value === '' ? null : Number(e.target.value)) : e.target.value,
                         })
                       }
                       className="border hairline px-2 py-1 text-sm w-full"
@@ -250,7 +272,7 @@ export default function MasterTable({
                 ))}
                 <td className="py-3 px-3 text-right">
                   <button
-                    onClick={create}
+                    onClick={() => run(create)}
                     disabled={busy}
                     className="text-[10px] tracking-luxe bg-black text-white px-3 py-1.5 hover:bg-neutral-800 disabled:opacity-50"
                   >

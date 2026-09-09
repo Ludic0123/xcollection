@@ -1,6 +1,8 @@
 ﻿'use client'
 
 import { useState } from 'react'
+import { localDateTime } from '@/lib/date'
+import PostingForm from './PostingForm'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -38,7 +40,7 @@ export default function EventForm({
     event?.max_participants?.toString() ?? ''
   )
   const [budgetYen, setBudgetYen] = useState<string>(event?.budget_yen?.toString() ?? '')
-  const [deadline, setDeadline] = useState(event?.deadline?.slice(0, 16) ?? '')
+  const [deadline, setDeadline] = useState(event?.deadline ? localDateTime(event.deadline) : '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -56,7 +58,7 @@ export default function EventForm({
       return
     }
     const payload = {
-      organizer_id: user.id,
+      ...(!event ? { organizer_id: user.id } : {}),
       event_type: eventType,
       title,
       description: description || null,
@@ -71,7 +73,7 @@ export default function EventForm({
       deadline: deadline ? new Date(deadline).toISOString() : null,
     }
     if (event) {
-      const { error } = await supabase.from('events').update(payload).eq('id', event.id)
+      const { error } = await supabase.from('events').update(payload).eq('id', event.id).select('id').single()
       if (error) {
         setError(error.message)
         setSaving(false)
@@ -99,7 +101,7 @@ export default function EventForm({
   const showSakePicker = eventType === 'sake_meetup' || eventType === 'sake_distribution'
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border hairline p-6 max-w-2xl space-y-5">
+    <PostingForm onSubmit={handleSubmit} onError={setError} onSettled={() => setSaving(false)} className="bg-white border hairline p-6 max-w-2xl space-y-5">
       <div>
         <label className="block text-xs tracking-luxe text-neutral-500 mb-2">COVER IMAGE</label>
         <ImageUpload value={coverImage} onChange={setCoverImage} folder="events" />
@@ -260,6 +262,6 @@ export default function EventForm({
       >
         {saving ? 'SAVING…' : event ? 'UPDATE' : 'CREATE'}
       </button>
-    </form>
+    </PostingForm>
   )
 }

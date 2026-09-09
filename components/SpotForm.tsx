@@ -1,6 +1,8 @@
 ﻿'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
+import { localDate } from '@/lib/date'
+import PostingForm from './PostingForm'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { CATEGORY_OPTIONS, MEAL_TIME_OPTIONS, type Category, type Spot, type Visit } from '@/types'
@@ -9,6 +11,7 @@ import BlogComposer, { type ComposerBlock } from './BlogComposer'
 import PhotoPool, { type PoolPhoto } from './PhotoPool'
 import {
   visitToPool,
+  photosToPool,
   visitToComposerBlocks,
   buildBlogBlocks,
   blogTextConcat,
@@ -41,6 +44,7 @@ export default function SpotForm({
   ingredients?: IngredientMaster[]
 }) {
   const router = useRouter()
+  const savedIds = useRef<{ spot: string; visit: string } | null>(null)
   const [name, setName] = useState(spot?.name ?? '')
   const [category, setCategory] = useState<Category>(spot?.category ?? 'restaurant')
   const [genre, setGenre] = useState(spot?.genre ?? '')
@@ -77,10 +81,14 @@ export default function SpotForm({
   const [mealTimes, setMealTimes] = useState<string[]>(spot?.meal_times ?? [])
   // ブログ（初回訪問記録）: 新規=空 / 編集=firstVisit から復元
   const [firstVisitDate, setFirstVisitDate] = useState<string>(
-    firstVisit?.visited_at ?? new Date().toISOString().slice(0, 10)
+    firstVisit?.visited_at ?? localDate()
   )
   const [blogTitle, setBlogTitle] = useState<string>(firstVisit?.title ?? '')
-  const [poolPhotos, setPoolPhotos] = useState<PoolPhoto[]>(visitToPool(firstVisit))
+  const [poolPhotos, setPoolPhotos] = useState<PoolPhoto[]>(() => {
+    const visitPhotos = visitToPool(firstVisit)
+    const existing = new Set(visitPhotos.map(p => p.url))
+    return [...visitPhotos, ...photosToPool(spot?.photo_urls).filter(p => !existing.has(p.url))]
+  })
   const [blogBlocks, setBlogBlocks] = useState<ComposerBlock[]>(visitToComposerBlocks(firstVisit))
   const [firstVisitRating, setFirstVisitRating] = useState<number | ''>(
     firstVisit?.rating ?? ''
@@ -212,56 +220,20 @@ export default function SpotForm({
       photo_urls: poolPhotos,
     }
 
-    if (spot) {
-      const { error } = await supabase.from('spots').update(payload).eq('id', spot.id)
-      if (error) {
-        setError(error.message)
-        setSaving(false)
-        return
-      }
-      // 初回ブログ（訪問記録）も更新 / 無ければ新規作成
-      if (firstVisit) {
-        const { error: vErr } = await supabase
-          .from('visits')
-          .update(visitPayload)
-          .eq('id', firstVisit.id)
-        if (vErr) {
-          setError('お店は更新されましたがブログの保存に失敗: ' + vErr.message)
-          setSaving(false)
-          return
-        }
-      } else if (blogTitle.trim() || blogBlocks.length > 0) {
-        const { error: vErr } = await supabase
-          .from('visits')
-          .insert({ ...visitPayload, user_id: user.id, spot_id: spot.id })
-        if (vErr) {
-          setError('お店は更新されましたがブログの保存に失敗: ' + vErr.message)
-          setSaving(false)
-          return
-        }
-      }
-      router.push(`/spots/${spot.id}`)
-    } else {
-      const { data, error } = await supabase
-        .from('spots')
-        .insert(payload)
-        .select('id')
-        .single()
-      if (error) {
-        setError(error.message)
-        setSaving(false)
-        return
-      }
-      const { error: visitError } = await supabase
-        .from('visits')
-        .insert({ ...visitPayload, user_id: user.id, spot_id: data.id })
-      if (visitError) {
-        setError('スポットは登録されましたが訪問記録の保存に失敗: ' + visitError.message)
-        setSaving(false)
-        return
-      }
-      router.push(`/spots/${data.id}`)
+    savedIds.current ??= { spot: spot?.id ?? crypto.randomUUID(), visit: firstVisit?.id ?? crypto.randomUUID() }
+    const { data, error } = await supabase.rpc('save_spot_with_visit', {
+      p_spot_id: savedIds.current.spot,
+      p_visit_id: savedIds.current.visit,
+      p_spot: payload,
+      p_visit: !spot || firstVisit || blogTitle.trim() || blogBlocks.length ? visitPayload : null,
+      p_edit: !!spot,
+    })
+    if (error) {
+      setError(error.message)
+      return
     }
+    if (!data) throw new Error('保存結果を確認できませんでした。もう一度お試しください。')
+    router.push(`/spots/${data}`)
     router.refresh()
   }
 
@@ -279,7 +251,7 @@ export default function SpotForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border hairline p-6 max-w-2xl space-y-5">
+    <PostingForm onSubmit={handleSubmit} onError={setError} onSettled={() => setSaving(false)} className="bg-white border hairline p-6 max-w-2xl space-y-5">
       <div>
         <label className="block text-sm text-gray-700 mb-1">名前 *</label>
         <input
@@ -758,7 +730,7 @@ export default function SpotForm({
           </button>
         )}
       </div>
-    </form>
+    </PostingForm>
   )
 }
 
