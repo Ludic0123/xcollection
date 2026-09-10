@@ -22,9 +22,9 @@ export default async function SakeDetailPage({
   return (
     <div className="bg-white min-h-screen">
       {sake.cover_image_url ? (
-        <div className="relative h-[60vh] md:h-[70vh] bg-neutral-100 overflow-hidden">
+        <div className="relative w-full max-w-4xl mx-auto aspect-square overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={sake.cover_image_url} alt={sake.name} className="w-full h-full object-contain" />
+          <img src={sake.cover_image_url} alt={sake.name} className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 px-8 md:px-16 pb-12 text-white">
             <p className="text-[10px] tracking-luxe opacity-80">

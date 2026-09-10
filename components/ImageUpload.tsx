@@ -52,7 +52,7 @@ export default function ImageUpload({
           <img
             src={value}
             alt=""
-            className={`w-full max-w-md aspect-[4/3] border hairline ${folder === 'sakes' ? 'object-contain' : 'object-cover'}`}
+            className={`w-full max-w-md object-cover border hairline ${folder === 'sakes' ? 'aspect-square' : 'aspect-[4/3]'}`}
           />
           <button
             type="button"
@@ -65,7 +65,7 @@ export default function ImageUpload({
         </div>
       ) : (
         <label
-          className={`flex flex-col items-center justify-center w-full max-w-md aspect-[4/3] border-2 border-dashed hairline cursor-pointer hover:bg-neutral-50 ${
+          className={`flex flex-col items-center justify-center w-full max-w-md ${folder === 'sakes' ? 'aspect-square' : 'aspect-[4/3]'} border-2 border-dashed hairline cursor-pointer hover:bg-neutral-50 ${
             uploading ? 'opacity-50' : ''
           }`}
         >

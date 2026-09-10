@@ -52,7 +52,7 @@ export default async function SakeListPage() {
                       <img
                         src={s.cover_image_url}
                         alt={s.name}
-                        className="w-full h-full object-contain"
+                        className="w-full h-full object-cover"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">

@@ -238,7 +238,7 @@ export default async function TopPage() {
                   <img
                     src={s.cover_image_url}
                     alt={s.name}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center font-serif italic text-neutral-300 text-3xl">
