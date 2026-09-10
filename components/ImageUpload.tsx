@@ -52,7 +52,7 @@ export default function ImageUpload({
           <img
             src={value}
             alt=""
-            className="w-full max-w-md aspect-[4/3] object-cover border hairline"
+            className={`w-full max-w-md aspect-[4/3] border hairline ${folder === 'sakes' ? 'object-contain' : 'object-cover'}`}
           />
           <button
             type="button"
