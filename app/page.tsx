@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import Link from 'next/link'
+import PlacesMap from '@/components/PlacesMap'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentMember } from '@/lib/auth'
 import {
@@ -283,6 +284,10 @@ export default async function TopPage() {
           trips.map((t) => <TripCard key={t.id} trip={t} />)
         )}
       </CarouselSection>
+
+      <section id="map" className="border-b hairline">
+        <PlacesMap embedded />
+      </section>
     </div>
   )
 }

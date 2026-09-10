@@ -20,12 +20,8 @@ function coverFor(spot: Spot, mode: CoverMode): string | null {
 
 export default function SpotsList({
   spots,
-  ratingsBySpot,
-  authed,
 }: {
   spots: Spot[]
-  ratingsBySpot: Record<string, { avg: number; count: number }>
-  authed: boolean
 }) {
   const [mode, setMode] = useState<CoverMode>('default')
 
@@ -51,7 +47,6 @@ export default function SpotsList({
 
       <ul className="divide-y hairline">
         {spots.map((spot) => {
-          const r = ratingsBySpot[spot.id]
           const cover = coverFor(spot, mode)
           const lv = spot.price_range_dinner ?? spot.price_range_lunch ?? spot.price_range
           return (
@@ -80,7 +75,6 @@ export default function SpotsList({
                     {spot.name}
                   </h3>
                   <div className="flex items-center gap-3 mt-1 text-xs text-neutral-500 flex-wrap">
-                    {authed && r && <span>★ {r.avg.toFixed(1)}</span>}
                     {lv ? (
                       <span className="text-neutral-400">
                         {lv <= 5 ? '¥'.repeat(lv) : '¥¥¥¥¥+'}

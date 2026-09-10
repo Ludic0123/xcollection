@@ -11,10 +11,7 @@ const PUBLIC_NAV = [
   { href: '/spots', label: 'TASTES' },
   { href: '/hotels', label: 'STAYS' },
   { href: '/sake', label: 'SAKE' },
-  { href: '/chefs', label: 'CHEFS' },
   { href: '/trips', label: 'JOURNEYS' },
-  { href: '/blog', label: 'BLOG' },
-  { href: '/map', label: 'MAP' },
 ]
 
 const MEMBER_NAV = [...PUBLIC_NAV, { href: '/invitation', label: 'INVITATION' }]

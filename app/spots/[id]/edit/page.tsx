@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { ArrowLeft } from 'lucide-react'
 import SpotForm from '@/components/SpotForm'
 import { fetchSpotMasters } from '@/lib/masters'
-import type { Spot, Visit } from '@/types'
+import type { Spot } from '@/types'
 
 export default async function EditSpotPage({
   params,
@@ -13,18 +13,10 @@ export default async function EditSpotPage({
 }) {
   const { id } = await params
   const supabase = await createClient()
-  const [{ data, error }, masters, { data: firstVisit, error: visitError }] = await Promise.all([
+  const [{ data, error }, masters] = await Promise.all([
     supabase.from('spots').select('*').eq('id', id).single(),
     fetchSpotMasters(),
-    supabase
-      .from('visits')
-      .select('*')
-      .eq('spot_id', id)
-      .order('created_at', { ascending: true })
-      .limit(1)
-      .maybeSingle(),
   ])
-  if (visitError) throw new Error('ブログを読み込めませんでした: ' + visitError.message)
   if (error && error.code !== 'PGRST116') throw new Error(error.message)
   if (!data) notFound()
 
@@ -40,7 +32,6 @@ export default async function EditSpotPage({
       <h1 className="text-2xl font-bold mb-6">編集</h1>
       <SpotForm
         spot={data as Spot}
-        firstVisit={(firstVisit as Visit) ?? null}
         {...masters}
       />
     </div>

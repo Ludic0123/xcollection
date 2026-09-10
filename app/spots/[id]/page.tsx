@@ -6,10 +6,8 @@ import { createClient } from '@/lib/supabase/server'
 import { isAuthed } from '@/lib/auth'
 import {
   type Spot,
-  type Visit,
 } from '@/types'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
-import VisitItem from '@/components/VisitItem'
 
 export default async function SpotDetailPage({
   params,
@@ -22,20 +20,15 @@ export default async function SpotDetailPage({
 
   const [
     { data: spotData },
-    { data: visitsData },
     { data: priceRanges },
     { data: reservationMasters },
   ] = await Promise.all([
-    supabase.from('spots').select('*, chef:chefs(id, name, specialty)').eq('id', id).single(),
-    supabase.from('visits').select('*').eq('spot_id', id).order('visited_at', { ascending: false }),
+    supabase.from('spots').select('*').eq('id', id).single(),
     supabase.from('master_price_ranges').select('level, label'),
     supabase.from('master_reservation_methods').select('value, label'),
   ])
   if (!spotData) notFound()
-  const spot = spotData as Spot & {
-    chef?: { id: string; name: string; specialty: string | null } | null
-  }
-  const visits = (visitsData ?? []) as Visit[]
+  const spot = spotData as Spot
   const priceLabelOf = (lv: number | null | undefined) =>
     lv == null ? null : priceRanges?.find((p) => p.level === lv)?.label ?? `Lv. ${lv}`
   const lunchLabel = priceLabelOf(spot.price_range_lunch)
@@ -44,26 +37,7 @@ export default async function SpotDetailPage({
     (reservationMasters ?? []).map((r) => [r.value, r.label])
   )
 
-  const totalPaid = visits.reduce((a, v) => a + (v.price ?? 0), 0)
-  const photoUrl = (p: unknown): string | null =>
-    typeof p === 'string'
-      ? p
-      : p && typeof p === 'object' && 'url' in p
-      ? ((p as { url: string }).url ?? null)
-      : null
-  const allPhotos = [...new Set([
-    ...(spot.photo_urls ?? []),
-    ...visits.flatMap((v) => v.photo_urls ?? []),
-  ]
-    .map(photoUrl)
-    .filter((u): u is string => !!u))]
-
-  // 評価平均はエディターにだけ計算
-  const rated = visits.filter((v) => v.rating != null)
-  const avg =
-    rated.length > 0
-      ? rated.reduce((a, v) => a + (v.rating ?? 0), 0) / rated.length
-      : null
+  const allPhotos = [...new Set(spot.photo_urls ?? [])]
 
   return (
     <div className="bg-white min-h-screen">
@@ -117,19 +91,6 @@ export default async function SpotDetailPage({
       {/* META */}
       <section className="px-8 md:px-16 py-12 grid grid-cols-1 md:grid-cols-12 gap-10 border-b hairline">
         <div className="md:col-span-4 space-y-6">
-          {/* 評価はエディターにのみ表示 */}
-          {authed && avg !== null && (
-            <div>
-              <p className="text-[10px] tracking-luxe text-neutral-400">
-                RATING <span className="ml-1 text-neutral-300">(EDITOR ONLY)</span>
-              </p>
-              <p className="font-serif text-4xl mt-2">
-                {avg.toFixed(1)}
-                <span className="text-base text-neutral-400 ml-2">/ 5.0</span>
-              </p>
-              <p className="text-xs text-neutral-500 mt-1">{rated.length}回評価</p>
-            </div>
-          )}
           {(lunchLabel || dinnerLabel) && (
             <div>
               <p className="text-[10px] tracking-luxe text-neutral-400">PRICE</p>
@@ -144,31 +105,6 @@ export default async function SpotDetailPage({
                   <span className="text-xs text-neutral-400 mr-2">夜</span>
                   {dinnerLabel}
                 </p>
-              )}
-            </div>
-          )}
-          {visits.length > 0 && (
-            <div>
-              <p className="text-[10px] tracking-luxe text-neutral-400">VISITS</p>
-              <p className="font-serif text-2xl mt-2">{visits.length}</p>
-              {totalPaid > 0 && (
-                <p className="text-xs text-neutral-500 mt-1">
-                  総支出 ¥{totalPaid.toLocaleString()}
-                </p>
-              )}
-            </div>
-          )}
-          {spot.chef && (
-            <div>
-              <p className="text-[10px] tracking-luxe text-neutral-400">大将・シェフ</p>
-              <Link
-                href={`/chefs/${spot.chef.id}`}
-                className="font-serif text-2xl mt-2 inline-block hover:italic transition-all"
-              >
-                {spot.chef.name}
-              </Link>
-              {spot.chef.specialty && (
-                <p className="text-xs text-neutral-500 mt-1">{spot.chef.specialty}</p>
               )}
             </div>
           )}
@@ -245,7 +181,7 @@ export default async function SpotDetailPage({
         </div>
       </section>
 
-      {/* GALLERY: 全訪問の写真をまとめて */}
+      {/* GALLERY */}
       {allPhotos.length > 0 && (
         <section className="px-8 md:px-16 py-12 border-b hairline">
           <p className="text-[10px] tracking-luxe text-neutral-400">GALLERY</p>
@@ -271,43 +207,6 @@ export default async function SpotDetailPage({
         </section>
       )}
 
-      {/* VISITS LOG（訪問が1回以上、または編集者には常に表示） */}
-      {(visits.length > 0 || authed) && (
-        <section className="px-8 md:px-16 py-12">
-          <div className="flex items-baseline justify-between mb-6">
-            <div>
-              <p className="text-[10px] tracking-luxe text-neutral-400">VISITS</p>
-              <h2 className="font-serif text-3xl italic font-light mt-1">Memories.</h2>
-            </div>
-            {authed && (
-              <Link
-                href={`/spots/${id}/visit`}
-                className="text-[10px] tracking-luxe text-neutral-500 hover:text-black"
-              >
-                + ADD VISIT
-              </Link>
-            )}
-          </div>
-
-          {visits.length === 0 ? (
-            <div className="py-12 text-center text-sm text-neutral-400">
-              まだ訪問記録がありません。
-            </div>
-          ) : (
-            <ul className="space-y-px bg-neutral-100">
-              {visits.map((v) => (
-                <VisitItem
-                  key={v.id}
-                  visit={v}
-                  spotId={id}
-                  canEdit={authed}
-                  showRating={authed}
-                />
-              ))}
-            </ul>
-          )}
-        </section>
-      )}
     </div>
   )
 }

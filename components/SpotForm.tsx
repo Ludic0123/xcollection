@@ -1,50 +1,33 @@
 ﻿'use client'
 
 import { useState, useMemo, useRef } from 'react'
-import { localDate } from '@/lib/date'
 import PostingForm from './PostingForm'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { CATEGORY_OPTIONS, MEAL_TIME_OPTIONS, type Category, type Spot, type Visit } from '@/types'
+import { CATEGORY_OPTIONS, MEAL_TIME_OPTIONS, type Category, type Spot } from '@/types'
 import { PREFECTURES } from '@/types/profile'
-import BlogComposer, { type ComposerBlock } from './BlogComposer'
-import PhotoPool, { type PoolPhoto } from './PhotoPool'
-import {
-  visitToPool,
-  photosToPool,
-  visitToComposerBlocks,
-  buildBlogBlocks,
-  blogTextConcat,
-} from '@/lib/blog'
+import MultiImageUpload from './MultiImageUpload'
 
 export type GenreOption = { id: string; category: string; name: string }
 export type CityOption = { id: string; name: string; prefecture?: string | null }
 export type PriceRangeOption = { level: number; label: string }
 export type ReservationOption = { value: string; label: string }
-export type ChefOption = { id: string; name: string; specialty: string | null }
-export type IngredientMaster = { genre: string; name: string }
 
 export default function SpotForm({
   spot,
-  firstVisit,
   genres,
   cities,
   priceRanges,
   reservations,
-  chefs,
-  ingredients = [],
 }: {
   spot?: Spot
-  firstVisit?: Visit | null
   genres: GenreOption[]
   cities: CityOption[]
   priceRanges: PriceRangeOption[]
   reservations: ReservationOption[]
-  chefs: ChefOption[]
-  ingredients?: IngredientMaster[]
 }) {
   const router = useRouter()
-  const savedIds = useRef<{ spot: string; visit: string } | null>(null)
+  const savedIds = useRef<string | null>(null)
   const [name, setName] = useState(spot?.name ?? '')
   const [category, setCategory] = useState<Category>(spot?.category ?? 'restaurant')
   const [genre, setGenre] = useState(spot?.genre ?? '')
@@ -77,45 +60,22 @@ export default function SpotForm({
   const [isFeatured, setIsFeatured] = useState(spot?.is_featured ?? false)
   const [lat, setLat] = useState<string>(spot?.lat?.toString() ?? '')
   const [lng, setLng] = useState<string>(spot?.lng?.toString() ?? '')
-  const [chefId, setChefId] = useState<string>(spot?.chef_id ?? '')
   const [mealTimes, setMealTimes] = useState<string[]>(spot?.meal_times ?? [])
-  // ブログ（初回訪問記録）: 新規=空 / 編集=firstVisit から復元
-  const [firstVisitDate, setFirstVisitDate] = useState<string>(
-    firstVisit?.visited_at ?? localDate()
-  )
-  const [blogTitle, setBlogTitle] = useState<string>(firstVisit?.title ?? '')
-  const [poolPhotos, setPoolPhotos] = useState<PoolPhoto[]>(() => {
-    const visitPhotos = visitToPool(firstVisit)
-    const existing = new Set(visitPhotos.map(p => p.url))
-    return [...visitPhotos, ...photosToPool(spot?.photo_urls).filter(p => !existing.has(p.url))]
-  })
-  const [blogBlocks, setBlogBlocks] = useState<ComposerBlock[]>(visitToComposerBlocks(firstVisit))
-  const [firstVisitRating, setFirstVisitRating] = useState<number | ''>(
-    firstVisit?.rating ?? ''
-  )
-  const [firstVisitPrice, setFirstVisitPrice] = useState<string>(
-    firstVisit?.price?.toString() ?? ''
-  )
+  const [photos, setPhotos] = useState<string[]>(spot?.photo_urls ?? [])
 
   const genresForCategory = useMemo(
     () => genres.filter((g) => g.category === category),
     [genres, category]
   )
 
-  // 選択中ジャンルに対応する食材（ジャンル未選択時は全件）
-  const ingredientsForGenre = useMemo(
-    () => (genre ? ingredients.filter((i) => i.genre === genre) : ingredients),
-    [ingredients, genre]
-  )
-
   // トップ画像の候補 = アップ済みのプール写真（新規・編集とも）
   const coverCandidates = useMemo(() => {
-    const fromPool = poolPhotos.map((p) => p.url).filter(Boolean)
+    const fromPool = photos.filter(Boolean)
     // 既存のトップ画像がプール外でも選べるよう候補に含める
     const extras = [spot?.cover_image_exterior, spot?.cover_image_food, spot?.cover_image_url]
       .filter((u): u is string => !!u)
     return Array.from(new Set([...fromPool, ...extras]))
-  }, [poolPhotos, spot])
+  }, [photos, spot])
 
   const citiesForPrefecture = useMemo(
     () =>
@@ -159,33 +119,7 @@ export default function SpotForm({
       coverFood ||
       coverImageUrl
 
-    // ブログ本文の整形（プールから caption/食材をスナップショット）
-    const finalBlocks = buildBlogBlocks(blogBlocks, poolPhotos)
-    const textConcat = blogTextConcat(blogBlocks)
-    const hasBody = finalBlocks.length > 0
-
-    // ブログのバリデーション（編集時は firstVisit がある場合のみ必須）
-    const blogRequired = !spot || !!firstVisit
-    if (blogRequired) {
-      if (!firstVisitDate) {
-        setError('訪問日を入力してください')
-        setSaving(false)
-        return
-      }
-      if (!blogTitle.trim()) {
-        setError('ブログタイトルを入力してください')
-        setSaving(false)
-        return
-      }
-      if (!hasBody) {
-        setError('ブログ本文（文章または写真）を1つ以上入れてください')
-        setSaving(false)
-        return
-      }
-    }
-
     const payload = {
-      user_id: user.id,
       name,
       category,
       genre: genre || null,
@@ -201,45 +135,31 @@ export default function SpotForm({
       cover_image_url: primaryCover,
       cover_image_exterior: coverExterior,
       cover_image_food: coverFood,
-      photo_urls: poolPhotos.map((p) => p.url),
+      photo_urls: photos,
       reservation_methods: reservationMethods,
       is_featured: isFeatured,
       lat: lat === '' ? null : Number(lat),
       lng: lng === '' ? null : Number(lng),
-      chef_id: chefId || null,
       meal_times: mealTimes,
     }
 
-    const visitPayload = {
-      visited_at: firstVisitDate,
-      rating: firstVisitRating === '' ? null : Number(firstVisitRating),
-      price: firstVisitPrice === '' ? null : Number(firstVisitPrice),
-      title: blogTitle.trim() || null,
-      comment: textConcat || null,
-      body_blocks: finalBlocks,
-      photo_urls: poolPhotos,
-    }
-
-    savedIds.current ??= { spot: spot?.id ?? crypto.randomUUID(), visit: firstVisit?.id ?? crypto.randomUUID() }
-    const { data, error } = await supabase.rpc('save_spot_with_visit', {
-      p_spot_id: savedIds.current.spot,
-      p_visit_id: savedIds.current.visit,
-      p_spot: payload,
-      p_visit: !spot || firstVisit || blogTitle.trim() || blogBlocks.length ? visitPayload : null,
-      p_edit: !!spot,
-    })
+    savedIds.current ??= crypto.randomUUID()
+    const query = spot
+      ? supabase.from('spots').update(payload).eq('id', spot.id)
+      : supabase.from('spots').upsert({ ...payload, id: savedIds.current, user_id: user.id }, { onConflict: 'id' })
+    const { data, error } = await query.select('id').single()
     if (error) {
       setError(error.message)
       return
     }
     if (!data) throw new Error('保存結果を確認できませんでした。もう一度お試しください。')
-    router.push(`/spots/${data}`)
+    router.push(`/spots/${data.id}`)
     router.refresh()
   }
 
   async function handleDelete() {
     if (!spot) return
-    if (!confirm('削除しますか？訪問記録も一緒に削除されます。')) return
+    if (!confirm('このお店を削除しますか？')) return
     const supabase = createClient()
     const { error } = await supabase.from('spots').delete().eq('id', spot.id)
     if (error) {
@@ -372,26 +292,6 @@ export default function SpotForm({
       </div>
 
       <div>
-        <label className="block text-sm text-gray-700 mb-1">大将・シェフ</label>
-        <select
-          value={chefId}
-          onChange={(e) => setChefId(e.target.value)}
-          className="w-full border border-gray-300 px-3 py-2 text-sm"
-        >
-          <option value="">未設定</option>
-          {chefs.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-              {c.specialty && ` (${c.specialty})`}
-            </option>
-          ))}
-        </select>
-        <p className="text-[10px] text-neutral-400 mt-1">
-          選択肢にない場合は <a href="/chefs/new" target="_blank" className="underline">新しい大将を登録</a> してください
-        </p>
-      </div>
-
-      <div>
         <label className="block text-sm text-gray-700 mb-1">住所</label>
         <input
           value={address}
@@ -521,194 +421,64 @@ export default function SpotForm({
         トップページのFEATUREDで取り上げる
       </label>
 
-      {/* ============================================================
-          BLOG / 初回訪問記録（新規 or 既存ブログがある編集時）
-          ============================================================ */}
-      {(!spot || firstVisit) && (
-        <div className="border-t hairline pt-6 mt-2 space-y-4">
-          <div>
-            <p className="text-[10px] tracking-luxe text-neutral-400">BLOG / FIRST VISIT</p>
-            <p className="text-xs text-neutral-500 mt-1">
-              {spot
-                ? '初回訪問のブログを編集します。文章と写真を好きな順に並べられます。'
-                : 'この登録は初回訪問のブログ投稿としても保存されます。文章と写真を好きな順に並べられます。'}
+      <div className="border-t hairline pt-6 mt-2 space-y-4">
+        <div>
+          <label className="block text-xs tracking-luxe text-neutral-500 mb-2">PHOTOS</label>
+          <MultiImageUpload value={photos} onChange={setPhotos} folder="spots" max={40} />
+        </div>
+        {/* トップ画像（アップ済み写真から選択） */}
+        <div className="border-t hairline pt-4">
+          <label className="block text-xs tracking-luxe text-neutral-500 mb-1">
+            トップ画像（アップ済みの写真から選択）
+          </label>
+          {coverCandidates.length === 0 ? (
+            <p className="text-xs text-neutral-400 mt-2">
+              上のPHOTOSに写真を追加すると、ここから店構え・料理のトップ画像を選べます。
             </p>
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-700 mb-1">訪問日 *</label>
-            <input
-              type="date"
-              required
-              value={firstVisitDate}
-              onChange={(e) => setFirstVisitDate(e.target.value)}
-              className="border border-gray-300 px-3 py-2 text-sm"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs tracking-luxe text-neutral-500 mb-2">
-              PHOTOS（まとめてアップロード・各写真に名前/食材）
-            </label>
-            <PhotoPool
-              value={poolPhotos}
-              onChange={setPoolPhotos}
-              folder="visits"
-              max={40}
-              ingredientOptions={ingredientsForGenre}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-700 mb-1">ブログタイトル *</label>
-            <input
-              value={blogTitle}
-              onChange={(e) => setBlogTitle(e.target.value)}
-              placeholder="例: 念願の初訪問"
-              className="w-full border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-black"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-700 mb-2">
-              本文 *（文章ベース・写真ブロックは上のPHOTOSから選択）
-            </label>
-            <BlogComposer blocks={blogBlocks} onChange={setBlogBlocks} pool={poolPhotos} />
-          </div>
-
-          {/* トップ画像（アップ済み写真から選択） */}
-          <div className="border-t hairline pt-4">
-            <label className="block text-xs tracking-luxe text-neutral-500 mb-1">
-              トップ画像（アップ済みの写真から選択）
-            </label>
-            {coverCandidates.length === 0 ? (
-              <p className="text-xs text-neutral-400 mt-2">
-                上のPHOTOSに写真を追加すると、ここから店構え・料理のトップ画像を選べます。
-              </p>
-            ) : (
-              <div className="space-y-5 mt-3">
-                <CoverPicker
-                  label="店構え"
-                  candidates={coverCandidates}
-                  selected={coverExterior}
-                  onSelect={setCoverExterior}
-                />
-                <CoverPicker
-                  label="料理"
-                  candidates={coverCandidates}
-                  selected={coverFood}
-                  onSelect={setCoverFood}
-                />
-                <div>
-                  <p className="text-[10px] tracking-luxe text-neutral-400 mb-2">
-                    プロフィール画像（一覧・トップに表示）
-                  </p>
-                  <div className="flex gap-4 text-sm">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="coverPrimary"
-                        checked={coverPrimary === 'exterior'}
-                        onChange={() => setCoverPrimary('exterior')}
-                      />
-                      店構え
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="coverPrimary"
-                        checked={coverPrimary === 'food'}
-                        onChange={() => setCoverPrimary('food')}
-                      />
-                      料理
-                    </label>
-                  </div>
+          ) : (
+            <div className="space-y-5 mt-3">
+              <CoverPicker
+                label="店構え"
+                candidates={coverCandidates}
+                selected={coverExterior}
+                onSelect={setCoverExterior}
+              />
+              <CoverPicker
+                label="料理"
+                candidates={coverCandidates}
+                selected={coverFood}
+                onSelect={setCoverFood}
+              />
+              <div>
+                <p className="text-[10px] tracking-luxe text-neutral-400 mb-2">
+                  プロフィール画像（一覧・トップに表示）
+                </p>
+                <div className="flex gap-4 text-sm">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="coverPrimary"
+                      checked={coverPrimary === 'exterior'}
+                      onChange={() => setCoverPrimary('exterior')}
+                    />
+                    店構え
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="coverPrimary"
+                      checked={coverPrimary === 'food'}
+                      onChange={() => setCoverPrimary('food')}
+                    />
+                    料理
+                  </label>
                 </div>
               </div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-gray-700 mb-1">評価（任意・非公開）</label>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    onClick={() => setFirstVisitRating(firstVisitRating === n ? '' : n)}
-                    className={`w-9 h-9 border hairline text-sm ${
-                      firstVisitRating !== '' && n <= firstVisitRating
-                        ? 'bg-black border-black text-white'
-                        : 'bg-white text-neutral-300'
-                    }`}
-                  >
-                    ★
-                  </button>
-                ))}
-              </div>
             </div>
-            <div>
-              <label className="block text-sm text-gray-700 mb-1">支払い金額（円・任意）</label>
-              <input
-                type="number"
-                min={0}
-                value={firstVisitPrice}
-                onChange={(e) => setFirstVisitPrice(e.target.value)}
-                className="border border-gray-300 px-3 py-2 text-sm w-40"
-              />
-            </div>
-          </div>
+          )}
         </div>
-      )}
 
-      {/* 編集モード(ブログ無しの旧データ): トップ画像選択 */}
-      {spot && !firstVisit && coverCandidates.length > 0 && (
-        <div className="border-t hairline pt-5">
-          <label className="block text-xs tracking-luxe text-neutral-500 mb-1">
-            トップ画像（登録した写真から選択）
-          </label>
-          <div className="space-y-5 mt-3">
-            <CoverPicker
-              label="店構え"
-              candidates={coverCandidates}
-              selected={coverExterior}
-              onSelect={setCoverExterior}
-            />
-            <CoverPicker
-              label="料理"
-              candidates={coverCandidates}
-              selected={coverFood}
-              onSelect={setCoverFood}
-            />
-            <div>
-              <p className="text-[10px] tracking-luxe text-neutral-400 mb-2">
-                プロフィール画像（一覧・トップに表示）
-              </p>
-              <div className="flex gap-4 text-sm">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="coverPrimaryEdit"
-                    checked={coverPrimary === 'exterior'}
-                    onChange={() => setCoverPrimary('exterior')}
-                  />
-                  店構え
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="coverPrimaryEdit"
-                    checked={coverPrimary === 'food'}
-                    onChange={() => setCoverPrimary('food')}
-                  />
-                  料理
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 

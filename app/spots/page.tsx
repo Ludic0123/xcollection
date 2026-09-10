@@ -25,29 +25,6 @@ export default async function SpotsPage({
   const { data: spots } = await query
   const list = (spots ?? []) as Spot[]
 
-  const ids = list.map((s) => s.id)
-  const ratingsBySpot: Record<string, { avg: number; count: number }> = {}
-  if (ids.length > 0) {
-    const { data: visits } = await supabase
-      .from('visits')
-      .select('spot_id, rating')
-      .in('spot_id', ids)
-    if (visits) {
-      const map: Record<string, number[]> = {}
-      for (const v of visits) {
-        if (v.rating == null) continue
-        ;(map[v.spot_id as string] ||= []).push(v.rating as number)
-      }
-      for (const sid of Object.keys(map)) {
-        const arr = map[sid]
-        ratingsBySpot[sid] = {
-          avg: arr.reduce((a, b) => a + b, 0) / arr.length,
-          count: arr.length,
-        }
-      }
-    }
-  }
-
   const cityList = Array.from(new Set(list.map((s) => s.city).filter(Boolean))) as string[]
   const title =
     params.category === 'hotel' ? 'Stays' : params.category === 'cafe' ? 'Cafés' : 'Tastes'
@@ -131,7 +108,7 @@ export default async function SpotsPage({
             まだ登録がありません。
           </div>
         ) : (
-          <SpotsList spots={list} ratingsBySpot={ratingsBySpot} authed={authed} />
+          <SpotsList spots={list} />
         )}
       </div>
     </div>

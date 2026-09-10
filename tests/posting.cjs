@@ -21,6 +21,7 @@ function runtime(component, props, behavior={}) {
     from(table) {
       const call={table};
       const q={
+        upsert(payload){Object.assign(call,{action:'upsert',payload});calls.push(call);return q},
         insert(payload){Object.assign(call,{action:'insert',payload});calls.push(call);return q},
         update(payload){Object.assign(call,{action:'update',payload});calls.push(call);return q},
         delete(){Object.assign(call,{action:'delete'});calls.push(call);return q},
@@ -54,13 +55,12 @@ function runtime(component, props, behavior={}) {
   const Component=load(path.join(root,'components',component+'.tsx')).default;
   return{calls,navigations,states,render(nextProps=props){props=nextProps;index=0;return Component(props)},find(pred){return nodes(this.render()).find(pred)}};
 }
-const defaults={genres:[],cities:[],priceRanges:[],reservations:[],chefs:[],brands:[],sakeTypes:[],sakeBrands:[],sakeModels:[],spots:[{id:'spot-a',name:'Test',category:'restaurant'}],spotId:'spot-a',hotelId:'hotel-a',planId:'plan-a'};
+const defaults={genres:[],cities:[],priceRanges:[],reservations:[],brands:[],sakeTypes:[],sakeBrands:[],sakeModels:[],spots:[{id:'spot-a',name:'Test',category:'restaurant'}],spotId:'spot-a',hotelId:'hotel-a',planId:'plan-a'};
 const event={preventDefault(){}};
 
 (async()=>{
-  for(const name of ['SpotForm','HotelForm','SakeForm','ChefForm','EventForm','VisitForm','VisitFormWithPicker','StayForm','TripPlanForm','TripItemForm']) {
+  for(const name of ['SpotForm','HotelForm','SakeForm','EventForm','StayForm','TripPlanForm','TripItemForm']) {
     const rt=runtime(name,defaults,{authThrow:true,writeThrow:true});
-    if(name==='VisitFormWithPicker')rt.find(n=>n.type==='select').props.onChange({target:{value:'spot-a'}});
     const wrapper=runtime('PostingForm',rt.render().props);
     await wrapper.find(n=>n.type==='form').props.onSubmit(event);
     assert.equal(rt.find(n=>n.type==='button'&&n.props.type==='submit').props.disabled,false,name);
@@ -68,13 +68,25 @@ const event={preventDefault(){}};
   }
   {
     const spot={id:'legacy',name:'Old',photo_urls:['https://test.invalid/kept.jpg']};
-    const rt=runtime('SpotForm',{...defaults,spot,firstVisit:null});
+    const rt=runtime('SpotForm',{...defaults,spot});
     await rt.render().props.onSubmit(event);
-    assert.equal(rt.calls[0].action,'rpc');
-    assert.deepEqual(Array.from(rt.calls[0].payload.p_spot.photo_urls),spot.photo_urls);
-    assert.equal(rt.calls[0].payload.p_visit,null);
+    assert.equal(rt.calls[0].action,'update');
+    assert.deepEqual(Array.from(rt.calls[0].payload.photo_urls),spot.photo_urls);
+    assert(!('user_id' in rt.calls[0].payload));
+    assert.equal(rt.calls[0].table,'spots');
   }
-  for(const [name,entity] of [['HotelForm','hotel'],['SakeForm','sake'],['ChefForm','chef'],['EventForm','event'],['TripPlanForm','plan']]) {
+  {
+    const rt=runtime('SpotForm',defaults);
+    rt.find(n=>n.type==='input'&&n.props.required).props.onChange({target:{value:'店名だけで登録'}});
+    await rt.render().props.onSubmit(event);
+    await rt.render().props.onSubmit(event);
+    assert.equal(rt.calls.length,2);
+    assert(rt.calls.every(c=>c.table==='spots'&&c.action==='upsert'));
+    assert.equal(rt.calls[0].payload.id,rt.calls[1].payload.id);
+    assert.equal(rt.calls[0].payload.name,'店名だけで登録');
+    assert.equal(rt.navigations.length,2);
+  }
+  for(const [name,entity] of [['SpotForm','spot'],['HotelForm','hotel'],['SakeForm','sake'],['EventForm','event'],['TripPlanForm','plan']]) {
     const rt=runtime(name,{...defaults,[entity]:{id:'existing',name:'Name',title:'Title'}},{write:call=>{assert(call.single);return {data:null,error:{message:'No rows'}}}});
     await rt.render().props.onSubmit(event);
     assert(!('user_id' in rt.calls[0].payload));assert(!('organizer_id' in rt.calls[0].payload));assert.equal(rt.navigations.length,0);
@@ -99,6 +111,6 @@ const event={preventDefault(){}};
     rt.render({...props,value:photos});release({error:null});await new Promise(r=>setImmediate(r));
     if(name==='PhotoPool')assert.equal(photos[0].caption,'edited');else assert.equal(photos.length,1);
   }
-  console.log('PASS: 10 forms recover thrown errors, atomic spot save retains legacy photos, 5 updates preserve owner and reject missing row, double-click/upload/failure guards, photo edits survive upload');
+  console.log('PASS: 7 forms recover errors; spot save needs no blog and retries use same ID; existing photos and ownership retained; missing updates rejected; duplicate/upload guards pass');
 })().catch(e=>{console.error(e);process.exitCode=1});
 

@@ -7,8 +7,6 @@ export async function fetchSpotMasters() {
     { data: cities, error: error2 },
     { data: priceRanges, error: error3 },
     { data: reservations, error: error4 },
-    { data: chefs, error: error5 },
-    { data: ingredients, error: error6 },
   ] = await Promise.all([
     supabase
       .from('master_genres')
@@ -27,26 +25,14 @@ export async function fetchSpotMasters() {
       .from('master_reservation_methods')
       .select('value, label')
       .order('display_order'),
-    supabase
-      .from('chefs')
-      .select('id, name, specialty')
-      .order('name'),
-    supabase
-      .from('master_ingredients')
-      .select('genre, name')
-      .order('genre')
-      .order('display_order')
-      .order('name'),
   ])
-  const error = [error1, error2, error3, error4, error5, error6].find(Boolean)
+  const error = [error1, error2, error3, error4].find(Boolean)
   if (error) throw new Error('選択肢を取得できませんでした: ' + error.message)
   return {
     genres: genres ?? [],
     cities: cities ?? [],
     priceRanges: priceRanges ?? [],
     reservations: reservations ?? [],
-    chefs: chefs ?? [],
-    ingredients: ingredients ?? [],
   }
 }
 

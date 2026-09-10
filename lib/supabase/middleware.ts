@@ -12,7 +12,6 @@ const ADMIN_ONLY_PATTERNS = [
   /^\/admin/,
   /^\/spots\/new$/,
   /^\/spots\/[^/]+\/edit$/,
-  /^\/spots\/[^/]+\/visit$/,
   /^\/trips\/new$/,
   /^\/trips\/[^/]+\/edit$/,
   /^\/trips\/[^/]+\/items\/new$/,
@@ -21,9 +20,6 @@ const ADMIN_ONLY_PATTERNS = [
   /^\/hotels\/new$/,
   /^\/hotels\/[^/]+\/edit$/,
   /^\/hotels\/[^/]+\/stay$/,
-  /^\/chefs\/new$/,
-  /^\/chefs\/[^/]+\/edit$/,
-  /^\/visits\/new$/,
 ]
 
 function needsLogin(path: string) {

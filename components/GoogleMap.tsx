@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import OpenStreetMap from './OpenStreetMap'
 
 export type Marker = {
   id: string
@@ -48,18 +49,13 @@ function loadGoogleMaps(apiKey: string): Promise<void> {
   })
 }
 
-export default function GoogleMap({ markers }: { markers: Marker[] }) {
+export default function GoogleMap({ markers, className = 'w-full h-[calc(100vh-6rem)]' }: { markers: Marker[]; className?: string }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [error, setError] = useState<string | null>(null)
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
   useEffect(() => {
-    if (!apiKey) {
-      setError(
-        'Google Maps APIキーが設定されていません。.env.local に NEXT_PUBLIC_GOOGLE_MAPS_API_KEY を追加してください。'
-      )
-      return
-    }
+    if (!apiKey) return
 
     let cancelled = false
 
@@ -146,13 +142,7 @@ export default function GoogleMap({ markers }: { markers: Marker[] }) {
     }
   }, [apiKey, markers])
 
-  if (error) {
-    return (
-      <div className="w-full h-[70vh] bg-neutral-50 flex items-center justify-center p-6">
-        <p className="text-sm text-neutral-500 text-center max-w-md">{error}</p>
-      </div>
-    )
-  }
+  if (!apiKey || error) return <OpenStreetMap markers={markers} className={className} />
 
-  return <div ref={containerRef} className="w-full h-[calc(100vh-6rem)]" />
+  return <div ref={containerRef} className={className} />
 }
