@@ -34,7 +34,7 @@ export default function SpotsList({
             key={m.value}
             type="button"
             onClick={() => setMode(m.value)}
-            className={`text-xs tracking-luxe px-3 py-1.5 border hairline transition-colors ${
+            className={`ui-action text-xs tracking-luxe px-3 py-1.5 border hairline transition-colors ${
               mode === m.value
                 ? 'bg-black text-white border-black'
                 : 'bg-white text-neutral-500 hover:border-black'
