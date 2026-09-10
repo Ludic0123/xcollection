@@ -41,3 +41,21 @@ body {
 .tracking-luxe {
   letter-spacing: 0.25em;
 }
+
+/* Standalone actions need a usable touch target even when the label is short. */
+@layer components {
+.ui-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding-inline: 12px;
+  flex-shrink: 0;
+}
+
+.ui-action:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+}

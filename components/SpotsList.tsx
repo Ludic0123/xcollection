@@ -28,13 +28,13 @@ export default function SpotsList({
   return (
     <div>
       {/* 表示画像の切り替え */}
-      <div className="flex gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-4">
         {MODE_LABELS.map((m) => (
           <button
             key={m.value}
             type="button"
             onClick={() => setMode(m.value)}
-            className={`text-[10px] tracking-luxe px-3 py-1.5 border hairline transition-colors ${
+            className={`text-xs tracking-luxe px-3 py-1.5 border hairline transition-colors ${
               mode === m.value
                 ? 'bg-black text-white border-black'
                 : 'bg-white text-neutral-500 hover:border-black'
@@ -68,21 +68,21 @@ export default function SpotsList({
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] tracking-luxe text-neutral-400">
+                  <p className="text-xs tracking-luxe text-neutral-600">
                     {[spot.prefecture, spot.city].filter(Boolean).join(' · ') || '—'}
                   </p>
-                  <h3 className="font-serif text-base md:text-lg mt-1 leading-snug truncate">
+                  <h3 className="font-serif text-base md:text-lg mt-1 leading-snug break-words">
                     {spot.name}
                   </h3>
                   <div className="flex items-center gap-3 mt-1 text-xs text-neutral-500 flex-wrap">
                     {lv ? (
-                      <span className="text-neutral-400">
+                      <span className="text-neutral-600">
                         {lv <= 5 ? '¥'.repeat(lv) : '¥¥¥¥¥+'}
                       </span>
                     ) : null}
-                    {spot.genre && <span className="text-neutral-400">{spot.genre}</span>}
+                    {spot.genre && <span className="text-neutral-600">{spot.genre}</span>}
                     {spot.want_to_visit && (
-                      <span className="text-[9px] tracking-luxe bg-neutral-100 px-1.5 py-0.5">
+                      <span className="text-xs tracking-luxe bg-neutral-100 px-1.5 py-0.5">
                         WISHLIST
                       </span>
                     )}

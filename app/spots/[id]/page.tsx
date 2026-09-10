@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import { isTestContent } from '@/lib/content-visibility'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -27,7 +28,7 @@ export default async function SpotDetailPage({
     supabase.from('master_price_ranges').select('level, label'),
     supabase.from('master_reservation_methods').select('value, label'),
   ])
-  if (!spotData) notFound()
+  if (!spotData || isTestContent(spotData.name)) notFound()
   const spot = spotData as Spot
   const priceLabelOf = (lv: number | null | undefined) =>
     lv == null ? null : priceRanges?.find((p) => p.level === lv)?.label ?? `Lv. ${lv}`
@@ -53,7 +54,7 @@ export default async function SpotDetailPage({
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 px-8 md:px-16 pb-12 text-white">
-              <p className="text-[10px] tracking-luxe opacity-80">
+              <p className="inline-block max-w-full bg-black/70 px-2 py-1 text-xs tracking-luxe text-white">
                 {[spot.genre, spot.prefecture, spot.city].filter(Boolean).join(' · ')}
               </p>
               <h1 className="font-serif text-5xl md:text-7xl mt-3 leading-tight">{spot.name}</h1>
@@ -61,7 +62,7 @@ export default async function SpotDetailPage({
           </div>
         ) : (
           <div className="px-8 md:px-16 pt-20 pb-12 border-b hairline">
-            <p className="text-[10px] tracking-luxe text-neutral-400">
+            <p className="text-xs tracking-luxe text-neutral-600">
               {[spot.genre, spot.prefecture, spot.city].filter(Boolean).join(' · ')}
             </p>
             <h1 className="font-serif text-5xl md:text-7xl mt-4 leading-tight">{spot.name}</h1>
@@ -70,10 +71,10 @@ export default async function SpotDetailPage({
       </section>
 
       {/* TOP BAR */}
-      <div className="px-8 md:px-16 py-5 border-b hairline flex items-center justify-between text-xs">
+      <div className="px-8 md:px-16 py-5 border-b hairline flex flex-wrap gap-3 items-center justify-between text-xs">
         <Link
           href="/spots"
-          className="inline-flex items-center gap-1 text-neutral-500 hover:text-black tracking-luxe text-[10px]"
+          className="ui-action inline-flex items-center gap-1 text-neutral-500 hover:text-black tracking-luxe text-xs"
         >
           <ArrowLeft className="w-3 h-3" />
           BACK
@@ -81,7 +82,7 @@ export default async function SpotDetailPage({
         {authed && (
           <Link
             href={`/spots/${id}/edit`}
-            className="text-[10px] tracking-luxe text-neutral-500 hover:text-black"
+            className="ui-action text-xs tracking-luxe text-neutral-500 hover:text-black"
           >
             EDIT
           </Link>
@@ -93,16 +94,16 @@ export default async function SpotDetailPage({
         <div className="md:col-span-4 space-y-6">
           {(lunchLabel || dinnerLabel) && (
             <div>
-              <p className="text-[10px] tracking-luxe text-neutral-400">PRICE</p>
+              <p className="text-xs tracking-luxe text-neutral-600">PRICE</p>
               {lunchLabel && (
                 <p className="font-serif text-lg mt-2">
-                  <span className="text-xs text-neutral-400 mr-2">昼</span>
+                  <span className="text-xs text-neutral-600 mr-2">昼</span>
                   {lunchLabel}
                 </p>
               )}
               {dinnerLabel && (
                 <p className="font-serif text-lg mt-1">
-                  <span className="text-xs text-neutral-400 mr-2">夜</span>
+                  <span className="text-xs text-neutral-600 mr-2">夜</span>
                   {dinnerLabel}
                 </p>
               )}
@@ -110,7 +111,7 @@ export default async function SpotDetailPage({
           )}
           {spot.meal_times && spot.meal_times.length > 0 && (
             <div>
-              <p className="text-[10px] tracking-luxe text-neutral-400">MEAL TIMES</p>
+              <p className="text-xs tracking-luxe text-neutral-600">MEAL TIMES</p>
               <div className="mt-2 flex flex-wrap gap-2">
                 {spot.meal_times.map((m) => (
                   <span
@@ -125,7 +126,7 @@ export default async function SpotDetailPage({
           )}
           {spot.reservation_methods && spot.reservation_methods.length > 0 && (
             <div>
-              <p className="text-[10px] tracking-luxe text-neutral-400">RESERVATION</p>
+              <p className="text-xs tracking-luxe text-neutral-600">RESERVATION</p>
               <div className="mt-2 flex flex-wrap gap-2">
                 {spot.reservation_methods.map((m) => (
                   <span
@@ -143,7 +144,7 @@ export default async function SpotDetailPage({
         <div className="md:col-span-8 space-y-6">
           {spot.notes && (
             <div>
-              <p className="text-[10px] tracking-luxe text-neutral-400 mb-3">NOTES</p>
+              <p className="text-xs tracking-luxe text-neutral-600 mb-3">NOTES</p>
               <p className="font-serif text-lg leading-relaxed whitespace-pre-wrap text-neutral-800">
                 {spot.notes}
               </p>
@@ -184,7 +185,7 @@ export default async function SpotDetailPage({
       {/* GALLERY */}
       {allPhotos.length > 0 && (
         <section className="px-8 md:px-16 py-12 border-b hairline">
-          <p className="text-[10px] tracking-luxe text-neutral-400">GALLERY</p>
+          <p className="text-xs tracking-luxe text-neutral-600">GALLERY</p>
           <h2 className="font-serif text-3xl italic font-light mt-1 mb-6">All photos.</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2">
             {allPhotos.map((url, idx) => (

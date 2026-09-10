@@ -9,7 +9,7 @@ export default async function NewHotelPage() {
     <div className="bg-white min-h-screen px-8 md:px-16 py-12">
       <Link
         href="/hotels"
-        className="inline-flex items-center gap-1 text-[10px] tracking-luxe text-neutral-500 hover:text-black mb-4"
+        className="ui-action inline-flex items-center gap-1 text-xs tracking-luxe text-neutral-500 hover:text-black mb-4"
       >
         <ArrowLeft className="w-3 h-3" />
         BACK

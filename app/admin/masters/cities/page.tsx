@@ -11,7 +11,7 @@ export default async function CitiesAdminPage() {
   if (error) throw new Error('マスターを取得できませんでした: ' + error.message)
   return (
     <div className="px-4 py-6 md:px-10 md:py-10">
-      <p className="text-[10px] tracking-luxe text-neutral-400">MASTERS</p>
+      <p className="text-xs tracking-luxe text-neutral-600">MASTERS</p>
       <h1 className="font-serif text-4xl italic font-light mt-1 mb-6">Cities.</h1>
       <p className="text-sm text-neutral-500 mb-6">街・エリアの選択肢。</p>
       <MasterTable

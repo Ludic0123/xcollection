@@ -19,7 +19,7 @@ export default async function NewStayPage({
     <div className="bg-white min-h-screen px-8 md:px-16 py-12 max-w-2xl">
       <Link
         href={`/hotels/${id}`}
-        className="inline-flex items-center gap-1 text-[10px] tracking-luxe text-neutral-500 hover:text-black mb-4"
+        className="ui-action inline-flex items-center gap-1 text-xs tracking-luxe text-neutral-500 hover:text-black mb-4"
       >
         <ArrowLeft className="w-3 h-3" />
         BACK

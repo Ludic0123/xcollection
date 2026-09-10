@@ -58,7 +58,7 @@ export default function JoinEventButton({
     return (
       <button
         disabled
-        className="text-[11px] tracking-luxe bg-neutral-300 text-white px-6 py-3 cursor-not-allowed"
+        className="ui-action text-xs tracking-luxe bg-neutral-300 text-white px-6 py-3 cursor-not-allowed"
       >
         FULL
       </button>
@@ -70,7 +70,7 @@ export default function JoinEventButton({
       <button
         onClick={handle}
         disabled={busy}
-        className={`text-[11px] tracking-luxe px-6 py-3 disabled:opacity-50 ${
+        className={`ui-action text-xs tracking-luxe px-6 py-3 disabled:opacity-50 ${
           isJoined
             ? 'border border-black bg-white text-black hover:bg-neutral-100'
             : 'bg-black text-white hover:bg-neutral-800'

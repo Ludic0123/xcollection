@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import { isTestContent } from '@/lib/content-visibility'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
@@ -27,7 +28,7 @@ export default async function HotelDetailPage({
     supabase.from('master_price_ranges').select('level, label'),
     supabase.from('master_reservation_methods').select('value, label'),
   ])
-  if (!hotelData) notFound()
+  if (!hotelData || isTestContent(hotelData.name)) notFound()
   const hotel = hotelData as Hotel
   const stays = (staysData ?? []) as Stay[]
 
@@ -64,7 +65,7 @@ export default async function HotelDetailPage({
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 px-8 md:px-16 pb-12 text-white">
-              <p className="text-[10px] tracking-luxe opacity-80">
+              <p className="inline-block max-w-full bg-black/70 px-2 py-1 text-xs tracking-luxe text-white">
                 {hotel.brand ?? 'HOTEL'}
                 {hotel.prefecture && ` · ${hotel.prefecture}`}
               </p>
@@ -73,7 +74,7 @@ export default async function HotelDetailPage({
           </div>
         ) : (
           <div className="px-8 md:px-16 pt-20 pb-12 border-b hairline">
-            <p className="text-[10px] tracking-luxe text-neutral-400">
+            <p className="text-xs tracking-luxe text-neutral-600">
               {hotel.brand ?? 'HOTEL'}
               {hotel.prefecture && ` · ${hotel.prefecture}`}
             </p>
@@ -83,25 +84,25 @@ export default async function HotelDetailPage({
       </section>
 
       {/* TOP BAR */}
-      <div className="px-8 md:px-16 py-5 border-b hairline flex items-center justify-between text-xs">
+      <div className="px-8 md:px-16 py-5 border-b hairline flex flex-wrap gap-3 items-center justify-between text-xs">
         <Link
           href="/hotels"
-          className="inline-flex items-center gap-1 text-neutral-500 hover:text-black tracking-luxe text-[10px]"
+          className="ui-action inline-flex items-center gap-1 text-neutral-500 hover:text-black tracking-luxe text-xs"
         >
           <ArrowLeft className="w-3 h-3" />
           BACK
         </Link>
         {authed && (
-          <div className="flex items-center gap-5">
+          <div className="flex flex-wrap items-center gap-3">
             <Link
               href={`/hotels/${id}/stay`}
-              className="text-[10px] tracking-luxe bg-black text-white px-3 py-1.5 hover:bg-neutral-800"
+              className="ui-action text-xs tracking-luxe bg-black text-white px-3 py-1.5 hover:bg-neutral-800"
             >
               + LOG STAY
             </Link>
             <Link
               href={`/hotels/${id}/edit`}
-              className="text-[10px] tracking-luxe text-neutral-500 hover:text-black"
+              className="ui-action text-xs tracking-luxe text-neutral-500 hover:text-black"
             >
               EDIT
             </Link>
@@ -114,7 +115,7 @@ export default async function HotelDetailPage({
         <div className="md:col-span-4 space-y-6">
           {authed && avg !== null && (
             <div>
-              <p className="text-[10px] tracking-luxe text-neutral-400">
+              <p className="text-xs tracking-luxe text-neutral-600">
                 RATING <span className="text-neutral-300 ml-1">(EDITOR ONLY)</span>
               </p>
               <p className="font-serif text-4xl mt-2">★ {avg.toFixed(1)}</p>
@@ -122,13 +123,13 @@ export default async function HotelDetailPage({
           )}
           {hotel.price_range && (
             <div>
-              <p className="text-[10px] tracking-luxe text-neutral-400">PRICE / NIGHT</p>
+              <p className="text-xs tracking-luxe text-neutral-600">PRICE / NIGHT</p>
               <p className="font-serif text-2xl mt-2">{priceLabel ?? `Lv. ${hotel.price_range}`}</p>
             </div>
           )}
           {stayCount > 0 && (
             <div>
-              <p className="text-[10px] tracking-luxe text-neutral-400">STAYS</p>
+              <p className="text-xs tracking-luxe text-neutral-600">STAYS</p>
               <p className="font-serif text-2xl mt-2">{stayCount}回</p>
               {totalPaid > 0 && (
                 <p className="text-xs text-neutral-500 mt-1">
@@ -144,7 +145,7 @@ export default async function HotelDetailPage({
           )}
           {hotel.reservation_methods && hotel.reservation_methods.length > 0 && (
             <div>
-              <p className="text-[10px] tracking-luxe text-neutral-400">RESERVATION</p>
+              <p className="text-xs tracking-luxe text-neutral-600">RESERVATION</p>
               <div className="mt-2 flex flex-wrap gap-2">
                 {hotel.reservation_methods.map((m) => (
                   <span
@@ -162,7 +163,7 @@ export default async function HotelDetailPage({
         <div className="md:col-span-8 space-y-6">
           {hotel.notes && (
             <div>
-              <p className="text-[10px] tracking-luxe text-neutral-400 mb-3">NOTES</p>
+              <p className="text-xs tracking-luxe text-neutral-600 mb-3">NOTES</p>
               <p className="font-serif text-lg leading-relaxed whitespace-pre-wrap text-neutral-800">
                 {hotel.notes}
               </p>
@@ -203,7 +204,7 @@ export default async function HotelDetailPage({
       {/* GALLERY */}
       {allPhotos.length > 0 && (
         <section className="px-8 md:px-16 py-12">
-          <p className="text-[10px] tracking-luxe text-neutral-400">GALLERY</p>
+          <p className="text-xs tracking-luxe text-neutral-600">GALLERY</p>
           <h2 className="font-serif text-3xl italic font-light mt-1 mb-6">All photos.</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2">
             {allPhotos.map((url, idx) => (

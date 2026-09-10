@@ -14,14 +14,14 @@ export default async function AdminEventsPage() {
 
   return (
     <div className="px-4 py-6 md:px-10 md:py-10">
-      <div className="flex items-baseline justify-between mb-6">
+      <div className="flex flex-wrap gap-4 items-center justify-between mb-6">
         <div>
-          <p className="text-[10px] tracking-luxe text-neutral-400">CONTENTS</p>
+          <p className="text-xs tracking-luxe text-neutral-600">CONTENTS</p>
           <h1 className="font-serif text-4xl italic font-light mt-1">Events.</h1>
         </div>
         <Link
           href="/invitation/new"
-          className="text-[11px] tracking-luxe bg-black text-white px-4 py-2 hover:bg-neutral-800"
+          className="ui-action text-xs tracking-luxe bg-black text-white px-4 py-2 hover:bg-neutral-800"
         >
           + NEW EVENT
         </Link>
@@ -30,10 +30,10 @@ export default async function AdminEventsPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-neutral-50 border-b hairline">
-              <th className="py-2 px-3 text-left text-[10px] tracking-luxe text-neutral-500">タイトル</th>
-              <th className="py-2 px-3 text-left text-[10px] tracking-luxe text-neutral-500">タイプ</th>
-              <th className="py-2 px-3 text-left text-[10px] tracking-luxe text-neutral-500">日程</th>
-              <th className="py-2 px-3 text-left text-[10px] tracking-luxe text-neutral-500">ステータス</th>
+              <th className="py-2 px-3 text-left text-xs tracking-luxe text-neutral-500">タイトル</th>
+              <th className="py-2 px-3 text-left text-xs tracking-luxe text-neutral-500">タイプ</th>
+              <th className="py-2 px-3 text-left text-xs tracking-luxe text-neutral-500">日程</th>
+              <th className="py-2 px-3 text-left text-xs tracking-luxe text-neutral-500">ステータス</th>
               <th></th>
             </tr>
           </thead>

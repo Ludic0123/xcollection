@@ -19,7 +19,7 @@ export default async function NewEventPage() {
     <div className="bg-white min-h-[calc(100vh-6rem)] px-8 md:px-16 py-12">
       <Link
         href="/invitation"
-        className="inline-flex items-center gap-1 text-[10px] tracking-luxe text-neutral-500 hover:text-black mb-4"
+        className="ui-action inline-flex items-center gap-1 text-xs tracking-luxe text-neutral-500 hover:text-black mb-4"
       >
         <ArrowLeft className="w-3 h-3" />
         BACK

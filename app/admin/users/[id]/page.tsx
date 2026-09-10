@@ -60,7 +60,7 @@ export default async function UserDetailPage({
     <div className="px-4 py-6 md:px-10 md:py-10 max-w-4xl">
       <Link
         href="/admin/users"
-        className="inline-flex items-center gap-1 text-[10px] tracking-luxe text-neutral-500 hover:text-black mb-4"
+        className="ui-action inline-flex items-center gap-1 text-xs tracking-luxe text-neutral-500 hover:text-black mb-4"
       >
         <ArrowLeft className="w-3 h-3" />
         BACK

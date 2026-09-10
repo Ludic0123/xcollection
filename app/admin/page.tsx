@@ -23,7 +23,7 @@ export default async function AdminDashboard() {
 
   return (
     <div className="px-4 py-6 md:px-10 md:py-10">
-      <p className="text-[10px] tracking-luxe text-neutral-400">DASHBOARD</p>
+      <p className="text-xs tracking-luxe text-neutral-600">DASHBOARD</p>
       <h1 className="font-serif text-4xl italic font-light mt-1">Overview.</h1>
 
       <div className="mt-10 grid grid-cols-2 md:grid-cols-6 gap-4">
@@ -50,7 +50,7 @@ function StatTile({ label, value, href }: { label: string; value: number; href: 
       href={href}
       className="block bg-white border hairline p-5 hover:border-black transition-colors"
     >
-      <p className="text-[10px] tracking-luxe text-neutral-400">{label}</p>
+      <p className="text-xs tracking-luxe text-neutral-600">{label}</p>
       <p className="font-serif text-3xl mt-2">{value}</p>
     </Link>
   )
@@ -67,7 +67,7 @@ function QuickAction({
 }) {
   return (
     <Link href={href} className="block bg-white border hairline p-6 hover:border-black">
-      <p className="text-[10px] tracking-luxe text-neutral-400">QUICK ACTION</p>
+      <p className="text-xs tracking-luxe text-neutral-600">QUICK ACTION</p>
       <p className="font-serif text-xl mt-1">{title}</p>
       <p className="text-xs text-neutral-500 mt-2">{desc}</p>
     </Link>

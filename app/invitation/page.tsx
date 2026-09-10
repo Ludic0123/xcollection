@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import { TEST_CONTENT_PATTERN } from '@/lib/content-visibility'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -28,6 +29,7 @@ export default async function InvitationPage({
   let q = supabase
     .from('events')
     .select('*, spot:spots(id, name, city), sake:sakes(id, name, model, brewery)')
+    .not('title', 'like', TEST_CONTENT_PATTERN)
     .order('event_date', { ascending: true, nullsFirst: false })
     .order('created_at', { ascending: false })
   if (params.type) q = q.eq('event_type', params.type)
@@ -54,11 +56,11 @@ export default async function InvitationPage({
     <div className="bg-white min-h-[calc(100vh-6rem)]">
       {/* HERO */}
       <div className="px-4 md:px-16 pt-4 pb-3 md:pt-12 md:pb-8 border-b hairline">
-        <p className="text-[9px] tracking-luxe text-neutral-400">MEMBERS ONLY</p>
+        <p className="text-xs tracking-luxe text-neutral-600">MEMBERS ONLY</p>
         <h1 className="font-serif text-3xl md:text-6xl mt-1 md:mt-3 italic font-light">
           Invitation.
         </h1>
-        <p className="text-[10px] md:text-sm text-neutral-500 mt-1 md:mt-2">
+        <p className="text-xs md:text-sm text-neutral-500 mt-1 md:mt-2">
           グルメ会・日本酒会・日本酒配布の募集と参加
         </p>
       </div>
@@ -68,7 +70,7 @@ export default async function InvitationPage({
         <div className="flex items-center justify-end mb-6">
           <Link
             href="/invitation/new"
-            className="text-[11px] tracking-luxe bg-black text-white px-4 py-2.5 hover:bg-neutral-800"
+            className="ui-action text-xs tracking-luxe bg-black text-white px-4 py-2.5 hover:bg-neutral-800"
           >
             + CREATE
           </Link>
@@ -88,7 +90,7 @@ export default async function InvitationPage({
         </div>
 
         {events.length === 0 ? (
-          <p className="py-12 text-center text-sm text-neutral-400">まだ募集はありません。</p>
+          <p className="py-12 text-center text-sm text-neutral-600">まだ募集はありません。</p>
         ) : (
           <ul className="divide-y hairline">
             {events.map((e) => (
@@ -112,7 +114,7 @@ export default async function InvitationPage({
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] tracking-luxe text-neutral-400">
+                    <p className="text-xs tracking-luxe text-neutral-600">
                       {EVENT_TYPE_LABELS[e.event_type]}
                       {e.event_date && ` · ${e.event_date}${e.event_time ? ' ' + e.event_time.slice(0, 5) : ''}`}
                     </p>
@@ -158,8 +160,8 @@ function FilterTab({
   return (
     <Link
       href={href}
-      className={`text-xs tracking-luxe pb-1 ${
-        active ? 'text-black border-b-2 border-black' : 'text-neutral-400 hover:text-black'
+      className={`ui-action text-xs tracking-luxe pb-1 ${
+        active ? 'text-black border-b-2 border-black' : 'text-neutral-600 hover:text-black'
       }`}
     >
       {label}

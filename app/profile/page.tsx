@@ -43,12 +43,12 @@ export default async function ProfilePage() {
     <div className="bg-white min-h-[calc(100vh-6rem)]">
       {/* HERO */}
       <section className="px-8 md:px-16 pt-16 pb-12 border-b hairline">
-        <p className="text-[10px] tracking-luxe text-neutral-400">PROFILE</p>
+        <p className="text-xs tracking-luxe text-neutral-600">PROFILE</p>
         <h1 className="font-serif text-5xl md:text-7xl italic font-light mt-3">
           {displayName}
         </h1>
         {(full?.last_name_kana || full?.first_name_kana) && (
-          <p className="text-xs tracking-luxe text-neutral-400 mt-2">
+          <p className="text-xs tracking-luxe text-neutral-600 mt-2">
             {[full.last_name_kana, full.first_name_kana].filter(Boolean).join(' ')}
           </p>
         )}
@@ -56,17 +56,17 @@ export default async function ProfilePage() {
 
       {/* MEMBERSHIP CARD */}
       <section className="px-8 md:px-16 py-12 border-b hairline">
-        <p className="text-[10px] tracking-luxe text-neutral-400 mb-6">MEMBERSHIP</p>
+        <p className="text-xs tracking-luxe text-neutral-600 mb-6">MEMBERSHIP</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
           <div className="bg-black text-white p-8">
-            <p className="text-[10px] tracking-luxe text-white/50">MEMBER NO.</p>
+            <p className="text-xs tracking-luxe text-white/50">MEMBER NO.</p>
             <p className="font-mono text-4xl md:text-5xl tracking-widest mt-3">
               {String(member.memberNumber).padStart(3, '0')}
             </p>
             <CopyText value={String(member.memberNumber)} className="mt-4 text-white" />
           </div>
           <div className="bg-neutral-900 text-white p-8">
-            <p className="text-[10px] tracking-luxe text-white/50">INVITATION CODE</p>
+            <p className="text-xs tracking-luxe text-white/50">INVITATION CODE</p>
             <p className="font-mono text-2xl md:text-3xl tracking-[0.3em] mt-3">
               {member.memberCode}
             </p>
@@ -87,10 +87,10 @@ export default async function ProfilePage() {
       {/* INVITER */}
       {inviter && (
         <section className="px-8 md:px-16 py-10 border-b hairline">
-          <p className="text-[10px] tracking-luxe text-neutral-400">INVITED BY</p>
+          <p className="text-xs tracking-luxe text-neutral-600">INVITED BY</p>
           <p className="font-serif text-2xl mt-2">
             {inviter.name}{' '}
-            <span className="text-sm text-neutral-400 font-sans font-light ml-2">
+            <span className="text-sm text-neutral-600 font-sans font-light ml-2">
               MEMBER NO.{String(inviter.number).padStart(3, '0')}
             </span>
           </p>
@@ -99,7 +99,7 @@ export default async function ProfilePage() {
 
       {/* DETAILS */}
       <section className="px-8 md:px-16 py-12 border-b hairline">
-        <p className="text-[10px] tracking-luxe text-neutral-400 mb-6">DETAILS</p>
+        <p className="text-xs tracking-luxe text-neutral-600 mb-6">DETAILS</p>
         <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-5 max-w-3xl text-sm">
           {member.email && (
             <Row label="メール" value={member.email} />
@@ -135,7 +135,7 @@ export default async function ProfilePage() {
 
         {(full?.best_restaurant_1 || full?.best_restaurant_2 || full?.best_restaurant_3) && (
           <div className="mt-10 max-w-3xl">
-            <p className="text-[10px] tracking-luxe text-neutral-400 mb-3">
+            <p className="text-xs tracking-luxe text-neutral-600 mb-3">
               人生最高レストラン
             </p>
             <ol className="space-y-2 text-sm">
@@ -143,7 +143,7 @@ export default async function ProfilePage() {
                 .filter(Boolean)
                 .map((r, i) => (
                   <li key={i} className="font-serif text-base">
-                    <span className="font-sans text-[10px] tracking-luxe text-neutral-400 mr-2">
+                    <span className="font-sans text-xs tracking-luxe text-neutral-600 mr-2">
                       {String(i + 1).padStart(2, '0')}
                     </span>
                     {r}
@@ -160,7 +160,7 @@ export default async function ProfilePage() {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-[10px] tracking-luxe text-neutral-400">{label}</dt>
+      <dt className="text-xs tracking-luxe text-neutral-600">{label}</dt>
       <dd className="font-serif text-base mt-1 break-words">{value}</dd>
     </div>
   )

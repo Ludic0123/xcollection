@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import { isTestContent } from '@/lib/content-visibility'
 import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
@@ -23,7 +24,7 @@ export default async function EventDetailPage({
     .select('*, spot:spots(id, name, city), sake:sakes(id, name, model, brewery)')
     .eq('id', id)
     .single()
-  if (!eventData) notFound()
+  if (!eventData || isTestContent(eventData.title)) notFound()
   const event = eventData as AppEvent
 
   const { data: parts } = await supabase
@@ -50,7 +51,7 @@ export default async function EventDetailPage({
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 px-8 md:px-16 pb-10 text-white">
-            <p className="text-[10px] tracking-luxe opacity-80">
+            <p className="inline-block max-w-full bg-black/70 px-2 py-1 text-xs tracking-luxe text-white">
               {EVENT_TYPE_LABELS[event.event_type]}
               {event.event_date && ` · ${event.event_date}`}
             </p>
@@ -59,7 +60,7 @@ export default async function EventDetailPage({
         </div>
       ) : (
         <div className="px-8 md:px-16 pt-16 pb-10 border-b hairline">
-          <p className="text-[10px] tracking-luxe text-neutral-400">
+          <p className="text-xs tracking-luxe text-neutral-600">
             {EVENT_TYPE_LABELS[event.event_type]}
           </p>
           <h1 className="font-serif text-4xl md:text-6xl mt-3 leading-tight">{event.title}</h1>
@@ -69,7 +70,7 @@ export default async function EventDetailPage({
       <div className="px-8 md:px-16 py-5 border-b hairline flex items-center justify-between">
         <Link
           href="/invitation"
-          className="inline-flex items-center gap-1 text-[10px] tracking-luxe text-neutral-500 hover:text-black"
+          className="ui-action inline-flex items-center gap-1 text-xs tracking-luxe text-neutral-500 hover:text-black"
         >
           <ArrowLeft className="w-3 h-3" />
           BACK
@@ -77,7 +78,7 @@ export default async function EventDetailPage({
         {isOrganizer && (
           <Link
             href={`/invitation/${id}/edit`}
-            className="text-[10px] tracking-luxe text-neutral-500 hover:text-black"
+            className="ui-action text-xs tracking-luxe text-neutral-500 hover:text-black"
           >
             EDIT
           </Link>
@@ -88,7 +89,7 @@ export default async function EventDetailPage({
         <div className="md:col-span-4 space-y-6">
           {event.event_date && (
             <div>
-              <p className="text-[10px] tracking-luxe text-neutral-400">DATE</p>
+              <p className="text-xs tracking-luxe text-neutral-600">DATE</p>
               <p className="font-serif text-2xl mt-2">
                 {event.event_date}
                 {event.event_time && (
@@ -99,13 +100,13 @@ export default async function EventDetailPage({
           )}
           {event.budget_yen != null && (
             <div>
-              <p className="text-[10px] tracking-luxe text-neutral-400">BUDGET / FEE</p>
+              <p className="text-xs tracking-luxe text-neutral-600">BUDGET / FEE</p>
               <p className="font-serif text-2xl mt-2">¥{event.budget_yen.toLocaleString()}</p>
             </div>
           )}
           {event.max_participants != null && (
             <div>
-              <p className="text-[10px] tracking-luxe text-neutral-400">PARTICIPANTS</p>
+              <p className="text-xs tracking-luxe text-neutral-600">PARTICIPANTS</p>
               <p className="font-serif text-2xl mt-2">
                 {participants.length} / {event.max_participants} 名
               </p>
@@ -113,7 +114,7 @@ export default async function EventDetailPage({
           )}
           {event.deadline && (
             <div>
-              <p className="text-[10px] tracking-luxe text-neutral-400">DEADLINE</p>
+              <p className="text-xs tracking-luxe text-neutral-600">DEADLINE</p>
               <p className="font-serif text-base mt-2">
                 {new Date(event.deadline).toLocaleString('ja-JP')}
               </p>
@@ -124,7 +125,7 @@ export default async function EventDetailPage({
         <div className="md:col-span-8 space-y-6">
           {event.description && (
             <div>
-              <p className="text-[10px] tracking-luxe text-neutral-400 mb-3">DESCRIPTION</p>
+              <p className="text-xs tracking-luxe text-neutral-600 mb-3">DESCRIPTION</p>
               <p className="font-serif text-lg leading-relaxed whitespace-pre-wrap text-neutral-800">
                 {event.description}
               </p>
@@ -134,14 +135,14 @@ export default async function EventDetailPage({
             <div className="pt-4 border-t hairline space-y-3 text-sm text-neutral-700">
               {event.spot && (
                 <div>
-                  <p className="text-[10px] tracking-luxe text-neutral-400">SPOT</p>
+                  <p className="text-xs tracking-luxe text-neutral-600">SPOT</p>
                   <Link
                     href={`/spots/${event.spot.id}`}
                     className="font-serif text-xl hover:underline"
                   >
                     {event.spot.name}
                     {event.spot.city && (
-                      <span className="text-neutral-400 text-sm ml-2">
+                      <span className="text-neutral-600 text-sm ml-2">
                         {event.spot.city}
                       </span>
                     )}
@@ -150,14 +151,14 @@ export default async function EventDetailPage({
               )}
               {event.sake && (
                 <div>
-                  <p className="text-[10px] tracking-luxe text-neutral-400">SAKE</p>
+                  <p className="text-xs tracking-luxe text-neutral-600">SAKE</p>
                   <Link
                     href={`/sake/${event.sake.id}`}
                     className="font-serif text-xl hover:underline"
                   >
                     {[event.sake.name, event.sake.model].filter(Boolean).join(' ')}
                     {event.sake.brewery && (
-                      <span className="text-neutral-400 text-sm ml-2">
+                      <span className="text-neutral-600 text-sm ml-2">
                         {event.sake.brewery}
                       </span>
                     )}
@@ -166,7 +167,7 @@ export default async function EventDetailPage({
               )}
               {event.location_text && !event.spot && (
                 <div>
-                  <p className="text-[10px] tracking-luxe text-neutral-400">LOCATION</p>
+                  <p className="text-xs tracking-luxe text-neutral-600">LOCATION</p>
                   <p className="font-serif text-xl">{event.location_text}</p>
                 </div>
               )}

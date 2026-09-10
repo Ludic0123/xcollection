@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import { TEST_CONTENT_PATTERN } from '@/lib/content-visibility'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { isAuthed } from '@/lib/auth'
@@ -11,7 +12,7 @@ export default async function SakeListPage() {
 
   const { data } = await supabase
     .from('sakes')
-    .select('*')
+    .select('*').not('name', 'like', TEST_CONTENT_PATTERN)
     .order('created_at', { ascending: false })
   const list = (data ?? []) as Sake[]
 
@@ -19,23 +20,23 @@ export default async function SakeListPage() {
     <div className="bg-white min-h-screen">
       <div className="px-4 md:px-16 pt-4 pb-3 md:pt-12 md:pb-8 border-b hairline">
         <div className="flex items-baseline justify-between">
-          <p className="text-[9px] tracking-luxe text-neutral-400">SAKE</p>
+          <p className="text-xs tracking-luxe text-neutral-600">SAKE</p>
           {authed && (
             <Link
               href="/sake/new"
-              className="text-[9px] tracking-luxe text-neutral-500 hover:text-black"
+              className="ui-action text-xs tracking-luxe text-neutral-500 hover:text-black"
             >
               + ADD NEW
             </Link>
           )}
         </div>
         <h1 className="font-serif text-3xl md:text-6xl mt-1 md:mt-3 italic font-light">Sake.</h1>
-        <p className="text-[10px] md:text-sm text-neutral-500 mt-1 md:mt-2">{list.length} bottles</p>
+        <p className="text-xs md:text-sm text-neutral-500 mt-1 md:mt-2">{list.length} bottles</p>
       </div>
 
       <div className="px-4 md:px-16 py-6">
         {list.length === 0 ? (
-          <div className="py-24 text-center text-sm text-neutral-400">
+          <div className="py-24 text-center text-sm text-neutral-600">
             まだ登録がありません。
           </div>
         ) : (
@@ -63,15 +64,16 @@ export default async function SakeListPage() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] tracking-luxe text-neutral-400">
+                    <p className="text-xs tracking-luxe text-neutral-600">
                       {s.region ?? 'JAPAN'}
                       {s.sake_type && ` · ${s.sake_type}`}
                     </p>
-                    <h3 className="font-serif text-base md:text-lg mt-1 leading-snug truncate">
-                      {[s.name, s.model].filter(Boolean).join(' ')}
+                    <h3 className="font-serif text-base md:text-lg mt-1 leading-snug break-words">
+                      {s.name}
                     </h3>
+                    {s.model && <p className="text-sm text-neutral-700 mt-1 leading-relaxed break-words">{s.model}</p>}
                     {s.brewery && (
-                      <p className="text-xs text-neutral-500 mt-1 truncate">{s.brewery}</p>
+                      <p className="text-xs text-neutral-500 mt-1 break-words">{s.brewery}</p>
                     )}
                   </div>
                 </Link>

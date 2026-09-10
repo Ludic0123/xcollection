@@ -10,11 +10,11 @@ export default async function ReservationMethodsAdminPage() {
   if (error) throw new Error('マスターを取得できませんでした: ' + error.message)
   return (
     <div className="px-4 py-6 md:px-10 md:py-10">
-      <p className="text-[10px] tracking-luxe text-neutral-400">MASTERS</p>
+      <p className="text-xs tracking-luxe text-neutral-600">MASTERS</p>
       <h1 className="font-serif text-4xl italic font-light mt-1 mb-6">Reservation methods.</h1>
       <p className="text-sm text-neutral-500 mb-6">
         予約方法の選択肢。
-        <span className="text-neutral-400 text-xs ml-2">
+        <span className="text-neutral-600 text-xs ml-2">
           ※ value (内部キー) は半角英数+アンダースコアで一意に
         </span>
       </p>

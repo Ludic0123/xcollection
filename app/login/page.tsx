@@ -44,13 +44,13 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-white p-4">
       <div className="w-full max-w-sm">
         <Link href="/" className="block text-center mb-12">
-          <p className="text-[10px] tracking-luxe text-neutral-400">COLLECTION</p>
+          <p className="text-xs tracking-luxe text-neutral-600">COLLECTION</p>
           <h1 className="font-serif text-3xl italic font-light mt-2">Welcome back.</h1>
-          <p className="text-[10px] tracking-luxe text-neutral-400 mt-4">MEMBER SIGN IN</p>
+          <p className="text-xs tracking-luxe text-neutral-600 mt-4">MEMBER SIGN IN</p>
         </Link>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <p className="text-[10px] tracking-luxe text-neutral-400 mb-2">EMAIL</p>
+            <p className="text-xs tracking-luxe text-neutral-600 mb-2">EMAIL</p>
             <input
               type="email"
               required
@@ -60,7 +60,7 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <p className="text-[10px] tracking-luxe text-neutral-400 mb-2">PASSWORD</p>
+            <p className="text-xs tracking-luxe text-neutral-600 mb-2">PASSWORD</p>
             <input
               type="password"
               required
@@ -73,18 +73,18 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full text-[11px] tracking-luxe bg-black text-white py-3 hover:bg-neutral-800 disabled:opacity-50"
+            className="ui-action w-full text-xs tracking-luxe bg-black text-white py-3 hover:bg-neutral-800 disabled:opacity-50"
           >
             {loading ? 'SIGNING IN…' : 'SIGN IN'}
           </button>
         </form>
-        <p className="text-[10px] tracking-luxe text-neutral-400 mt-10 text-center">
+        <p className="text-xs tracking-luxe text-neutral-600 mt-10 text-center">
           初めての方は{' '}
           <Link href="/signup" className="text-black underline">
             会員登録
           </Link>
         </p>
-        <p className="text-[10px] tracking-luxe text-neutral-300 mt-3 text-center">
+        <p className="text-xs tracking-luxe text-neutral-300 mt-3 text-center">
           <Link href="/" className="hover:text-black">← BACK TO SITE</Link>
         </p>
       </div>

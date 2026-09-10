@@ -55,7 +55,7 @@ export default function Header({
           </Link>
 
           {/* Center nav (desktop) */}
-          <nav className="hidden lg:flex items-center gap-9 absolute left-1/2 -translate-x-1/2">
+          <nav className="hidden xl:flex items-center gap-4">
             {nav.map((item) => {
               const active =
                 item.href === '/'
@@ -65,8 +65,8 @@ export default function Header({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`text-xs tracking-luxe transition-colors ${
-                    active ? 'text-black' : 'text-neutral-400 hover:text-black'
+                  className={`ui-action px-1 text-xs tracking-luxe transition-colors ${
+                    active ? 'text-black' : 'text-neutral-600 hover:text-black'
                   }`}
                 >
                   {item.label}
@@ -76,18 +76,18 @@ export default function Header({
           </nav>
 
           {/* Right action — Desktop */}
-          <div className="hidden lg:flex items-center gap-5 shrink-0">
+          <div className="hidden xl:flex items-center gap-2 shrink-0">
             {isMember ? (
               <>
                 <Link
                   href="/profile"
-                  className="text-[11px] tracking-luxe text-neutral-500 hover:text-black"
+                  className="ui-action text-xs tracking-luxe text-neutral-500 hover:text-black"
                 >
                   PROFILE
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="text-[11px] tracking-luxe text-neutral-500 hover:text-black"
+                  className="ui-action text-xs tracking-luxe text-neutral-500 hover:text-black"
                 >
                   SIGN OUT
                 </button>
@@ -96,13 +96,13 @@ export default function Header({
               <>
                 <Link
                   href="/signup"
-                  className="text-[11px] tracking-luxe text-neutral-500 hover:text-black"
+                  className="ui-action text-xs tracking-luxe text-neutral-500 hover:text-black"
                 >
                   JOIN
                 </Link>
                 <Link
                   href="/login"
-                  className="text-[11px] tracking-luxe text-neutral-300 hover:text-black"
+                  className="ui-action text-xs tracking-luxe text-neutral-600 hover:text-black"
                 >
                   SIGN IN
                 </Link>
@@ -112,7 +112,7 @@ export default function Header({
 
           {/* Hamburger — Mobile/Tablet */}
           <button
-            className="lg:hidden p-1 -mr-1"
+            className="xl:hidden ui-action -mr-2"
             aria-label="メニュー"
             onClick={() => setOpen(true)}
           >
@@ -124,7 +124,7 @@ export default function Header({
       {/* ===== Mobile drawer (Headerの外に置く: backdrop-blurの影響を避ける) ===== */}
       {open && (
         <div
-          className="lg:hidden fixed inset-0 z-[60] bg-white flex flex-col"
+          className="xl:hidden fixed inset-0 z-[60] bg-white flex flex-col"
           role="dialog"
           aria-modal="true"
         >
@@ -136,12 +136,12 @@ export default function Header({
             >
               Collection
             </Link>
-            <button onClick={() => setOpen(false)} aria-label="閉じる" className="p-1 -mr-1">
+            <button onClick={() => setOpen(false)} aria-label="閉じる" className="ui-action -mr-2">
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          <nav className="flex-1 overflow-y-auto px-8 py-8 space-y-5">
+          <nav className="flex-1 overflow-y-auto px-8 py-8 space-y-2">
             {nav.map((item) => {
               const active =
                 item.href === '/'
@@ -152,8 +152,8 @@ export default function Header({
                   key={item.href}
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className={`block font-serif text-2xl italic font-light ${
-                    active ? 'text-black' : 'text-neutral-400'
+                  className={`flex min-h-11 items-center font-serif text-2xl italic font-light ${
+                    active ? 'text-black' : 'text-neutral-600'
                   }`}
                 >
                   {item.label}
@@ -168,13 +168,13 @@ export default function Header({
                 <Link
                   href="/profile"
                   onClick={() => setOpen(false)}
-                  className="block text-xs tracking-luxe text-neutral-700"
+                  className="ui-action block text-xs tracking-luxe text-neutral-700"
                 >
                   PROFILE
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="block text-xs tracking-luxe text-neutral-500"
+                  className="ui-action block text-xs tracking-luxe text-neutral-500"
                 >
                   SIGN OUT
                 </button>
@@ -184,14 +184,14 @@ export default function Header({
                 <Link
                   href="/signup"
                   onClick={() => setOpen(false)}
-                  className="block text-xs tracking-luxe text-neutral-700"
+                  className="ui-action block text-xs tracking-luxe text-neutral-700"
                 >
                   JOIN
                 </Link>
                 <Link
                   href="/login"
                   onClick={() => setOpen(false)}
-                  className="block text-xs tracking-luxe text-neutral-500"
+                  className="ui-action block text-xs tracking-luxe text-neutral-500"
                 >
                   SIGN IN
                 </Link>

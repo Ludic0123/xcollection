@@ -44,7 +44,7 @@ export default async function UsersAdminPage() {
 
   return (
     <div className="px-4 py-6 md:px-10 md:py-10">
-      <p className="text-[10px] tracking-luxe text-neutral-400">PEOPLE</p>
+      <p className="text-xs tracking-luxe text-neutral-600">PEOPLE</p>
       <h1 className="font-serif text-4xl italic font-light mt-1 mb-6">Members.</h1>
 
       {errorMessage && (
@@ -64,14 +64,14 @@ export default async function UsersAdminPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-neutral-50 border-b hairline">
-              <th className="py-2 px-3 text-left text-[10px] tracking-luxe text-neutral-500">NO.</th>
-              <th className="py-2 px-3 text-left text-[10px] tracking-luxe text-neutral-500">氏名</th>
-              <th className="py-2 px-3 text-left text-[10px] tracking-luxe text-neutral-500">フリガナ</th>
-              <th className="py-2 px-3 text-left text-[10px] tracking-luxe text-neutral-500">勤務先</th>
-              <th className="py-2 px-3 text-left text-[10px] tracking-luxe text-neutral-500">居住地</th>
-              <th className="py-2 px-3 text-left text-[10px] tracking-luxe text-neutral-500">生年月日</th>
-              <th className="py-2 px-3 text-left text-[10px] tracking-luxe text-neutral-500">ADMIN</th>
-              <th className="py-2 px-3 text-left text-[10px] tracking-luxe text-neutral-500">登録日</th>
+              <th className="py-2 px-3 text-left text-xs tracking-luxe text-neutral-500">NO.</th>
+              <th className="py-2 px-3 text-left text-xs tracking-luxe text-neutral-500">氏名</th>
+              <th className="py-2 px-3 text-left text-xs tracking-luxe text-neutral-500">フリガナ</th>
+              <th className="py-2 px-3 text-left text-xs tracking-luxe text-neutral-500">勤務先</th>
+              <th className="py-2 px-3 text-left text-xs tracking-luxe text-neutral-500">居住地</th>
+              <th className="py-2 px-3 text-left text-xs tracking-luxe text-neutral-500">生年月日</th>
+              <th className="py-2 px-3 text-left text-xs tracking-luxe text-neutral-500">ADMIN</th>
+              <th className="py-2 px-3 text-left text-xs tracking-luxe text-neutral-500">登録日</th>
             </tr>
           </thead>
           <tbody>

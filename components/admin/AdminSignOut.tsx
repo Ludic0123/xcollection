@@ -14,7 +14,7 @@ export default function AdminSignOut() {
   return (
     <button
       onClick={handle}
-      className="text-[10px] tracking-luxe text-neutral-400 hover:text-black"
+      className="ui-action px-1 text-xs tracking-luxe text-neutral-600 hover:text-black"
     >
       SIGN OUT
     </button>

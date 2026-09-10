@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import { TEST_CONTENT_PATTERN } from '@/lib/content-visibility'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { isAuthed } from '@/lib/auth'
@@ -11,7 +12,7 @@ export default async function TripsPage() {
 
   const { data: plans } = await supabase
     .from('trip_plans')
-    .select('*')
+    .select('*').not('title', 'like', TEST_CONTENT_PATTERN)
     .order('created_at', { ascending: false })
   const list = (plans ?? []) as TripPlan[]
 
@@ -36,25 +37,25 @@ export default async function TripsPage() {
     <div className="bg-white min-h-screen">
       <div className="px-4 md:px-16 pt-4 pb-3 md:pt-12 md:pb-8 border-b hairline">
         <div className="flex items-baseline justify-between">
-          <p className="text-[9px] tracking-luxe text-neutral-400">JOURNEYS</p>
+          <p className="text-xs tracking-luxe text-neutral-600">JOURNEYS</p>
           {authed && (
             <Link
               href="/trips/new"
-              className="text-[9px] tracking-luxe text-neutral-500 hover:text-black"
+              className="ui-action text-xs tracking-luxe text-neutral-500 hover:text-black"
             >
               + NEW JOURNEY
             </Link>
           )}
         </div>
         <h1 className="font-serif text-3xl md:text-6xl mt-1 md:mt-3 italic font-light">Journeys.</h1>
-        <p className="text-[10px] md:text-sm text-neutral-500 mt-1 md:mt-2">
+        <p className="text-xs md:text-sm text-neutral-500 mt-1 md:mt-2">
           {list.length} plan{list.length !== 1 ? 's' : ''}
         </p>
       </div>
 
       <div className="px-4 md:px-16 py-6">
         {list.length === 0 ? (
-          <div className="py-24 text-center text-sm text-neutral-400">
+          <div className="py-24 text-center text-sm text-neutral-600">
             まだプランがありません。
           </div>
         ) : (
@@ -84,7 +85,7 @@ export default async function TripsPage() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[10px] tracking-luxe text-neutral-400">
+                      <p className="text-xs tracking-luxe text-neutral-600">
                         {plan.city ?? 'JOURNEY'}
                         {plan.start_date &&
                           ` · ${new Date(plan.start_date).toLocaleDateString('ja-JP', {

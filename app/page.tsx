@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import { TEST_CONTENT_PATTERN } from '@/lib/content-visibility'
 import Link from 'next/link'
 import PlacesMap from '@/components/PlacesMap'
 import { createClient } from '@/lib/supabase/server'
@@ -34,40 +35,40 @@ export default async function TopPage() {
     { data: sakeData },
     { data: eventsData },
   ] = await Promise.all([
-    supabase.from('spots').select('id', { count: 'exact', head: true }),
-    supabase.from('hotels').select('id', { count: 'exact', head: true }),
-    supabase.from('trip_plans').select('id', { count: 'exact', head: true }),
+    supabase.from('spots').select('id', { count: 'exact', head: true }).not('name', 'like', TEST_CONTENT_PATTERN),
+    supabase.from('hotels').select('id', { count: 'exact', head: true }).not('name', 'like', TEST_CONTENT_PATTERN),
+    supabase.from('trip_plans').select('id', { count: 'exact', head: true }).not('title', 'like', TEST_CONTENT_PATTERN),
     supabase
       .from('spots')
-      .select('*')
+      .select('*').not('name', 'like', TEST_CONTENT_PATTERN)
       .eq('is_featured', true)
       .order('updated_at', { ascending: false })
       .limit(8),
     supabase
       .from('spots')
-      .select('*')
+      .select('*').not('name', 'like', TEST_CONTENT_PATTERN)
       .in('category', ['restaurant', 'cafe', 'bar', 'other'])
       .order('created_at', { ascending: false })
       .limit(12),
     supabase
       .from('hotels')
-      .select('*')
+      .select('*').not('name', 'like', TEST_CONTENT_PATTERN)
       .order('created_at', { ascending: false })
       .limit(12),
     supabase
       .from('trip_plans')
-      .select('*')
+      .select('*').not('title', 'like', TEST_CONTENT_PATTERN)
       .order('created_at', { ascending: false })
       .limit(12),
     supabase
       .from('sakes')
-      .select('*')
+      .select('*').not('name', 'like', TEST_CONTENT_PATTERN)
       .order('created_at', { ascending: false })
       .limit(12),
     member
       ? supabase
           .from('events')
-          .select('id, event_type, title, cover_image_url, event_date, location_text, max_participants, budget_yen, status')
+          .select('id, event_type, title, cover_image_url, event_date, location_text, max_participants, budget_yen, status').not('title', 'like', TEST_CONTENT_PATTERN)
           .eq('status', 'open')
           .order('event_date', { ascending: true, nullsFirst: false })
           .limit(6)
@@ -106,7 +107,7 @@ export default async function TopPage() {
 
         {/* 左下にキャプション (モバイルでは省略) */}
         <div className="hidden md:block absolute bottom-14 left-14">
-          <p className="text-[10px] tracking-luxe text-white/70">
+          <p className="text-xs tracking-luxe text-white/90">
             CURATED EATS<br />STAYS · JOURNEYS
           </p>
         </div>
@@ -115,7 +116,7 @@ export default async function TopPage() {
       {/* ====== FEATURED BANNER ====== */}
       {featured.length > 0 && (
         <section className="bg-neutral-800 text-white border-b hairline">
-          <div className="px-8 md:px-14 pt-6 pb-2 flex items-baseline justify-between">
+          <div className="px-8 md:px-14 pt-6 pb-2 flex flex-wrap gap-x-4 items-baseline justify-between">
             <h2 className="font-serif text-2xl md:text-3xl italic font-light">Featured.</h2>
           </div>
           <div className="overflow-x-auto pb-6">
@@ -141,13 +142,13 @@ export default async function TopPage() {
                       </span>
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
                     <h3 className="font-serif text-base md:text-xl leading-tight">
                       {s.name}
                     </h3>
                     {(s.prefecture || s.city) && (
-                      <p className="font-sans font-light text-[9px] md:text-[10px] tracking-luxe text-white/60 mt-1">
+                      <p className="font-sans font-light text-xs md:text-xs tracking-luxe text-white/90 mt-1">
                         {[s.prefecture, s.city].filter(Boolean).join(' · ')}
                       </p>
                     )}
@@ -167,7 +168,7 @@ export default async function TopPage() {
             <h2 className="font-serif text-2xl md:text-3xl italic font-light">Invitation.</h2>
             <Link
               href="/invitation"
-              className="text-[10px] tracking-luxe text-neutral-500 hover:text-black"
+              className="ui-action text-xs tracking-luxe text-neutral-500 hover:text-black"
             >
               VIEW ALL →
             </Link>
@@ -194,7 +195,7 @@ export default async function TopPage() {
                   )}
                 </div>
                 <div className="p-5">
-                  <p className="text-[10px] tracking-luxe text-neutral-400">
+                  <p className="text-xs tracking-luxe text-neutral-600">
                     {EVENT_TYPE_LABELS[e.event_type]}
                     {e.event_date && ` · ${e.event_date}`}
                   </p>
@@ -248,14 +249,14 @@ export default async function TopPage() {
                 )}
               </div>
               <div className="mt-3">
-                <p className="text-[9px] tracking-luxe text-neutral-400">
+                <p className="text-xs tracking-luxe text-neutral-600">
                   {s.region ?? 'JAPAN'}
                 </p>
                 <h3 className="font-serif text-base mt-0.5 leading-snug">
                   {[s.name, s.model].filter(Boolean).join(' ')}
                 </h3>
                 {s.brewery && (
-                  <p className="text-[10px] text-neutral-500 mt-0.5">{s.brewery}</p>
+                  <p className="text-xs text-neutral-500 mt-0.5">{s.brewery}</p>
                 )}
               </div>
             </Link>
@@ -305,7 +306,7 @@ function HeroStat({
 }) {
   return (
     <Link href={href} className="block group">
-      <p className="text-[9px] md:text-xs tracking-luxe text-white/70 group-hover:text-white transition-colors">
+      <p className="text-xs md:text-xs tracking-luxe text-white/90 group-hover:text-white transition-colors">
         {label}
       </p>
       <p className="font-serif text-2xl md:text-6xl mt-0.5 md:mt-1 leading-none group-hover:italic transition-all">
@@ -331,7 +332,7 @@ function CarouselSection({
         <h2 className="font-serif text-2xl md:text-3xl italic font-light">{title}</h2>
         <Link
           href={viewAllHref}
-          className="text-[10px] tracking-luxe text-neutral-500 hover:text-black"
+          className="ui-action text-xs tracking-luxe text-neutral-500 hover:text-black"
         >
           VIEW ALL →
         </Link>
@@ -382,11 +383,11 @@ function SpotCard({ spot }: { spot: Spot }) {
       </div>
       <div className="mt-2">
         {location && (
-          <p className="text-[9px] tracking-luxe text-neutral-400">{location}</p>
+          <p className="text-xs tracking-luxe text-neutral-600">{location}</p>
         )}
         <h3 className="font-serif text-base mt-0.5 leading-snug">{spot.name}</h3>
         {subParts.length > 0 && (
-          <p className="text-[10px] text-neutral-500 mt-0.5">{subParts.join(' · ')}</p>
+          <p className="text-xs text-neutral-500 mt-0.5">{subParts.join(' · ')}</p>
         )}
       </div>
     </Link>
@@ -422,12 +423,12 @@ function HotelCard({ hotel }: { hotel: Hotel }) {
         )}
       </div>
       <div className="mt-2">
-        <p className="text-[9px] tracking-luxe text-neutral-400">
+        <p className="text-xs tracking-luxe text-neutral-600">
           {hotel.prefecture ?? 'JAPAN'}
         </p>
         <h3 className="font-serif text-base mt-0.5 leading-snug">{hotel.name}</h3>
         {(hotel.brand || priceMark) && (
-          <p className="text-[10px] text-neutral-500 mt-0.5">
+          <p className="text-xs text-neutral-500 mt-0.5">
             {[hotel.brand, priceMark].filter(Boolean).join(' · ')}
           </p>
         )}
@@ -459,7 +460,7 @@ function TripCard({ trip }: { trip: TripPlan }) {
         )}
       </div>
       <div className="mt-3">
-        <p className="text-[9px] tracking-luxe text-neutral-400">
+        <p className="text-xs tracking-luxe text-neutral-600">
           {trip.city ?? 'JOURNEY'}
         </p>
         <h3 className="font-serif text-base mt-0.5 leading-snug">{trip.title}</h3>
@@ -470,7 +471,7 @@ function TripCard({ trip }: { trip: TripPlan }) {
 
 function EmptyState() {
   return (
-    <div className="py-16 px-8 text-sm text-neutral-300 w-full text-center">
+    <div className="py-16 px-8 text-sm text-neutral-600 w-full text-center">
       まだ登録がありません。
     </div>
   )
